@@ -1,0 +1,19 @@
+{
+  "host": "www.example.com",
+  "name": "healthcheck",
+  "port": 80,
+  "protocol": "http",
+  "retries": 5,
+  "connect_timeout": 60000,
+  "read_timeout": 60000,
+  "write_timeout": 60000,
+  "plugins": [
+    {
+      "name": "request-termination",
+      "config": {
+        "message": "All good",
+        "status_code": 200
+      }
+    }
+  ]
+}

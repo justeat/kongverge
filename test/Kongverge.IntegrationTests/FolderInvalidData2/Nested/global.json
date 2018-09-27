@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    {
+      "name": "je-request-delay",
+      "config": {
+        "delay": 1000
+      }
+    }
+  ]
+}

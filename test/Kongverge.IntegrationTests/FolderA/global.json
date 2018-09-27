@@ -1,0 +1,35 @@
+{
+  "plugins": [
+    {
+      "name": "cors",
+      "config": {
+        "origins": [
+          "www.example1.com"
+        ],
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "credentials": true,
+        "preflight_continue": true
+      }
+    },
+    {
+      "name": "basic-auth",
+      "config": {
+        "hide_credentials": true,
+        "anonymous": "65c5e2d4-8a05-4c99-bea8-665a41b33ace"
+      }
+    },
+    {
+      "name": "tcp-log",
+      "config": {
+        "host": "www.tcp-log.com",
+        "keepalive": 200,
+        "port": 8080,
+        "timeout": 100,
+        "tls": true 
+      }
+    }
+  ]
+}

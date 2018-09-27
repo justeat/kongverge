@@ -1,0 +1,227 @@
+{
+  "name": "service1",
+  "host": "www.service1.com",
+  "port": 8080,
+  "protocol": "http",
+  "retries": 2,
+  "connect_timeout": 20000,
+  "read_timeout": 20000,
+  "write_timeout": 20000,
+  "plugins": [
+    {
+      "name": "response-ratelimiting",
+      "config": {
+        "block_on_first_violation": false,
+        "fault_tolerant": false,
+        "header_name": "x-kong-limit",
+        "hide_client_headers": true,
+        "limit_by": "consumer",
+        "policy": "cluster",
+        "redis_database": 0,
+        "redis_port": 6379,
+        "redis_timeout": 2000,
+        "limits": {
+          "all": {
+            "second": 5,
+            "minute": 200,
+            "hour": 10000
+          } 
+        }
+      }
+    },
+    {
+      "name": "request-termination",
+      "config": {
+        "message": "request-terminated",
+        "status_code": 403
+      }
+    },
+    {
+      "name": "statsd",
+      "config": {
+        "host": "www.stats-server.com",
+        "port": 8001,
+        "prefix": "kong-stat-",
+        "metrics": [
+          {
+            "name": "latency",
+            "stat_type": "meter",
+            "sample_rate": 100,
+            "customer_identifier": "username"
+          },
+          {
+            "name": "request_size",
+            "stat_type": "histogram",
+            "sample_rate": 200,
+            "customer_identifier": "custom_id"
+          }
+        ]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "methods": [
+        "GET"
+      ],
+      "protocols": [
+        "http"
+      ],
+      "regex_priority": 20,
+      "strip_path": true,
+      "plugins": [
+        {
+          "name": "request-transformer",
+          "config": {
+            "http_method": "get",
+            "add": {
+              "body": [
+                "value-1:a-changed",
+                "value-2:b-changed"
+              ],
+              "headers": [
+                "header-1:a-changed",
+                "header-2:b-changed"
+              ],
+              "querystring": [
+                "param-1:a-changed",
+                "param-2:b-changed"
+              ]
+            },
+            "append": {
+              "body": [
+                "value-1:a-changed",
+                "value-2:b-changed"
+              ],
+              "headers": [
+                "header-1:a-changed",
+                "header-2:b-changed"
+              ],
+              "querystring": [
+                "param-1:a-changed",
+                "param-2:b-changed"
+              ]
+            },
+            "remove": {
+              "body": [
+                "value-3-changed",
+                "value-4-changed"
+              ],
+              "headers": [
+                "header-3-changed",
+                "header-4-changed"
+              ],
+              "querystring": [
+                "param-3-changed",
+                "param-4-changed"
+              ]
+            },
+            "rename": {
+              "body": [
+                "value-5:value-7-changed",
+                "value-6:value-8-changed"
+              ],
+              "headers": [
+                "header-5:header-7-changed",
+                "header-6:header-8-changed"
+              ],
+              "querystring": [
+                "param-5:param-7-changed",
+                "param-6:param-8-changed"
+              ]
+            },
+            "replace": {
+              "body": [
+                "value-10:b-changed",
+                "value-9:a-changed"
+              ],
+              "headers": [
+                "header-10:b-changed",
+                "header-9:a-changed"
+              ],
+              "querystring": [
+                "param-10:b-changed",
+                "param-9:a-changed"
+              ]
+            }
+          }
+        },
+        {
+          "name": "correlation-id",
+          "config": {
+            "echo_downstream": true,
+            "generator": "uuid#counter",
+            "header_name": "x-correlation-id"
+          }
+        },
+        {
+          "name": "request-termination",
+          "config": {
+            "message": "request-terminated",
+            "status_code": 403
+          }
+        }
+      ]
+    },
+    {
+      "paths": [
+        "/resource1-2"
+      ],
+      "protocols": [
+        "http",
+        "https"
+      ],
+      "regex_priority": 30,
+      "strip_path": true,
+      "plugins": [
+        {
+          "name": "response-ratelimiting",
+          "config": {
+            "block_on_first_violation": false,
+            "fault_tolerant": true,
+            "header_name": "x-kong-limit",
+            "hide_client_headers": true,
+            "limit_by": "credential",
+            "policy": "cluster",
+            "redis_database": 0,
+            "redis_port": 6379,
+            "redis_timeout": 2000,
+            "limits": {
+              "all": {
+                "second": 5,
+                "minute": 200,
+                "hour": 10000
+              }
+            }
+          }
+        },
+        {
+          "name": "request-termination",
+          "config": {
+            "message": "request-terminated",
+            "status_code": 401
+          }
+        },
+        {
+          "name": "correlation-id",
+          "config": {
+            "echo_downstream": false,
+            "generator": "tracker",
+            "header_name": "x-correlation-id"
+          }
+        }
+      ]
+    },
+    {
+      "paths": [
+        "/resource1-4-added"
+      ],
+      "protocols": [
+        "http",
+        "https"
+      ],
+      "regex_priority": 50,
+      "strip_path": true
+    }
+  ]
+}

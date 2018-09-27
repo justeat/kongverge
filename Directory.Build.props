@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Just Eat</Authors>
+    <Company>Just Eat</Company>
+	<PackageLicenseUrl>https://github.com/justeat/kongverge/blob/master/LICENSE</PackageLicenseUrl>
+	<PackageProjectUrl>https://github.com/justeat/kongverge</PackageProjectUrl>
+	<PackageIconUrl>https://raw.githubusercontent.com/justeat/kongverge/master/Kongverge.png</PackageIconUrl>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <LangVersion>latest</LangVersion>
+    <Copyright>Copyright (c) JustEat 2018-$([System.DateTime]::Now.ToString(yyyy))</Copyright>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/justeat/kongverge.git</RepositoryUrl>
+  </PropertyGroup>
+</Project>

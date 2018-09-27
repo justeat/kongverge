@@ -1,0 +1,26 @@
+{
+  "host": "www.example.com",
+  "name": "healthcheck",
+  "port": 80,
+  "protocol": "http",
+  "retries": 5,
+  "connect_timeout": 60000,
+  "read_timeout": 60000,
+  "write_timeout": 60000,
+  "plug
+    }
+  ],
+  "routes": [
+    {
+      "paths": [
+        "/health/check"
+      ],
+      "protocols": [
+        "http",
+        "https"
+      ],
+      "regex_priority": 20,
+      "strip_path": true
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+{
+  "name": "service1",
+  "host": "www.service1.com",
+  "port": 80,
+  "path": "/resource",
+  "protocol": "http",
+  "retries": 1,
+  "connect_timeout": 10000,
+  "read_timeout": 10000,
+  "write_timeout": 10000,
+  "plugins": [
+    {
+      "name": "response-ratelimiting",
+      "config": {
+        "block_on_first_violation": false,
+        "fault_tolerant": true,
+        "header_name": "x-kong-limit",
+        "hide_client_headers": false,
+        "limit_by": "ip",
+        "policy": "cluster",
+        "redis_database": 0,
+        "redis_port": 6379,
+        "redis_timeout": 2000,
+        "limits": {
+          "all": {
+            "second": 8,
+            "minute": 300,
+            "hour": 15000
+          } 
+        }
+      }
+    },
+    {
+      "name": "request-termination",
+      "config": {
+        "message": "request-terminated",
+        "status_code": 403
+      }
+    },
+    {
+      "name": "request-size-limiting",
+      "config": {
+        "allowed_payload_size": 256
+      }
+    }
+  ],
+  "routes": [
+    {
+      "paths": [
+        "/resource1-1"
+      ],
+      "protocols": [
+        "http",
+        "https"
+      ],
+      "regex_priority": 20,
+      "strip_path": true,
+      "plugins": [
+        {
+          "name": "request-transformer",
+          "config": {
+            "http_method": "get",
+            "add": {
+              "body": [
+                "value-1:a",
+                "value-2:b"
+              ],
+              "headers": [
+                "header-1:a",
+                "header-2:b"
+              ],
+              "querystring": [
+                "param-1:a",
+                "param-2:b"
+              ]
+            },
+            "append": {
+              "body": [
+                "value-1:a",
+                "value-2:b"
+              ],
+              "headers": [
+                "header-1:a",
+                "header-2:b"
+              ],
+              "querystring": [
+                "param-1:a",
+                "param-2:b"
+              ]
+            },
+            "remove": {
+              "body": [
+                "value-3",
+                "value-4"
+              ],
+              "headers": [
+                "header-3",
+                "header-4"
+              ],
+              "querystring": [
+                "param-3",
+                "param-4"
+              ]
+            },
+            "rename": {
+              "body": [
+                "value-5:value-7",
+                "value-6:value-8"
+              ],
+              "headers": [
+                "header-5:header-7",
+                "header-6:header-8"
+              ],
+              "querystring": [
+                "param-5:param-7",
+                "param-6:param-8"
+              ]
+            },
+            "replace": {
+              "body": [
+                "value-10:b",
+                "value-9:a"
+              ],
+              "headers": [
+                "header-10:b",
+                "header-9:a"
+              ],
+              "querystring": [
+                "param-10:b",
+                "param-9:a"
+              ]
+            }
+          }
+        },
+        {
+          "name": "correlation-id",
+          "config": {
+            "echo_downstream": true,
+            "generator": "uuid#counter",
+            "header_name": "x-correlation-id"
+          }
+        },
+        {
+          "name": "key-auth",
+          "config": {
+            "anonymous": "",
+            "hide_credentials": true,
+            "key_in_body": true,
+            "key_names": [
+              "key-1",
+              "key-2"
+            ],
+            "run_on_preflight": false
+          }
+        }
+      ]
+    },
+    {
+      "paths": [
+        "/resource1-2"
+      ],
+      "protocols": [
+        "http",
+        "https"
+      ],
+      "regex_priority": 30,
+      "strip_path": true,
+      "plugins": [
+        {
+          "name": "response-ratelimiting",
+          "config": {
+            "block_on_first_violation": false,
+            "fault_tolerant": true,
+            "header_name": "x-kong-limit",
+            "hide_client_headers": false,
+            "limit_by": "consumer",
+            "policy": "cluster",
+            "redis_database": 0,
+            "redis_port": 6379,
+            "redis_timeout": 2000,
+            "limits": {
+              "all": {
+                "second": 10,
+                "minute": 400,
+                "hour": 20000
+              }
+            }
+          }
+        },
+        {
+          "name": "request-termination",
+          "config": {
+            "message": "request-terminated",
+            "status_code": 401
+          }
+        },
+        {
+          "name": "request-size-limiting",
+          "config": {
+            "allowed_payload_size": 256
+          }
+        }
+      ]
+    },
+    {
+      "paths": [
+        "/resource1-3"
+      ],
+      "protocols": [
+        "http",
+        "https"
+      ],
+      "regex_priority": 40,
+      "strip_path": true
+    }
+  ]
+}

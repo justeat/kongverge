@@ -1,0 +1,51 @@
+version: '3.5'
+
+services:
+  kong:
+    image: kong:0.14.1-alpine
+    depends_on:
+      - kong-database
+      - kong-migration
+    ports:
+      - 8000:8000
+      - 8443:8443
+      - 8001:8001
+      - 8444:8444
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: postgres
+      KONG_PG_DATABASE: postgres
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_PROXY_LISTEN_SSL: 0.0.0.0:8443
+      KONG_PROXY_ERROR_LOG: '/dev/stdout'
+      KONG_PROXY_ACCESS_LOG: '/dev/stdout'
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_ADMIN_LISTEN_SSL: 0.0.0.0:8444
+      KONG_ADMIN_ERROR_LOG: '/dev/stdout'
+      KONG_ADMIN_ACCESS_LOG: '/dev/stdout'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001"]
+      interval: 5s
+      timeout: 2s
+      retries: 15
+  kong-database:
+    image: postgres:9.6.3
+    restart: always
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kong-migration:
+    image: kong:0.14.1-alpine
+    restart: on-failure
+    depends_on:
+      - kong-database
+    environment:
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: postgres
+      KONG_PG_DATABASE: postgres
+    command: kong migrations up
+    healthcheck:
+      test: "exit 0"
