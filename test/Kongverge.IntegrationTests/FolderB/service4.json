@@ -1,0 +1,40 @@
+{
+  "name": "service4",
+  "host": "www.service4.com",
+  "port": 80,
+  "protocol": "http",
+  "retries": 4,
+  "connect_timeout": 40000,
+  "write_timeout": 40000,
+  "read_timeout": 40000,
+  "routes": [
+    {
+      "protocols": [
+        "http",
+        "https"
+      ],
+      "paths": [
+        "/resource4-1"
+      ],
+      "regex_priority": 20,
+      "strip_path": true,
+      "plugins": [
+        {
+          "name": "request-termination",
+          "config": {
+            "message": "request-terminated",
+            "status_code": 401
+          }
+        },
+        {
+          "name": "correlation-id",
+          "config": {
+            "echo_downstream": true,
+            "generator": "uuid",
+            "header_name": "x-correlation-id"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "plugins": [
+    {
+      "name": "cors",
+      "config": {
+        "origins": [
+          "www.example1.com",
+          "www.example2.com"
+        ],
+        "methods": [
+          "GET",
+          "HEAD"
+        ],
+        "credentials": false,
+        "preflight_continue": false
+      }
+    },
+    {
+      "name": "basic-auth",
+      "config": {
+        "hide_credentials": true,
+        "anonymous": "65c5e2d4-8a05-4c99-bea8-665a41b33ace"
+      }
+    },
+    {
+      "name": "udp-log",
+      "config": {
+        "host": "www.udp-log.com",
+        "port": 9090,
+        "timeout": 200
+      }
+    }
+  ]
+}

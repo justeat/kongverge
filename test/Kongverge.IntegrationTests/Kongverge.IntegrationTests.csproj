@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.4.2" />
+    <PackageReference Include="NCrunch.Framework" Version="3.17.0" />
+    <PackageReference Include="TestStack.BDDfy.Xunit" Version="1.0.0" />
+    <PackageReference Include="xunit" Version="2.4.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Kongverge\Kongverge.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Folder*\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <Target Name="BuildDockerServices" AfterTargets="Build">
+    <Message Importance="high" Text="Building Docker services..." />
+    <Exec Command="docker-compose up --no-start" />
+  </Target>
+
+</Project>

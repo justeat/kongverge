@@ -1,0 +1,43 @@
+{
+  "name": "service3",
+  "host": "www.service3.com",
+  "port": 80,
+  "protocol": "http",
+  "retries": 3,
+  "connect_timeout": 30000,
+  "read_timeout": 30000,
+  "write_timeout": 30000,
+  "plugins": [
+    {
+      "name": "request-termination",
+      "config": {
+        "message": "request-terminated",
+        "status_code": 401
+      }
+    }
+  ],
+  "routes": [
+    {
+      "protocols": [
+        "http",
+        "https"
+      ],
+      "paths": [
+        "/resource3-1"
+      ],
+      "regex_priority": 20,
+      "strip_path": true
+    },
+    {
+      "protocols": [
+        "http",
+        "https"
+      ],
+      "paths": [
+        "/resource3-2"
+      ],
+      "regex_priority": 20,
+      "strip_path": true
+    }
+  ]
+}

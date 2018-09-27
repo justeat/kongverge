@@ -1,0 +1,22 @@
+{
+  "name": "service2",
+  "host": "www.service2.com",
+  "port": 80,
+  "protocol": "http",
+  "retries": 2,
+  "connect_timeout": 20000,
+  "read_timeout": 20000,
+  "write_timeout": 20000,
+  "routes": [
+    {
+      "paths": [
+        "/resource2-1-added"
+      ],
+      "protocols": [
+        "http"
+      ],
+      "regex_priority": 30,
+      "strip_path": true
+    }
+  ]
+}

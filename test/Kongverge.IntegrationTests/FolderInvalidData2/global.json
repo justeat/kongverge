@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    {
+      "name": "correlation-id",
+      "config": {
+        "echo_downstream": true,
+        "generator": "uuid#counter",
+        "header_name": "x-correlation-id"
+      }
+    }
+  ]
+}
