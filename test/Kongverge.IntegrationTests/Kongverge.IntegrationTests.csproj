@@ -26,7 +26,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
-  <Target Name="BuildDockerServices" AfterTargets="Build">
+  <Target Name="BuildDockerServices" BeforeTargets="VSTest">
     <Message Importance="high" Text="Building Docker services..." />
     <Exec Command="docker-compose up --no-start" />
   </Target>
