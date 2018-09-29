@@ -28,7 +28,7 @@
 
   <Target Name="BuildDockerServices" BeforeTargets="VSTest">
     <Message Importance="high" Text="Building Docker services..." />
-    <Exec Command="docker-compose up --no-start" />
+    <Exec Command="docker-compose -f &quot;$(ProjectDir)docker-compose.yml&quot; up --no-start" />
   </Target>
 
 </Project>
