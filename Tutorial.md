@@ -66,7 +66,7 @@ A health check that is terminated at kong, using a plugin.
         "status_code": 200
       }
     }
-  ]
+  ],
   "routes": [
     {
       "protocols": [ "http", "https" ],
