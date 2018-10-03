@@ -51,7 +51,8 @@ namespace Kongverge.DTOs
              new
              {
                 Name,
-                Config
+                Config,
+                Enabled
              };
 
         public bool Equals(KongPlugin other) => this.KongEquals(other);
