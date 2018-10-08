@@ -47,7 +47,7 @@ namespace Kongverge.DTOs
 
         public override string ToString()
         {
-            return $"Id: {Id}, Name: {Name}";
+            return $"{{{ToStringIdSegment()}Name: {Name}}}";
         }
 
         public override StringContent ToJsonStringContent()

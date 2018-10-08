@@ -40,11 +40,11 @@ namespace Kongverge
 
                 if (config.Value.DryRun)
                 {
-                    Log.Information("Performing dry run. No writes to Kong will occur.");
+                    Log.Information("Performing dry run: No writes to Kong will occur");
                     return s.GetService<KongAdminDryRun>();
                 }
 
-                Log.Information("Performing live integration. Changes will be made to {host}.", config.Value.Admin.Host);
+                Log.Information($"Performing live integration: Changes will be made to {config.Value.Admin.Host}");
                 return s.GetService<KongAdminWriter>();
             });
 
@@ -54,11 +54,11 @@ namespace Kongverge
 
                 if (string.IsNullOrEmpty(config.Value.OutputFolder))
                 {
-                    Log.Information("Performing full diff and merge.");
+                    Log.Information("Performing full diff and merge");
                     return s.GetService<KongvergeWorkflow>();
                 }
 
-                Log.Information("Exporting information from Kong.");
+                Log.Information("Exporting information from Kong");
                 return s.GetService<ExportWorkflow>();
             });
 

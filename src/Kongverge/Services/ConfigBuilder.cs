@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kongverge.DTOs;
+using Serilog;
 
 namespace Kongverge.Services
 {
@@ -9,8 +10,13 @@ namespace Kongverge.Services
     {
         public virtual async Task<KongvergeConfiguration> FromKong(IKongAdminReader kongReader)
         {
+            Log.Information("Querying Kong admin host for plugins");
             var plugins = await kongReader.GetPlugins();
+
+            Log.Information("Querying Kong admin host for services");
             var services = await kongReader.GetServices();
+
+            Log.Information("Querying Kong admin host for routes");
             var routes = await kongReader.GetRoutes();
 
             foreach (var existingService in services)

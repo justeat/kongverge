@@ -13,7 +13,7 @@ namespace Kongverge.Services
     {
         public virtual async Task<KongvergeConfiguration> ReadConfiguration(string folderPath)
         {
-            Log.Information("Reading files from {folderPath}", folderPath);
+            Log.Information($"Reading files from {folderPath}");
 
             var filePaths = Directory.EnumerateFiles(folderPath, $"*{Settings.FileExtension}", SearchOption.AllDirectories);
 
@@ -44,7 +44,7 @@ namespace Kongverge.Services
 
         private static async Task<T> ParseFile<T>(string path) where T : IKongvergeConfigObject
         {
-            Log.Information("Reading {path}", path);
+            Log.Information($"Reading {path}");
             string text;
             using (var reader = File.OpenText(path))
             {
@@ -58,9 +58,9 @@ namespace Kongverge.Services
                 data = JsonConvert.DeserializeObject<T>(text);
                 await data.Validate(errorMessages);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                throw new InvalidConfigurationFileException(path, ex.Message, ex);
+                throw new InvalidConfigurationFileException(path, e.Message, e);
             }
 
             if (errorMessages.Any())

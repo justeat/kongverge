@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kongverge.DTOs;
 using Newtonsoft.Json;
-using Serilog;
 
 namespace Kongverge.Services
 {
@@ -27,9 +25,8 @@ namespace Kongverge.Services
             {
                 await HttpClient.GetAsync("/");
             }
-            catch (Exception ex)
+            catch
             {
-                Log.Error(ex, "ERROR: Unable to contact Kong: {baseAddress}", HttpClient.BaseAddress);
                 return false;
             }
 

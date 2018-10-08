@@ -10,7 +10,7 @@ namespace Kongverge.Services
     {
         public virtual async Task WriteConfiguration(KongvergeConfiguration configuration, string folderPath)
         {
-            Log.Information("Writing files to {folderPath}", folderPath);
+            Log.Information($"Writing files to {folderPath}");
             PrepareOutputFolder(folderPath);
 
             foreach (var service in configuration.Services)
@@ -28,7 +28,7 @@ namespace Kongverge.Services
         {
             var json = configObject.ToConfigJson();
             var path = Path.Join(folderPath, fileName);
-            Log.Information("Writing {path}", path);
+            Log.Information($"Writing {path}");
             using (var stream = File.OpenWrite(path))
             using (var writer = new StreamWriter(stream))
             {

@@ -9,13 +9,13 @@ namespace Kongverge.Helpers
         public static string ToNormalizedJson(this object value)
         {
             var token = JToken.FromObject(value);
-            return JsonConvert.SerializeObject(token.Normalize(), new JsonSerializerSettings
+            return JsonConvert.SerializeObject(token.Normalize(true), new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented
             });
         }
 
-        private static JToken Normalize(this JToken token)
+        public static JToken Normalize(this JToken token, bool skipNullsAndEmptyArrays = false)
         {
             switch (token)
             {
@@ -24,11 +24,11 @@ namespace Kongverge.Helpers
                     var normalized = new JObject();
                     foreach (var property in jObject.Properties().OrderBy(x => x.Name))
                     {
-                        if (property.Value.Type == JTokenType.Null || property.Value is JArray jArray && jArray.Count == 0)
+                        if (skipNullsAndEmptyArrays && (property.Value.Type == JTokenType.Null || property.Value is JArray jArray && jArray.Count == 0))
                         {
                             continue;
                         }
-                        normalized.Add(property.Name, property.Value.Normalize());
+                        normalized.Add(property.Name, property.Value.Normalize(skipNullsAndEmptyArrays));
                     }
                     return normalized;
                 }
@@ -44,7 +44,7 @@ namespace Kongverge.Helpers
                     }
                     for (var i = 0; i < jArray.Count; i++)
                     {
-                        jArray[i] = jArray[i].Normalize();
+                        jArray[i] = jArray[i].Normalize(skipNullsAndEmptyArrays);
                     }
                     return jArray;
                 }

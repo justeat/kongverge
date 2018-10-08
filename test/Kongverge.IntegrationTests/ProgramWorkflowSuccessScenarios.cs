@@ -59,5 +59,18 @@ namespace Kongverge.IntegrationTests
                 .And(x => x.OutputFolderContentsMatchInputFolderContents())
                 .TearDownWith(s => KongIsBlank())
                 .BDDfy();
+
+        [BddfyFact(DisplayName = nameof(KongMatchesInputFolder) + A + And + nameof(AValidHost) + And + nameof(AValidPort) + And + nameof(InputFolderIs) + A)]
+        public void Scenario5() =>
+            this.Given(x => x.KongMatchesInputFolder(A))
+                .And(x => x.AValidHost())
+                .And(x => x.AValidPort())
+                .And(x => x.InputFolderIs(A))
+                .When(x => x.InvokingMain())
+                .And(x => x.InvokingMainAgainForExport())
+                .Then(x => x.TheExitCodeIs(ExitCode.Success))
+                .And(x => x.OutputFolderContentsMatchInputFolderContents())
+                .TearDownWith(s => KongIsBlank())
+                .BDDfy();
     }
 }
