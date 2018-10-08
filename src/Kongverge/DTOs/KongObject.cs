@@ -33,5 +33,10 @@ namespace Kongverge.DTOs
         public abstract object GetMatchValue();
 
         public abstract StringContent ToJsonStringContent();
+
+        protected string ToStringIdSegment()
+        {
+            return Id == null ? string.Empty : $"Id: {Id}, ";
+        }
     }
 }

@@ -29,18 +29,44 @@ it will put the server into the state that the file specifies
 
 The output is:
 ````
-[14:43:49 INF] Reading files from c:\code\kongvergefiles
-[14:43:50 INF] Reading c:\code\kongvergefiles\orderlocation.json
-[14:43:51 INF] Adding service orderlocation
-[14:43:51 INF] Adding route Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]
-[14:43:52 INF] Finished
+[19:22:16 INF] Starting up
+[19:22:16 INF] Performing full diff and merge
+[19:22:16 INF] Performing live integration: Changes will be made to kong.mycompany.com
+[19:22:16 INF] ************** Kongverge **************
+[19:22:16 INF] Reading files from c:\code\kongvergefiles
+[19:22:16 INF] Reading c:\code\kongvergefiles\orderlocation.json
+[19:22:16 INF] Querying Kong admin host for plugins
+[19:22:16 INF] Querying Kong admin host for services
+[19:22:16 INF] Querying Kong admin host for routes
+[19:22:16 INF] Target configuration and existing both have zero plugins
+[19:22:16 INF] Converging 1 target service with 0 existing services
+[19:22:16 INF] Creating service {Name: orderlocation} which exists in target configuration but not in Kong
+[19:22:16 INF] Target service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
+[19:22:16 INF] Converging 1 target route attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} with 0 existing routes
+[19:22:16 INF] Creating route {Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} which exists in target configuration but not in Kong
+[19:22:16 INF] Target route {Id: 2127357e-6714-4608-a755-1969d5048918, Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
+[19:22:16 INF] Finished
 ````
 
 If I run Kongverge a second time, it finds nothing to do, as the server is already in the desired state and the output is:
 ````
-[12:02:21 INF] Reading files from c:\code\kongvergefiles
-[12:02:21 INF] Reading c:\code\kongvergefiles\orderlocation.json
-[12:02:22 INF] Finished
+[19:22:20 INF] Starting up
+[19:22:20 INF] Performing full diff and merge
+[19:22:20 INF] Performing live integration: Changes will be made to kong.mycompany.com
+[19:22:20 INF] ************** Kongverge **************
+[19:22:20 INF] Reading files from c:\code\kongvergefiles
+[19:22:20 INF] Reading c:\code\kongvergefiles\orderlocation.json
+[19:22:20 INF] Querying Kong admin host for plugins
+[19:22:20 INF] Querying Kong admin host for services
+[19:22:20 INF] Querying Kong admin host for routes
+[19:22:20 INF] Target configuration and existing both have zero plugins
+[19:22:20 INF] Converging 1 target service with 1 existing service
+[19:22:20 INF] Identical service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} found in Kong matching target configuration
+[19:22:20 INF] Target service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
+[19:22:20 INF] Converging 1 target route attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} with 1 existing route
+[19:22:20 INF] Identical route {Id: 2127357e-6714-4608-a755-1969d5048918, Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} found in Kong matching target configuration
+[19:22:20 INF] Target route {Id: 2127357e-6714-4608-a755-1969d5048918, Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
+[19:22:20 INF] Finished
 ````
 
 

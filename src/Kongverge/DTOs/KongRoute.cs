@@ -17,16 +17,16 @@ namespace Kongverge.DTOs
         public ServiceReference Service { get; set; }
         
         [JsonProperty("hosts")]
-        public IEnumerable<string> Hosts { get; set; } = new List<string>();
+        public IEnumerable<string> Hosts { get; set; } = Array.Empty<string>();
 
         [JsonProperty("protocols")]
         public IEnumerable<string> Protocols { get; set; } = new[] { "http", "https" };
 
         [JsonProperty("methods")]
-        public IEnumerable<string> Methods { get; set; } = new List<string>();
+        public IEnumerable<string> Methods { get; set; } = Array.Empty<string>();
 
         [JsonProperty("paths")]
-        public IEnumerable<string> Paths { get; set; } = new List<string>();
+        public IEnumerable<string> Paths { get; set; } = Array.Empty<string>();
 
         [JsonProperty("regex_priority")]
         public int RegexPriority { get; set; }
@@ -39,7 +39,7 @@ namespace Kongverge.DTOs
 
         public override string ToString()
         {
-            return $@"Paths: [{string.Join(", ", Paths)}], Methods: [{string.Join(", ", Methods)}], Protocols: [{string.Join(", ", Protocols)}]";
+            return $@"{{{ToStringIdSegment()}Paths: [{string.Join(", ", Paths)}], Methods: [{string.Join(", ", Methods)}], Protocols: [{string.Join(", ", Protocols)}]}}";
         }
 
         public override StringContent ToJsonStringContent()

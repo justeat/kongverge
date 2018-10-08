@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using AutoFixture;
 using FluentAssertions;
 using Kongverge.DTOs;

@@ -1,9 +1,13 @@
 using System;
+using JsonDiffPatchDotNet;
 using Kongverge.Helpers;
+using Newtonsoft.Json.Linq;
 
 namespace Kongverge.DTOs
 {
-    public interface IKongEquatable<T> : IEquatable<T>
+    public interface IKongEquatable<T> : IKongEquatable, IEquatable<T> { }
+
+    public interface IKongEquatable
     {
         object GetEqualityValues();
     }
@@ -40,5 +44,21 @@ namespace Kongverge.DTOs
 
         internal static int GetKongHashCode<T>(this IKongEquatable<T> instance) where T : KongObject =>
             instance.GetEqualityValues().ToNormalizedJson().GetHashCode();
+
+        internal static JToken DifferencesFrom(this IKongEquatable instance, IKongEquatable other)
+        {
+            var instanceToken = instance.ToEqualityToken();
+            var otherToken = other.ToEqualityToken();
+
+            var options = new Options
+            {
+                ArrayDiff = ArrayDiffMode.Simple,
+                TextDiff = TextDiffMode.Simple
+            };
+            return new JsonDiffPatch(options).Diff(otherToken, instanceToken);
+        }
+
+        private static JToken ToEqualityToken(this IKongEquatable instance) =>
+            JToken.FromObject(instance.GetEqualityValues()).Normalize();
     }
 }
