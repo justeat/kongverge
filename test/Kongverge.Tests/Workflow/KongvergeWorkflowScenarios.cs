@@ -18,7 +18,7 @@ namespace Kongverge.Tests.Workflow
 
         protected KongvergeConfiguration Target = new KongvergeConfiguration();
 
-        protected IReadOnlyList<ExtendibleKongObject> GlobalConfigs;
+        protected IReadOnlyList<GlobalConfig> GlobalConfigs;
         protected IReadOnlyList<KongService> Services;
         protected IReadOnlyList<KongRoute> Routes;
         protected IReadOnlyList<KongPlugin> Plugins;
@@ -161,13 +161,13 @@ namespace Kongverge.Tests.Workflow
         protected void NoExistingServicesOrGlobalConfig()
         {
             Existing.Services = Array.Empty<KongService>();
-            Existing.GlobalConfig = new ExtendibleKongObject();
+            Existing.GlobalConfig = new GlobalConfig();
         }
 
         protected void NoTargetServicesOrGlobalConfig()
         {
             Target.Services = Array.Empty<KongService>();
-            Target.GlobalConfig = new ExtendibleKongObject();
+            Target.GlobalConfig = new GlobalConfig();
             
             SetupTargetConfiguration();
         }

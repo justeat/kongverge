@@ -36,24 +36,14 @@ namespace Kongverge.Tests.DTOs
         }
     }
 
-    public class KongPluginSerializationScenarios : SerializationScenarios<KongPlugin>
+    public class KongPluginSerializationScenarios : KongObjectSerializationScenarios<KongPlugin>
     {
         [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(SerializingToStringContent))]
-        public void Scenario2() =>
+        public void Scenario1() =>
             this.Given(x => x.ARandomInstance())
                 .When(x => x.SerializingToStringContent())
                 .Then(x => x.ItSerializesWithoutError())
                 .BDDfy();
-
-        protected override StringContent MakeStringContent() => Instance.ToJsonStringContent();
-
-        protected override string SerializingToConfigJson() => Serialized = new ExtendibleKongObject
-        {
-            Plugins = new []
-            {
-                Instance
-            }
-        }.ToConfigJson();
 
         protected void ItSerializesWithoutError() => Serialized.Should().NotBeEmpty();
     }

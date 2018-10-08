@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Kongverge.DTOs
 {
-    public sealed class KongService : ExtendibleKongObject, IKongEquatable<KongService>
+    public sealed class KongService : KongObject, IKongPluginHost, IKongEquatable<KongService>, IKongvergeConfigObject
     {
         private const int DefaultTimeout = 60000;
 
@@ -38,6 +38,9 @@ namespace Kongverge.DTOs
 
         [JsonProperty("path")]
         public string Path { get; set; }
+
+        [JsonProperty("plugins", NullValueHandling = NullValueHandling.Ignore)]
+        public IReadOnlyList<KongPlugin> Plugins { get; set; } = Array.Empty<KongPlugin>();
         
         [JsonProperty("routes", NullValueHandling = NullValueHandling.Ignore)]
         public IReadOnlyList<KongRoute> Routes { get; set; } = Array.Empty<KongRoute>();
@@ -47,7 +50,7 @@ namespace Kongverge.DTOs
             return $"Id: {Id}, Name: {Name}";
         }
 
-        public StringContent ToJsonStringContent()
+        public override StringContent ToJsonStringContent()
         {
             var routes = Routes;
             var plugins = Plugins;
@@ -61,22 +64,27 @@ namespace Kongverge.DTOs
             return json.AsJsonStringContent();
         }
 
-        public override void StripPersistedValues()
+        internal override void StripPersistedValues()
         {
             base.StripPersistedValues();
+            foreach (var plugin in Plugins)
+            {
+                plugin.StripPersistedValues();
+            }
             foreach (var route in Routes)
             {
                 route.StripPersistedValues();
             }
         }
 
-        public override void AssignParentId(KongPlugin plugin)
+        public void AssignParentId(KongPlugin plugin)
         {
-            base.AssignParentId(plugin);
+            plugin.ConsumerId = null;
+            plugin.RouteId = null;
             plugin.ServiceId = Id;
         }
 
-        public override async Task Validate(ICollection<string> errorMessages)
+        public async Task Validate(ICollection<string> errorMessages)
         {
             await ValidateRoutesAreValid(errorMessages);
         }
@@ -94,6 +102,12 @@ namespace Kongverge.DTOs
             }
 
             // TODO: Check if routes Clash
+        }
+
+        public string ToConfigJson()
+        {
+            StripPersistedValues();
+            return this.ToNormalizedJson() + Environment.NewLine;
         }
 
         public override object GetMatchValue() => Name;

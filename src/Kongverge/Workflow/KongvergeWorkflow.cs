@@ -94,9 +94,9 @@ namespace Kongverge.Workflow
             }
         }
 
-        private Task ConvergeChildrenPlugins(ExtendibleKongObject existing, ExtendibleKongObject target)
+        private Task ConvergeChildrenPlugins(IKongPluginHost existing, IKongPluginHost target)
         {
-            Task UpsertPlugin(KongPlugin plugin, ExtendibleKongObject parent)
+            Task UpsertPlugin(KongPlugin plugin, IKongPluginHost parent)
             {
                 parent.AssignParentId(plugin);
                 return _kongWriter.UpsertPlugin(plugin);

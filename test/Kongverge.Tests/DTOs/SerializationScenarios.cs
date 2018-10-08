@@ -1,4 +1,3 @@
-using System.Net.Http;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
@@ -8,13 +7,25 @@ using TestStack.BDDfy.Xunit;
 
 namespace Kongverge.Tests.DTOs
 {
-    public abstract class SerializationScenarios<T> : Fixture where T : KongObject
+    public abstract class SerializationScenarios<T> : Fixture
     {
         protected const string And = "_";
 
         protected T Instance;
         protected string Serialized;
 
+        protected void ARandomInstance() => Instance = this.Create<T>();
+        
+        protected void ServiceIsNotSerialized() => Serialized.Contains("\"service\":").Should().BeFalse();
+    }
+
+    public abstract class KongObjectSerializationScenarios<T> : SerializationScenarios<T> where T : KongObject
+    {
+        protected async Task SerializingToStringContent() => Serialized = await Instance.ToJsonStringContent().ReadAsStringAsync();
+    }
+
+    public abstract class KongvergeConfigObjectSerializationScenarios<T> : SerializationScenarios<T> where T : IKongvergeConfigObject
+    {
         [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(SerializingToConfigJson))]
         public void Scenario1() =>
             this.Given(x => x.ARandomInstance())
@@ -27,13 +38,7 @@ namespace Kongverge.Tests.DTOs
                 .And(x => x.ServiceIsNotSerialized())
                 .BDDfy();
 
-        protected void ARandomInstance() => Instance = this.Create<T>();
-
-        protected async Task SerializingToStringContent() => Serialized = await MakeStringContent().ReadAsStringAsync();
-
-        protected abstract string SerializingToConfigJson();
-
-        protected abstract StringContent MakeStringContent();
+        protected string SerializingToConfigJson() => Serialized = Instance.ToConfigJson();
 
         protected void IdIsNotSerialized() => Serialized.Contains("\"id\":").Should().BeFalse();
 
@@ -44,7 +49,5 @@ namespace Kongverge.Tests.DTOs
         protected void ServiceIdIsNotSerialized() => Serialized.Contains("\"service_id\":").Should().BeFalse();
 
         protected void RouteIdIsNotSerialized() => Serialized.Contains("\"route_id\":").Should().BeFalse();
-
-        protected void ServiceIsNotSerialized() => Serialized.Contains("\"service\":").Should().BeFalse();
     }
 }

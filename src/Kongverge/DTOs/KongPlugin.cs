@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Kongverge.Helpers;
 using Newtonsoft.Json;
 
 namespace Kongverge.DTOs
 {
-    public sealed class KongPlugin : KongObject, IKongEquatable<KongPlugin>
+    public sealed class KongPlugin : KongObject, IKongEquatable<KongPlugin>, IValidatableObject
     {
         [JsonProperty("consumer_id")]
         public string ConsumerId { get; set; }
@@ -35,14 +36,20 @@ namespace Kongverge.DTOs
             return $"Id: {Id}, Name: {Name}";
         }
 
-        public StringContent ToJsonStringContent() => JsonConvert.SerializeObject(this).AsJsonStringContent();
+        public override StringContent ToJsonStringContent() => JsonConvert.SerializeObject(this).AsJsonStringContent();
 
-        public override void StripPersistedValues()
+        internal override void StripPersistedValues()
         {
             base.StripPersistedValues();
             ConsumerId = null;
             ServiceId = null;
             RouteId = null;
+        }
+
+        public Task Validate(ICollection<string> errorMessages)
+        {
+            // TODO: Add validation
+            return Task.CompletedTask;
         }
 
         public override object GetMatchValue() => Name;

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using Newtonsoft.Json;
 
 namespace Kongverge.DTOs
@@ -12,7 +13,7 @@ namespace Kongverge.DTOs
         [JsonProperty("created_at", NullValueHandling = NullValueHandling.Ignore)]
         public long? CreatedAt { get; set; }
 
-        public virtual void StripPersistedValues()
+        internal virtual void StripPersistedValues()
         {
             Id = null;
             CreatedAt = null;
@@ -30,5 +31,7 @@ namespace Kongverge.DTOs
         }
 
         public abstract object GetMatchValue();
+
+        public abstract StringContent ToJsonStringContent();
     }
 }

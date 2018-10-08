@@ -6,6 +6,11 @@ namespace Kongverge.DTOs
     public class KongvergeConfiguration
     {
         public IReadOnlyList<KongService> Services { get; set; } = Array.Empty<KongService>();
-        public ExtendibleKongObject GlobalConfig { get; set; } = new ExtendibleKongObject();
+        public GlobalConfig GlobalConfig { get; set; } = new GlobalConfig();
+    }
+
+    public interface IKongvergeConfigObject : IValidatableObject
+    {
+        string ToConfigJson();
     }
 }
