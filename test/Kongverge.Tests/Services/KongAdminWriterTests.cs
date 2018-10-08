@@ -15,6 +15,7 @@ using TestStack.BDDfy.Xunit;
 
 namespace Kongverge.Tests.Services
 {
+    [Story(Title = nameof(KongAdminWriter))]
     public class KongAdminWriterTests : ScenarioFor<KongAdminWriter>
     {
         protected const string KongRespondsCorrectlyToMethodAtPathTextTemplate = "And kong responds correctly to {0} at {1}";

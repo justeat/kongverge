@@ -4,6 +4,7 @@ using TestStack.BDDfy.Xunit;
 
 namespace Kongverge.IntegrationTests
 {
+    [Story(Title = nameof(Program) + nameof(Program.Main))]
     public class ProgramInvalidArgumentsScenarios : ProgramSteps
     {
         [BddfyFact(DisplayName = nameof(NoArguments))]

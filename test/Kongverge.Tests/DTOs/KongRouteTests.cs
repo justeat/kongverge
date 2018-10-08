@@ -8,6 +8,7 @@ using TestStack.BDDfy.Xunit;
 
 namespace Kongverge.Tests.DTOs
 {
+    [Story(Title = nameof(KongRoute) + nameof(Equals))]
     public class KongRouteEqualityScenarios : EqualityScenarios<KongRoute>
     {
         [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(AnotherInstanceClonedFromTheFirst) + And + nameof(ListValuesAreShuffled))]
@@ -59,13 +60,14 @@ namespace Kongverge.Tests.DTOs
         }
     }
 
+    [Story(Title = nameof(KongRoute) + nameof(KongObject.ToJsonStringContent))]
     public class KongRouteSerializationScenarios : KongObjectSerializationScenarios<KongRoute>
     {
         [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(SerializingToStringContent))]
         public void Scenario1() =>
             this.Given(x => x.ARandomInstance())
                 .When(x => x.SerializingToStringContent())
-                .And(x => x.ServiceIsNotSerialized())
+                .Then(x => x.ServiceIsNotSerialized())
                 .And(x => x.PluginsIsNotSerialized())
                 .And(x => x.ServiceIsNotNull())
                 .And(x => x.PluginsIsNotNull())

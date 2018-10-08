@@ -8,6 +8,7 @@ using TestStack.BDDfy.Xunit;
 
 namespace Kongverge.Tests.DTOs
 {
+    [Story(Title = nameof(KongService) + nameof(Equals))]
     public class KongServiceEqualityScenarios : EqualityScenarios<KongService>
     {
         protected override void OnlyThePersistenceValuesAreDifferent()
@@ -17,6 +18,7 @@ namespace Kongverge.Tests.DTOs
         }
     }
 
+    [Story(Title = nameof(KongService) + nameof(KongService.Validate))]
     public class KongServiceValidationScenarios : Fixture
     {
         protected const string And = "_";
@@ -50,14 +52,14 @@ namespace Kongverge.Tests.DTOs
         protected void ItIsInvalid() => ErrorMessages.Count.Should().BeGreaterThan(0);
     }
 
+    [Story(Title = nameof(KongService) + nameof(KongObject.ToJsonStringContent))]
     public class KongServiceSerializationScenarios : KongObjectSerializationScenarios<KongService>
     {
-
         [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(SerializingToStringContent))]
         public void Scenario1() =>
             this.Given(x => x.ARandomInstance())
                 .When(x => x.SerializingToStringContent())
-                .And(x => x.RoutesIsNotSerialized())
+                .Then(x => x.RoutesIsNotSerialized())
                 .And(x => x.PluginsIsNotSerialized())
                 .And(x => x.PluginsIsNotNull())
                 .And(x => x.RoutesIsNotNull())
@@ -72,5 +74,6 @@ namespace Kongverge.Tests.DTOs
         protected void RoutesIsNotNull() => Instance.Routes.Should().NotBeNull();
     }
 
+    [Story(Title = nameof(KongService) + nameof(IKongvergeConfigObject.ToConfigJson))]
     public class KongServiceConfigSerializationScenarios : KongvergeConfigObjectSerializationScenarios<KongService> { }
 }
