@@ -5,14 +5,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Events;
 
 namespace Kongverge
 {
     public static class ServiceRegistration
     {
-        public static void CreateConsoleLogger()
+        public static void CreateConsoleLogger(bool verbose)
         {
             Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Is(verbose ? LogEventLevel.Verbose : LogEventLevel.Information)
                 .WriteTo.Console()
                 .CreateLogger();
             Log.Information("Starting up");
@@ -58,7 +60,7 @@ namespace Kongverge
                     return s.GetService<KongvergeWorkflow>();
                 }
 
-                Log.Information("Exporting information from Kong");
+                Log.Information("Exporting configuration from Kong");
                 return s.GetService<ExportWorkflow>();
             });
 

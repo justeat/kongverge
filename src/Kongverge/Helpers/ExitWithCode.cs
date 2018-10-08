@@ -23,7 +23,7 @@ namespace Kongverge.Helpers
             switch (exitCode)
             {
                 case ExitCode.Success:
-                    Log.Information(message ?? "Finished");
+                    Log.Information(message ?? "************** Finished **************");
                     break;
 
                 case ExitCode.InvalidPort:

@@ -10,6 +10,8 @@ namespace Kongverge.DTOs
 {
     public sealed class KongService : KongObject, IKongPluginHost, IKongEquatable<KongService>, IKongvergeConfigObject
     {
+        public const string ObjectName = "service";
+
         private const int DefaultTimeout = 60000;
 
         [JsonProperty("name")]

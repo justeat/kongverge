@@ -28,7 +28,7 @@ namespace Kongverge.Services
         {
             var json = configObject.ToConfigJson();
             var path = Path.Join(folderPath, fileName);
-            Log.Information($"Writing {path}");
+            Log.Verbose($"Writing {path}");
             using (var stream = File.OpenWrite(path))
             using (var writer = new StreamWriter(stream))
             {

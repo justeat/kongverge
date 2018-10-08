@@ -44,7 +44,7 @@ namespace Kongverge.Services
 
         private static async Task<T> ParseFile<T>(string path) where T : IKongvergeConfigObject
         {
-            Log.Information($"Reading {path}");
+            Log.Verbose($"Reading {path}");
             string text;
             using (var reader = File.OpenText(path))
             {

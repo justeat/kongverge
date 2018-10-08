@@ -8,6 +8,8 @@ namespace Kongverge.DTOs
 {
     public sealed class KongPlugin : KongObject, IKongEquatable<KongPlugin>, IValidatableObject
     {
+        public const string ObjectName = "plugin";
+
         [JsonProperty("consumer_id")]
         public string ConsumerId { get; set; }
 

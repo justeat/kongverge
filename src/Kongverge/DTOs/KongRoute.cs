@@ -10,6 +10,8 @@ namespace Kongverge.DTOs
 {
     public sealed class KongRoute : KongObject, IKongPluginHost, IKongEquatable<KongRoute>, IValidatableObject
     {
+        public const string ObjectName = "route";
+
         [JsonProperty("plugins", NullValueHandling = NullValueHandling.Ignore)]
         public IReadOnlyList<KongPlugin> Plugins { get; set; } = Array.Empty<KongPlugin>();
 
