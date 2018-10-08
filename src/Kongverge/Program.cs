@@ -22,7 +22,7 @@ namespace Kongverge
 
             app.OnExecute(async () =>
             {
-                ServiceRegistration.CreateConsoleLogger();
+                ServiceRegistration.CreateConsoleLogger(options.Verbose.HasValue());
 
                 var exitCode = options.Validate();
                 if (exitCode.HasValue)
@@ -61,27 +61,15 @@ namespace Kongverge
             {
                 app.HelpOption("-?|-h|--help");
 
-                DryRun = app.Option("-t|--test",
-                    "Perform dry run without updating Kong system",
-                    CommandOptionType.NoValue);
-
-                InputFolder = app.Option("-i|--input <inputFolder>",
-                    "Folder for input data",
-                    CommandOptionType.SingleValue);
-
-                OutputFolder = app.Option("-o|--output <outputFolder>",
-                    "Folder to output data from host",
-                    CommandOptionType.SingleValue);
-
-                Host = app.Option("-H|--host <KongAdminHostname>",
-                    "Kong Admin host with which to communicate",
-                    CommandOptionType.SingleValue);
-
-                Port = app.Option("-p|--port <KongAdminPort>",
-                    "Kong Admin API port",
-                    CommandOptionType.SingleValue);
+                Verbose = app.Option("-v|--verbose", "Use verbose logging output", CommandOptionType.NoValue);
+                DryRun = app.Option("-t|--test", "Perform dry run without updating Kong system", CommandOptionType.NoValue);
+                InputFolder = app.Option("-i|--input <inputFolder>", "Folder for input data", CommandOptionType.SingleValue);
+                OutputFolder = app.Option("-o|--output <outputFolder>", "Folder to output data from host", CommandOptionType.SingleValue);
+                Host = app.Option("-H|--host <KongAdminHostname>", "Kong Admin host with which to communicate", CommandOptionType.SingleValue);
+                Port = app.Option("-p|--port <KongAdminPort>", "Kong Admin API port", CommandOptionType.SingleValue);
             }
-
+            
+            public CommandOption Verbose { get; }
             public CommandOption DryRun { get; }
             public CommandOption InputFolder { get; }
             public CommandOption OutputFolder { get; }

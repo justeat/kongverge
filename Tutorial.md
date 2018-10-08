@@ -24,7 +24,7 @@ In order to define a route, e.g. forward requests to `/order/location` to the `o
 }
 ````
 
-And I run Kongverge: `dotnet run --host kong.mycompany.com --port 8001 --input "c:\code\kongvergefiles"`
+And I run Kongverge: `kongverge --host kong.mycompany.com --port 8001 --input "c:\code\kongvergefiles" --verbose`
 it will put the server into the state that the file specifies
 
 The output is:
@@ -34,18 +34,22 @@ The output is:
 [19:22:16 INF] Performing live integration: Changes will be made to kong.mycompany.com
 [19:22:16 INF] ************** Kongverge **************
 [19:22:16 INF] Reading files from c:\code\kongvergefiles
-[19:22:16 INF] Reading c:\code\kongvergefiles\orderlocation.json
-[19:22:16 INF] Querying Kong admin host for plugins
-[19:22:16 INF] Querying Kong admin host for services
-[19:22:16 INF] Querying Kong admin host for routes
-[19:22:16 INF] Target configuration and existing both have zero plugins
-[19:22:16 INF] Converging 1 target service with 0 existing services
-[19:22:16 INF] Creating service {Name: orderlocation} which exists in target configuration but not in Kong
-[19:22:16 INF] Target service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
-[19:22:16 INF] Converging 1 target route attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} with 0 existing routes
-[19:22:16 INF] Creating route {Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} which exists in target configuration but not in Kong
-[19:22:16 INF] Target route {Id: 2127357e-6714-4608-a755-1969d5048918, Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
-[19:22:16 INF] Finished
+[19:22:16 VRB] Reading c:\code\kongvergefiles\orderlocation.json
+[19:22:16 INF] Reading configuration from Kong
+[19:22:16 VRB] Getting plugins from Kong
+[19:22:16 VRB] Getting services from Kong
+[19:22:16 VRB] Getting routes from Kong
+[19:22:16 VRB] Target configuration and existing both have zero plugins
+[19:22:16 VRB] Converging 1 target service with 0 existing services
+[19:22:16 VRB] Creating service {Name: orderlocation} which exists in target configuration but not in Kong
+[19:22:16 VRB] Target service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
+[19:22:16 VRB] Converging 1 target route attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} with 0 existing routes
+[19:22:16 VRB] Creating route {Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} which exists in target configuration but not in Kong
+[19:22:16 VRB] Target route {Id: 2127357e-6714-4608-a755-1969d5048918, Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
+[19:22:16 INF] Created 1 service, 0 plugins, 1 route
+[19:22:16 INF] Updated 0 services, 0 plugins, 0 routes
+[19:22:16 INF] Deleted 0 services, 0 plugins, 0 routes
+[19:22:16 INF] ************** Finished **************
 ````
 
 If I run Kongverge a second time, it finds nothing to do, as the server is already in the desired state and the output is:
@@ -55,18 +59,22 @@ If I run Kongverge a second time, it finds nothing to do, as the server is alrea
 [19:22:20 INF] Performing live integration: Changes will be made to kong.mycompany.com
 [19:22:20 INF] ************** Kongverge **************
 [19:22:20 INF] Reading files from c:\code\kongvergefiles
-[19:22:20 INF] Reading c:\code\kongvergefiles\orderlocation.json
-[19:22:20 INF] Querying Kong admin host for plugins
-[19:22:20 INF] Querying Kong admin host for services
-[19:22:20 INF] Querying Kong admin host for routes
+[19:22:20 VRB] Reading c:\code\kongvergefiles\orderlocation.json
+[19:22:20 INF] Reading configuration from Kong
+[19:22:20 VRB] Getting plugins from Kong
+[19:22:20 VRB] Getting services from Kong
+[19:22:20 VRB] Getting routes from Kong
 [19:22:20 INF] Target configuration and existing both have zero plugins
-[19:22:20 INF] Converging 1 target service with 1 existing service
-[19:22:20 INF] Identical service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} found in Kong matching target configuration
-[19:22:20 INF] Target service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
-[19:22:20 INF] Converging 1 target route attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} with 1 existing route
-[19:22:20 INF] Identical route {Id: 2127357e-6714-4608-a755-1969d5048918, Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} found in Kong matching target configuration
-[19:22:20 INF] Target route {Id: 2127357e-6714-4608-a755-1969d5048918, Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
-[19:22:20 INF] Finished
+[19:22:20 VRB] Converging 1 target service with 1 existing service
+[19:22:20 VRB] Identical service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} found in Kong matching target configuration
+[19:22:20 VRB] Target service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
+[19:22:20 VRB] Converging 1 target route attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} with 1 existing route
+[19:22:20 VRB] Identical route {Id: 2127357e-6714-4608-a755-1969d5048918, Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} found in Kong matching target configuration
+[19:22:20 VRB] Target route {Id: 2127357e-6714-4608-a755-1969d5048918, Paths: [/(?i)order/(?i)location$], Methods: [], Protocols: [http, https]} attached to service {Id: c4875f99-3b4a-460f-a512-8dae4fb7dbaf, Name: orderlocation} and existing both have zero plugins
+[19:22:20 INF] Created 0 services, 0 plugins, 0 routes
+[19:22:20 INF] Updated 0 services, 0 plugins, 0 routes
+[19:22:20 INF] Deleted 0 services, 0 plugins, 0 routes
+[19:22:20 INF] ************** Finished **************
 ````
 
 

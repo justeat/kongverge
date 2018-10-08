@@ -51,6 +51,8 @@ namespace Kongverge.IntegrationTests
 
         protected void AValidPort() => Arguments.AddPair("--port", Port);
 
+        protected void VerboseOutput() => Arguments.Add("--verbose");
+
         protected void NoPort() { }
 
         protected void NoInputOrOutputFolder() { }

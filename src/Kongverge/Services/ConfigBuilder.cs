@@ -10,13 +10,15 @@ namespace Kongverge.Services
     {
         public virtual async Task<KongvergeConfiguration> FromKong(IKongAdminReader kongReader)
         {
-            Log.Information("Querying Kong admin host for plugins");
+            Log.Information("Reading configuration from Kong");
+
+            Log.Verbose("Getting plugins from Kong");
             var plugins = await kongReader.GetPlugins();
 
-            Log.Information("Querying Kong admin host for services");
+            Log.Verbose("Getting services from Kong");
             var services = await kongReader.GetServices();
 
-            Log.Information("Querying Kong admin host for routes");
+            Log.Verbose("Getting routes from Kong");
             var routes = await kongReader.GetRoutes();
 
             foreach (var existingService in services)
