@@ -12,6 +12,7 @@ using TestStack.BDDfy.Xunit;
 
 namespace Kongverge.Tests.Workflow
 {
+    [Story(Title = nameof(KongvergeWorkflow) + nameof(KongvergeWorkflow.DoExecute))]
     public class KongvergeWorkflowScenarios : WorkflowSteps<KongvergeWorkflow>
     {
         protected const string And = "_";

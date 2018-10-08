@@ -14,6 +14,7 @@ using TestStack.BDDfy.Xunit;
 
 namespace Kongverge.Tests.Services
 {
+    [Story(Title = nameof(KongAdminReader))]
     public class KongAdminReaderTests : ScenarioFor<KongAdminReader>
     {
         protected const string KongHasPagedDataStepTextTemplate = "Kong has paged data at {0} with <MultiplePages>";

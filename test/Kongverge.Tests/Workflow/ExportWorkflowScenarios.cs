@@ -6,6 +6,7 @@ using TestStack.BDDfy.Xunit;
 
 namespace Kongverge.Tests.Workflow
 {
+    [Story(Title = nameof(ExportWorkflow) + nameof(ExportWorkflow.DoExecute))]
     public class ExportWorkflowScenarios : WorkflowSteps<ExportWorkflow>
     {
         [BddfyFact(DisplayName = nameof(KongIsNotReachable))]

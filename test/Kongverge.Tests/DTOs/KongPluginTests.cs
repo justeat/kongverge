@@ -8,6 +8,7 @@ using TestStack.BDDfy.Xunit;
 
 namespace Kongverge.Tests.DTOs
 {
+    [Story(Title = nameof(KongPlugin) + nameof(Equals))]
     public class KongPluginEqualityScenarios : EqualityScenarios<KongPlugin>
     {
         [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(AnotherInstanceClonedFromTheFirst) + And + nameof(ConfigValuesAreShuffled))]
@@ -35,6 +36,7 @@ namespace Kongverge.Tests.DTOs
         }
     }
 
+    [Story(Title = nameof(KongPlugin) + nameof(KongObject.ToJsonStringContent))]
     public class KongPluginSerializationScenarios : KongObjectSerializationScenarios<KongPlugin>
     {
         [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(SerializingToStringContent))]
