@@ -18,7 +18,7 @@ namespace Kongverge.Services
             var filePaths = Directory.EnumerateFiles(folderPath, $"*{Settings.FileExtension}", SearchOption.AllDirectories);
 
             var services = new List<KongService>();
-            ExtendibleKongObject globalConfig = null;
+            GlobalConfig globalConfig = null;
             foreach (var configFilePath in filePaths)
             {
                 if (configFilePath.EndsWith(Settings.GlobalConfigFileName))
@@ -27,7 +27,7 @@ namespace Kongverge.Services
                     {
                         throw new InvalidConfigurationFileException(configFilePath, $"Cannot have more than one {Settings.GlobalConfigFileName} file.");
                     }
-                    globalConfig = await ParseFile<ExtendibleKongObject>(configFilePath);
+                    globalConfig = await ParseFile<GlobalConfig>(configFilePath);
                 }
                 else
                 {
@@ -38,11 +38,11 @@ namespace Kongverge.Services
             return new KongvergeConfiguration
             {
                 Services = services.AsReadOnly(),
-                GlobalConfig = globalConfig ?? new ExtendibleKongObject()
+                GlobalConfig = globalConfig ?? new GlobalConfig()
             };
         }
 
-        private static async Task<T> ParseFile<T>(string path) where T : ExtendibleKongObject
+        private static async Task<T> ParseFile<T>(string path) where T : IKongvergeConfigObject
         {
             Log.Information("Reading {path}", path);
             string text;

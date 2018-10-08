@@ -7,12 +7,12 @@ namespace Kongverge.Tests.Workflow
 {
     public static class TestGlobalConfigs
     {
-        public static IReadOnlyList<ExtendibleKongObject> CreateGlobalConfigs(this Fixture fixture, int count) =>
+        public static IReadOnlyList<GlobalConfig> CreateGlobalConfigs(this Fixture fixture, int count) =>
             Enumerable.Range(0, count).Select(x => fixture.CreateGlobalConfig()).ToArray();
 
-        private static ExtendibleKongObject CreateGlobalConfig(this Fixture fixture) =>
+        private static GlobalConfig CreateGlobalConfig(this Fixture fixture) =>
             fixture
-                .Build<ExtendibleKongObject>()
+                .Build<GlobalConfig>()
                 .Without(x => x.Plugins)
                 .Create();
     }

@@ -21,7 +21,7 @@ namespace Kongverge.Services
             return new KongvergeConfiguration
             {
                 Services = services.ToArray(),
-                GlobalConfig = new ExtendibleKongObject
+                GlobalConfig = new GlobalConfig
                 {
                     Plugins = plugins.Where(x => x.IsGlobal()).ToArray()
                 }

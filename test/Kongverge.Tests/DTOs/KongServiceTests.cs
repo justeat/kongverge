@@ -51,10 +51,11 @@ namespace Kongverge.Tests.DTOs
         protected void ItIsInvalid() => ErrorMessages.Count.Should().BeGreaterThan(0);
     }
 
-    public class KongServiceSerializationScenarios : SerializationScenarios<KongService>
+    public class KongServiceSerializationScenarios : KongObjectSerializationScenarios<KongService>
     {
+
         [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(SerializingToStringContent))]
-        public void Scenario2() =>
+        public void Scenario1() =>
             this.Given(x => x.ARandomInstance())
                 .When(x => x.SerializingToStringContent())
                 .And(x => x.RoutesIsNotSerialized())
@@ -62,10 +63,6 @@ namespace Kongverge.Tests.DTOs
                 .And(x => x.PluginsIsNotNull())
                 .And(x => x.RoutesIsNotNull())
                 .BDDfy();
-
-        protected override StringContent MakeStringContent() => Instance.ToJsonStringContent();
-
-        protected override string SerializingToConfigJson() => Serialized = Instance.ToConfigJson();
 
         protected void PluginsIsNotSerialized() => Serialized.Contains("\"plugins\":").Should().BeFalse();
 
@@ -75,4 +72,6 @@ namespace Kongverge.Tests.DTOs
 
         protected void RoutesIsNotNull() => Instance.Routes.Should().NotBeNull();
     }
+
+    public class KongServiceConfigSerializationScenarios : KongvergeConfigObjectSerializationScenarios<KongService> { }
 }

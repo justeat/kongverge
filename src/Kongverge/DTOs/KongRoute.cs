@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -7,8 +8,11 @@ using Newtonsoft.Json;
 
 namespace Kongverge.DTOs
 {
-    public sealed class KongRoute : ExtendibleKongObject, IKongEquatable<KongRoute>
+    public sealed class KongRoute : KongObject, IKongPluginHost, IKongEquatable<KongRoute>, IValidatableObject
     {
+        [JsonProperty("plugins", NullValueHandling = NullValueHandling.Ignore)]
+        public IReadOnlyList<KongPlugin> Plugins { get; set; } = Array.Empty<KongPlugin>();
+
         [JsonProperty("service", NullValueHandling = NullValueHandling.Ignore)]
         public ServiceReference Service { get; set; }
         
@@ -38,7 +42,7 @@ namespace Kongverge.DTOs
             return $@"Paths: [{string.Join(", ", Paths)}], Methods: [{string.Join(", ", Methods)}], Protocols: [{string.Join(", ", Protocols)}]";
         }
 
-        public StringContent ToJsonStringContent()
+        public override StringContent ToJsonStringContent()
         {
             var serviceReference = Service;
             var plugins = Plugins;
@@ -52,19 +56,24 @@ namespace Kongverge.DTOs
             return json.AsJsonStringContent();
         }
 
-        public override void StripPersistedValues()
+        internal override void StripPersistedValues()
         {
             base.StripPersistedValues();
+            foreach (var plugin in Plugins)
+            {
+                plugin.StripPersistedValues();
+            }
             Service = null;
         }
 
-        public override void AssignParentId(KongPlugin plugin)
+        public void AssignParentId(KongPlugin plugin)
         {
-            base.AssignParentId(plugin);
+            plugin.ConsumerId = null;
+            plugin.ServiceId = null;
             plugin.RouteId = Id;
         }
 
-        public override Task Validate(ICollection<string> errorMessages)
+        public Task Validate(ICollection<string> errorMessages)
         {
             if (IsNullOrEmpty(Protocols) || Protocols.Any(string.IsNullOrWhiteSpace))
             {

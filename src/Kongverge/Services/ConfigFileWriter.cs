@@ -24,7 +24,7 @@ namespace Kongverge.Services
             }
         }
 
-        private static async Task WriteConfigObject(ExtendibleKongObject configObject, string folderPath, string fileName)
+        private static async Task WriteConfigObject(IKongvergeConfigObject configObject, string folderPath, string fileName)
         {
             var json = configObject.ToConfigJson();
             var path = Path.Join(folderPath, fileName);
