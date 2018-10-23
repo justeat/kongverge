@@ -33,6 +33,7 @@ namespace Kongverge.Services
             using (var writer = new StreamWriter(stream))
             {
                 await writer.WriteAsync(json);
+                await writer.FlushAsync();
             }
         }
 
