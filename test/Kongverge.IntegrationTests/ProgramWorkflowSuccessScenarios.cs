@@ -1,16 +1,16 @@
 using Kongverge.Helpers;
 using Kongverge.Workflow;
+using NCrunch.Framework;
 using TestStack.BDDfy;
 using TestStack.BDDfy.Xunit;
-using Xunit;
 
 namespace Kongverge.IntegrationTests
 {
-    [Collection(Host)]
+    [ExclusivelyUses(Host)]
     [Story(Title = nameof(Program) + nameof(Program.Main) + nameof(KongvergeWorkflow) + "Success")]
     public class ProgramWorkflowSuccessScenarios : ProgramSteps
     {
-        [BddfyFact(DisplayName = nameof(KongIsBlank) + And + nameof(AValidHost) + And + nameof(AValidPort) + And  + nameof(InputFolderIs) + A)]
+        [BddfyFact(DisplayName = nameof(KongIsBlank) + And + nameof(AValidHost) + And + nameof(AValidPort) + And + nameof(InputFolderIs) + A)]
         public void Scenario1() =>
             this.Given(x => x.KongIsBlank())
                 .And(x => x.AValidHost())
@@ -23,7 +23,7 @@ namespace Kongverge.IntegrationTests
                 .TearDownWith(s => KongIsBlank())
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(KongIsBlank) + And + nameof(AValidHost) + And + nameof(AValidPort) + And  + nameof(InputFolderIs) + B)]
+        [BddfyFact(DisplayName = nameof(KongIsBlank) + And + nameof(AValidHost) + And + nameof(AValidPort) + And + nameof(InputFolderIs) + B)]
         public void Scenario2() =>
             this.Given(x => x.KongIsBlank())
                 .And(x => x.AValidHost())
