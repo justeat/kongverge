@@ -7,11 +7,6 @@ namespace Kongverge.Services
 {
     public class KongAdminReader : IKongAdminReader
     {
-        private const string ConfigurationRoute = "/";
-        private const string ServicesRoute = "/services";
-        private const string RoutesRoute = "/routes";
-        private const string PluginsRoute = "/plugins";
-
         protected readonly KongAdminHttpClient HttpClient;
 
         public KongAdminReader(KongAdminHttpClient httpClient)
@@ -19,35 +14,21 @@ namespace Kongverge.Services
             HttpClient = httpClient;
         }
 
-        public async Task<bool> KongIsReachable()
-        {
-            try
-            {
-                await HttpClient.GetAsync("/");
-            }
-            catch
-            {
-                return false;
-            }
-
-            return true;
-        }
-
         public async Task<KongConfiguration> GetConfiguration()
         {
-            var response = await HttpClient.GetAsync(ConfigurationRoute);
+            var response = await HttpClient.GetAsync("/");
             var value = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<KongConfiguration>(value);
         }
 
         public async Task<IReadOnlyCollection<KongService>> GetServices() =>
-            await GetPagedResponse<KongService>(ServicesRoute);
+            await GetPagedResponse<KongService>("/services");
 
         public async Task<IReadOnlyCollection<KongRoute>> GetRoutes() =>
-            await GetPagedResponse<KongRoute>(RoutesRoute);
+            await GetPagedResponse<KongRoute>("/routes");
 
         public async Task<IReadOnlyCollection<KongPlugin>> GetPlugins() =>
-            await GetPagedResponse<KongPlugin>(PluginsRoute);
+            await GetPagedResponse<KongPlugin>("/plugins");
 
         protected Task<IReadOnlyList<KongRoute>> GetServiceRoutes(string serviceId) =>
             GetPagedResponse<KongRoute>($"/services/{serviceId}/routes");
