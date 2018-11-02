@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
@@ -12,6 +13,7 @@ namespace Kongverge.Tests.Workflow
     public abstract class WorkflowSteps<T> : ScenarioFor<T> where T : Kongverge.Workflow.Workflow
     {
         protected KongvergeConfiguration Existing = new KongvergeConfiguration();
+        protected KongConfiguration KongConfiguration;
         protected Settings Settings;
         protected ExitCode ExitCode;
 
@@ -22,9 +24,9 @@ namespace Kongverge.Tests.Workflow
             GetMock<ConfigBuilder>().Setup(x => x.FromKong(Get<IKongAdminReader>())).ReturnsAsync(Existing);
         }
 
-        protected void KongIsNotReachable() => GetMock<IKongAdminReader>().Setup(x => x.KongIsReachable()).ReturnsAsync(false);
+        protected void KongIsNotReachable() => GetMock<IKongAdminReader>().Setup(x => x.GetConfiguration()).Throws<HttpRequestException>();
 
-        protected void KongIsReachable() => GetMock<IKongAdminReader>().Setup(x => x.KongIsReachable()).ReturnsAsync(true);
+        protected void KongIsReachable() => GetMock<IKongAdminReader>().Setup(x => x.GetConfiguration()).ReturnsAsync(KongConfiguration = Fixture.Create<KongConfiguration>());
 
         protected async Task Executing() => ExitCode = (ExitCode)await Subject.Execute();
 

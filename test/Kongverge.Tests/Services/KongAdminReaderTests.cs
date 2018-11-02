@@ -21,7 +21,6 @@ namespace Kongverge.Tests.Services
         protected object Result;
         protected object Expected;
 
-        protected KongConnection KongState = default;
         protected bool MultiplePages = default;
 
         public KongAdminReaderTests()
@@ -30,28 +29,15 @@ namespace Kongverge.Tests.Services
             Use(new KongAdminHttpClient(Get<FakeHttpMessageHandler>()) { BaseAddress = new Uri("http://localhost") });
         }
 
-        [BddfyFact(DisplayName = nameof(KongAdminReader.KongIsReachable))]
-        public void Scenario1() =>
-            this.Given(s => s.KongIs(KongState))
-                .When(async () => Result = await Subject.KongIsReachable(), Invoking(nameof(KongAdminReader.KongIsReachable)))
-                .Then(s => s.TheResultIs(Expected))
-                .WithExamples(new ExampleTable(nameof(KongState), nameof(Expected))
-                {
-                    { KongConnection.NotReachable, false },
-                    { KongConnection.Poorly, false },
-                    { KongConnection.Healthy, true }
-                })
-                .BDDfy();
-
         [BddfyFact(DisplayName = nameof(KongAdminReader.GetConfiguration))]
-        public void Scenario2() =>
+        public void Scenario1() =>
             this.Given(s => s.KongHasData("/", () => Fixture.Create<KongConfiguration>()))
                 .When(async () => Result = await Subject.GetConfiguration(), Invoking(nameof(KongAdminReader.GetConfiguration)))
                 .Then(s => s.TheResultIsEquivalentToTheKongData())
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(KongAdminReader.GetServices))]
-        public void Scenario3() =>
+        public void Scenario2() =>
             this.Given(s => s.KongHasPagedData("/services", () => Fixture.Build<KongService>().Without(x => x.Plugins).Without(x => x.Routes).Create()), KongHasPagedDataStepTextTemplate)
                 .When(async () => Result = await Subject.GetServices(), Invoking(nameof(KongAdminReader.GetServices)))
                 .Then(s => s.TheResultIsEquivalentToTheKongData())
@@ -59,7 +45,7 @@ namespace Kongverge.Tests.Services
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(KongAdminReader.GetRoutes))]
-        public void Scenario4() =>
+        public void Scenario3() =>
             this.Given(s => s.KongHasPagedData("/routes", () => Fixture.Build<KongRoute>().Without(x => x.Plugins).Create()), KongHasPagedDataStepTextTemplate)
                 .When(async () => Result = await Subject.GetRoutes(), Invoking(nameof(KongAdminReader.GetRoutes)))
                 .Then(s => s.TheResultIsEquivalentToTheKongData())
@@ -67,7 +53,7 @@ namespace Kongverge.Tests.Services
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(KongAdminReader.GetPlugins))]
-        public void Scenario5() =>
+        public void Scenario4() =>
             this.Given(s => s.KongHasPagedData("/plugins", () => Fixture.Create<KongPlugin>()), KongHasPagedDataStepTextTemplate)
                 .When(async () => Result = await Subject.GetPlugins(), Invoking(nameof(KongAdminReader.GetPlugins)))
                 .Then(s => s.TheResultIsEquivalentToTheKongData())
@@ -106,28 +92,7 @@ namespace Kongverge.Tests.Services
             };
         }
 
-        protected void KongIs(KongConnection kongState)
-        {
-            var setup = SetupKongResponse("/");
-            switch (kongState)
-            {
-                case KongConnection.NotReachable:
-                    setup.Throws<HttpRequestException>();
-                    break;
-                case KongConnection.Poorly:
-                    setup.Returns(new HttpResponseMessage(HttpStatusCode.BadGateway));
-                    break;
-                case KongConnection.Healthy:
-                    setup.Returns(new HttpResponseMessage(HttpStatusCode.OK));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(kongState), kongState, null);
-            }
-        }
-
         protected string Invoking(string name) => $"invoking {name}";
-
-        protected void TheResultIs<T>(T value) => Result.Should().Be(value);
 
         protected void TheResultIsEquivalentToTheKongData() => Result.Should().BeEquivalentTo(Expected);
 

@@ -16,11 +16,15 @@ namespace Kongverge.Workflow
 
         protected IKongAdminReader KongReader { get; }
         protected Settings Configuration { get; }
+        protected KongConfiguration KongConfiguration { get; private set; }
 
         public async Task<int> Execute()
         {
-            var reachable = await KongReader.KongIsReachable();
-            if (!reachable)
+            try
+            {
+                KongConfiguration = await KongReader.GetConfiguration();
+            }
+            catch
             {
                 return ExitWithCode.Return(ExitCode.HostUnreachable);
             }
