@@ -60,6 +60,9 @@ namespace Kongverge.Tests.DTOs
         }
     }
 
+    [Story(Title = nameof(KongRoute) + nameof(IValidatableObject.Validate))]
+    public class KongRouteValidationScenarios : KongPluginHostValidationScenarios<KongRoute> { }
+
     [Story(Title = nameof(KongRoute) + nameof(KongObject.ToJsonStringContent))]
     public class KongRouteSerializationScenarios : KongObjectSerializationScenarios<KongRoute>
     {

@@ -5,6 +5,6 @@ namespace Kongverge.DTOs
 {
     public interface IValidatableObject
     {
-        Task Validate(ICollection<string> errorMessages);
+        Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages);
     }
 }

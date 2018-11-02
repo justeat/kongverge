@@ -12,7 +12,7 @@ namespace Kongverge.Services
 {
     public class ConfigFileReader
     {
-        public virtual async Task<KongvergeConfiguration> ReadConfiguration(string folderPath)
+        public virtual async Task<KongvergeConfiguration> ReadConfiguration(string folderPath, IReadOnlyCollection<string> availablePlugins)
         {
             Log.Information($"Reading files from {folderPath}");
 
@@ -27,16 +27,16 @@ namespace Kongverge.Services
                 foreach (var globalConfigFilePath in globalConfigFilePaths)
                 {
                     fileErrorMessages.AddErrors(globalConfigFilePath, $"Cannot have more than one {Settings.GlobalConfigFileName} file.");
-                    await ParseFile<GlobalConfig>(globalConfigFilePath, fileErrorMessages);
+                    await ParseFile<GlobalConfig>(globalConfigFilePath, availablePlugins, fileErrorMessages);
                 }
             }
             else if (globalConfigFilePaths.Any())
             {
-                globalConfig = await ParseFile<GlobalConfig>(globalConfigFilePaths.Single(), fileErrorMessages);
+                globalConfig = await ParseFile<GlobalConfig>(globalConfigFilePaths.Single(), availablePlugins, fileErrorMessages);
             }
             foreach (var serviceConfigFilePath in filePaths.Except(globalConfigFilePaths))
             {
-                services.Add(await ParseFile<KongService>(serviceConfigFilePath, fileErrorMessages));
+                services.Add(await ParseFile<KongService>(serviceConfigFilePath, availablePlugins, fileErrorMessages));
             }
 
             if (fileErrorMessages.Any())
@@ -51,7 +51,7 @@ namespace Kongverge.Services
             };
         }
 
-        private static async Task<T> ParseFile<T>(string path, FileErrorMessages fileErrorMessages) where T : class, IKongvergeConfigObject
+        private static async Task<T> ParseFile<T>(string path, IReadOnlyCollection<string> availablePlugins, FileErrorMessages fileErrorMessages) where T : class, IKongvergeConfigObject
         {
             Log.Verbose($"Reading {path}");
             string text;
@@ -64,7 +64,7 @@ namespace Kongverge.Services
             try
             {
                 var data = JsonConvert.DeserializeObject<T>(text);
-                await data.Validate(errorMessages);
+                await data.Validate(availablePlugins, errorMessages);
                 if (errorMessages.Any())
                 {
                     fileErrorMessages.AddErrors(path, errorMessages.ToArray());

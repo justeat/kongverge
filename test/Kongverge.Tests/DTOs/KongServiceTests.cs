@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Kongverge.DTOs;
+using Moq;
 using TestStack.BDDfy;
 using TestStack.BDDfy.Xunit;
 
@@ -18,38 +19,79 @@ namespace Kongverge.Tests.DTOs
         }
     }
 
-    [Story(Title = nameof(KongService) + nameof(KongService.Validate))]
-    public class KongServiceValidationScenarios : Fixture
+    [Story(Title = nameof(KongService) + nameof(IValidatableObject.Validate))]
+    public class KongServiceValidationScenarios : ValidatableObjectSteps<KongService>
     {
-        protected const string And = "_";
+        protected Mock<KongRoute> RouteMock = new Mock<KongRoute>();
+        protected Mock<KongPlugin> PluginMock = new Mock<KongPlugin>();
 
-        protected KongService Instance;
-        protected ICollection<string> ErrorMessages = new List<string>();
+        protected bool PluginsValid;
+        protected bool RoutesValid;
+        protected RoutesExample Routes;
 
-        [BddfyFact(DisplayName = nameof(ARandomInstance))]
+        [BddfyFact(DisplayName = nameof(ARandomInstanceWithMockedPluginsAndRoutes))]
         public void Scenario1() =>
-            this.Given(x => x.ARandomInstance())
+            this.Given(x => x.ARandomInstanceWithMockedPluginsAndRoutes())
                 .When(x => x.Validating())
-                .Then(x => x.ItIsValid())
+                .Then(x => x.TheErrorMessagesCountIsCorrect())
+                .WithExamples(new ExampleTable(nameof(PluginsValid), nameof(RoutesValid), nameof(ErrorMessagesCount))
+                {
+                    { true, false, 1 },
+                    { false, true, 1 },
+                    { false, false, 2 },
+                    { true, true, 0 }
+                })
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(RouteProtocolsAreEmpty))]
+        [BddfyFact(DisplayName = nameof(ARandomInstanceWithExampleRoutes))]
         public void Scenario2() =>
-            this.Given(x => x.ARandomInstance())
-                .And(x => x.RouteProtocolsAreEmpty())
+            this.Given(x => x.ARandomInstanceWithExampleRoutes())
                 .When(x => x.Validating())
-                .Then(x => x.ItIsInvalid())
+                .Then(x => x.TheErrorMessagesCountIsCorrect())
+                .WithExamples(new ExampleTable(nameof(Routes), nameof(ErrorMessagesCount))
+                {
+                    { RoutesExample.Null, 1 },
+                    { RoutesExample.Empty, 1 },
+                    { RoutesExample.Valid, 0 }
+                })
                 .BDDfy();
 
-        protected void ARandomInstance() => Instance = this.Create<KongService>();
+        protected void ARandomInstanceWithMockedPluginsAndRoutes()
+        {
+            SetupMock(PluginMock, PluginsValid);
+            SetupMock(RouteMock, RoutesValid);
 
-        protected void RouteProtocolsAreEmpty() => Instance.Routes[0].Protocols = null;
+            Instance = Build<KongService>()
+                .With(x => x.Plugins, new[] { PluginMock.Object })
+                .With(x => x.Routes, new[] { RouteMock.Object })
+                .Create();
+        }
 
-        protected Task Validating() => Instance.Validate(ErrorMessages);
+        protected void ARandomInstanceWithExampleRoutes()
+        {
+            IReadOnlyList<KongRoute> routes = null;
+            if (Routes == RoutesExample.Empty)
+            {
+                routes = Array.Empty<KongRoute>();
+            }
+            else if (Routes ==  RoutesExample.Valid)
+            {
+                SetupMock(RouteMock, true);
+                routes = new[] { RouteMock.Object };
+            }
 
-        protected void ItIsValid() => ErrorMessages.Count.Should().Be(0);
+            Instance = Build<KongService>()
+                .With(x => x.Plugins, new KongPlugin[0])
+                .With(x => x.Routes, routes)
+                .Create();
+        }
 
-        protected void ItIsInvalid() => ErrorMessages.Count.Should().BeGreaterThan(0);
+        public enum RoutesExample
+        {
+            Null,
+            Empty,
+            Valid
+        }
     }
 
     [Story(Title = nameof(KongService) + nameof(KongObject.ToJsonStringContent))]
