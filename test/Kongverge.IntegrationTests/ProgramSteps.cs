@@ -5,8 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
+using Microsoft.Extensions.Options;
 
 namespace Kongverge.IntegrationTests
 {
@@ -103,9 +105,16 @@ namespace Kongverge.IntegrationTests
         {
             Debug.WriteLine(Directory.GetCurrentDirectory());
 
+            var settings = new Settings
+            {
+                Admin = new Admin { Host = Host, Port = Port }
+            };
+            var kongReader = new KongAdminReader(new KongAdminHttpClient(Options.Create(settings)));
+            var kongConfiguration = await kongReader.GetConfiguration();
+            var availablePlugins = kongConfiguration.Plugins.Available.Where(x => x.Value).Select(x => x.Key).ToArray();
             var configReader = new ConfigFileReader();
-            var inputConfiguration = await configReader.ReadConfiguration(InputFolder);
-            var outputConfiguration = await configReader.ReadConfiguration(OutputFolder);
+            var inputConfiguration = await configReader.ReadConfiguration(InputFolder, availablePlugins);
+            var outputConfiguration = await configReader.ReadConfiguration(OutputFolder, availablePlugins);
 
             inputConfiguration.GlobalConfig.Plugins.Should().NotBeEmpty();
             inputConfiguration.Services.Count.Should().Be(3);

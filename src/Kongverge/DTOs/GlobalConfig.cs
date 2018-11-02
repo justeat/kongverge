@@ -11,11 +11,11 @@ namespace Kongverge.DTOs
         [JsonProperty("plugins")]
         public IReadOnlyList<KongPlugin> Plugins { get; set; } = Array.Empty<KongPlugin>();
 
-        public async Task Validate(ICollection<string> errorMessages)
+        public async Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
         {
             foreach (var plugin in Plugins)
             {
-                await plugin.Validate(errorMessages);
+                await plugin.Validate(availablePlugins, errorMessages);
             }
         }
 

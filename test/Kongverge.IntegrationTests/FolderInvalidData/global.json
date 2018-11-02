@@ -7,6 +7,10 @@
         "generator": "uuid#counter",
         "header_name": "x-correlation-id"
       }
+    },
+    {
+      "name": "unavailable",
+      "config": { }
     }
   ]
 }

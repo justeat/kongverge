@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Kongverge.Helpers;
@@ -6,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Kongverge.DTOs
 {
-    public sealed class KongPlugin : KongObject, IKongEquatable<KongPlugin>, IValidatableObject
+    public class KongPlugin : KongObject, IKongEquatable<KongPlugin>, IValidatableObject
     {
         public const string ObjectName = "plugin";
 
@@ -48,9 +49,12 @@ namespace Kongverge.DTOs
             RouteId = null;
         }
 
-        public Task Validate(ICollection<string> errorMessages)
+        public virtual Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
         {
-            // TODO: Add validation
+            if (!availablePlugins.Contains(Name))
+            {
+                errorMessages.Add($"Plugin '{Name}' is not available on Kong server.");
+            }
             return Task.CompletedTask;
         }
 

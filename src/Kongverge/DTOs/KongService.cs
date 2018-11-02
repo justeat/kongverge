@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Kongverge.DTOs
 {
-    public sealed class KongService : KongObject, IKongPluginHost, IKongEquatable<KongService>, IKongvergeConfigObject
+    public class KongService : KongObject, IKongPluginHost, IKongEquatable<KongService>, IKongvergeConfigObject
     {
         public const string ObjectName = "service";
 
@@ -86,24 +86,26 @@ namespace Kongverge.DTOs
             plugin.ServiceId = Id;
         }
 
-        public async Task Validate(ICollection<string> errorMessages)
+        public async Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
         {
-            await ValidateRoutesAreValid(errorMessages);
+            foreach (var plugin in Plugins)
+            {
+                await plugin.Validate(availablePlugins, errorMessages);
+            }
+            await ValidateRoutes(availablePlugins, errorMessages);
         }
 
-        private async Task ValidateRoutesAreValid(ICollection<string> errorMessages)
+        private async Task ValidateRoutes(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
         {
             if (Routes == null || !Routes.Any())
             {
-                errorMessages.Add("Routes cannot be null or empty");
+                errorMessages.Add("Routes cannot be null or empty.");
                 return;
             }
             foreach (var route in Routes)
             {
-                await route.Validate(errorMessages);
+                await route.Validate(availablePlugins, errorMessages);
             }
-
-            // TODO: Check if routes Clash
         }
 
         public string ToConfigJson()

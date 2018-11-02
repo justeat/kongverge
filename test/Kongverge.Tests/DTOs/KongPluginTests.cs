@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
@@ -33,6 +34,31 @@ namespace Kongverge.Tests.DTOs
             OtherInstance.ConsumerId = this.Create<string>();
             OtherInstance.ServiceId = this.Create<string>();
             OtherInstance.RouteId = this.Create<string>();
+        }
+    }
+
+    [Story(Title = nameof(KongPlugin) + nameof(IValidatableObject.Validate))]
+    public class KongPluginValidationScenarios : ValidatableObjectSteps<KongPlugin>
+    {
+        protected string PluginName;
+
+        [BddfyFact(DisplayName = nameof(ARandomInstanceWithName))]
+        public void Scenario1() =>
+            this.Given(x => x.ARandomInstanceWithName(PluginName))
+                .When(x => x.Validating())
+                .Then(x => x.TheErrorMessagesCountIsCorrect())
+                .WithExamples(new ExampleTable(nameof(PluginName), nameof(ErrorMessagesCount))
+                {
+                    { AvailablePlugins[0], 0 },
+                    { Guid.NewGuid().ToString(), 1 }
+                })
+                .BDDfy();
+
+        protected void ARandomInstanceWithName(string pluginName)
+        {
+            Instance = Build<KongPlugin>()
+                .With(x => x.Name, pluginName)
+                .Create();
         }
     }
 

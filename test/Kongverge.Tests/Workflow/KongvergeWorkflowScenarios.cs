@@ -174,10 +174,10 @@ namespace Kongverge.Tests.Workflow
         }
 
         protected void NonExistentInputFolder() =>
-            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder)).ThrowsAsync(new DirectoryNotFoundException());
+            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IReadOnlyCollection<string>>())).ThrowsAsync(new DirectoryNotFoundException());
 
         protected void InvalidTargetConfiguration() =>
-            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder)).ThrowsAsync(new InvalidConfigurationFilesException(string.Empty));
+            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IReadOnlyCollection<string>>())).ThrowsAsync(new InvalidConfigurationFilesException(string.Empty));
 
         protected void AnAssortmentOfExistingServicesAndGlobalConfig()
         {
@@ -306,7 +306,7 @@ namespace Kongverge.Tests.Workflow
             SetupTargetConfiguration();
         }
 
-        protected void SetupTargetConfiguration() => GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder)).ReturnsAsync(Target);
+        protected void SetupTargetConfiguration() => GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IReadOnlyCollection<string>>())).ReturnsAsync(Target);
 
         protected void NoServicesAreAdded() =>
             GetMock<IKongAdminWriter>().Verify(x => x.AddService(It.IsAny<KongService>()), Times.Never);

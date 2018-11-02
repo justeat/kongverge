@@ -35,10 +35,11 @@ namespace Kongverge.Workflow
 
         public override async Task<int> DoExecute()
         {
+            var availablePlugins = KongConfiguration.Plugins.Available.Where(x => x.Value).Select(x => x.Key).ToArray();
             KongvergeConfiguration targetConfiguration;
             try
             {
-                targetConfiguration = await _configReader.ReadConfiguration(Configuration.InputFolder);
+                targetConfiguration = await _configReader.ReadConfiguration(Configuration.InputFolder, availablePlugins);
             }
             catch (DirectoryNotFoundException ex)
             {

@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Kongverge.DTOs
 {
-    public sealed class KongRoute : KongObject, IKongPluginHost, IKongEquatable<KongRoute>, IValidatableObject
+    public class KongRoute : KongObject, IKongPluginHost, IKongEquatable<KongRoute>, IValidatableObject
     {
         public const string ObjectName = "route";
 
@@ -75,7 +75,7 @@ namespace Kongverge.DTOs
             plugin.RouteId = Id;
         }
 
-        public Task Validate(ICollection<string> errorMessages)
+        public virtual async Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
         {
             if (IsNullOrEmpty(Protocols) || Protocols.Any(string.IsNullOrWhiteSpace))
             {
@@ -85,7 +85,7 @@ namespace Kongverge.DTOs
             if (IsNullOrEmpty(Hosts) && IsNullOrEmpty(Methods) && IsNullOrEmpty(Paths))
             {
                 errorMessages.Add("At least one of 'hosts', 'methods', or 'paths' must be set");
-                return Task.CompletedTask;
+                return;
             }
 
             if (Hosts?.Any(string.IsNullOrWhiteSpace) == true)
@@ -103,7 +103,10 @@ namespace Kongverge.DTOs
                 errorMessages.Add("Route Paths cannot contain null or empty values");
             }
 
-            return Task.CompletedTask;
+            foreach (var plugin in Plugins)
+            {
+                await plugin.Validate(availablePlugins, errorMessages);
+            }
         }
 
         private static bool IsNullOrEmpty(IEnumerable<string> values)
