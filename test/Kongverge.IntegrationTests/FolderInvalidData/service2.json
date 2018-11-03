@@ -1,12 +1,13 @@
 {
-  "host": "www.service2.com",
+  "host": ":",
   "name": "service2",
   "port": 80,
-  "protocol": "http",
-  "retries": 5,
-  "connect_timeout": 60000,
-  "read_timeout": 60000,
-  "write_timeout": 60000,
+  "path": "path:invalid", 
+  "protocol": "junk",
+  "retries": 26,
+  "connect_timeout": 300001,
+  "read_timeout": 300001,
+  "write_timeout": 300001,
   "plugins": [
     {
       "name": "request-termination",

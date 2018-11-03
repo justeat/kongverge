@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoFixture;
@@ -15,8 +16,9 @@ namespace Kongverge.Tests.DTOs
         protected int ErrorMessagesCount;
         protected IReadOnlyList<string> AvailablePlugins = new [] { "plugin1", "plugin2", "plugin3" };
 
-        protected void SetupMock<TMock>(Mock<TMock> mock, bool isValid) where TMock : class, IValidatableObject
+        private Mock<TMock> SetupMock<TMock>(bool isValid) where TMock : class, IValidatableObject
         {
+            var mock = new Mock<TMock>();
             mock
                 .Setup(x => x.Validate(AvailablePlugins, It.IsAny<ICollection<string>>()))
                 .Callback<IReadOnlyCollection<string>, ICollection<string>>((ep, em) =>
@@ -27,6 +29,23 @@ namespace Kongverge.Tests.DTOs
                     }
                 })
                 .Returns(Task.CompletedTask);
+            return mock;
+        }
+
+        protected IReadOnlyList<TItem> GetExampleCollection<TItem>(CollectionExample example) where TItem : class, IValidatableObject
+        {
+            IReadOnlyList<TItem> items = null;
+            if (example == CollectionExample.Empty)
+            {
+                items = Array.Empty<TItem>();
+            }
+            else if (example != CollectionExample.Null)
+            {
+                var mock = SetupMock<TItem>(example == CollectionExample.Valid);
+                items = new[] { mock.Object };
+            }
+
+            return items;
         }
 
         protected Task Validating()

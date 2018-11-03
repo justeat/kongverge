@@ -31,7 +31,7 @@ namespace Kongverge.DTOs
         public IEnumerable<string> Paths { get; set; } = Array.Empty<string>();
 
         [JsonProperty("regex_priority")]
-        public int RegexPriority { get; set; }
+        public ushort RegexPriority { get; set; }
 
         [JsonProperty("strip_path")]
         public bool StripPath { get; set; } = true;
@@ -77,32 +77,41 @@ namespace Kongverge.DTOs
 
         public virtual async Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
         {
-            if (IsNullOrEmpty(Protocols) || Protocols.Any(string.IsNullOrWhiteSpace))
+            if (IsNullOrEmpty(Protocols) || Protocols.Any(x => !new[] { "http", "https" }.Contains(x)))
             {
-                errorMessages.Add("Route Protocols cannot be null or contain null or empty values");
+                errorMessages.Add("Route Protocols is invalid (must contain one or both of 'http' or 'https').");
             }
 
             if (IsNullOrEmpty(Hosts) && IsNullOrEmpty(Methods) && IsNullOrEmpty(Paths))
             {
-                errorMessages.Add("At least one of 'hosts', 'methods', or 'paths' must be set");
+                errorMessages.Add("At least one of Route 'Hosts', 'Methods', or 'Paths' must be set.");
+            }
+
+            if (Hosts == null || Hosts.Any(x => string.IsNullOrWhiteSpace(x) || Uri.CheckHostName(x) == UriHostNameType.Unknown))
+            {
+                errorMessages.Add("Route Hosts is invalid (cannot be null, or contain null, empty or invalid values).");
+            }
+
+            if (Methods == null || Methods.Any(string.IsNullOrWhiteSpace))
+            {
+                errorMessages.Add("Route Methods is invalid (cannot be null, or contain null or empty values).");
+            }
+
+            if (Paths == null || Paths.Any(x => string.IsNullOrWhiteSpace(x) || !Uri.IsWellFormedUriString(x, UriKind.Relative)))
+            {
+                errorMessages.Add("Route Paths is invalid (cannot be null, or contain null, empty or invalid values).");
+            }
+
+            await ValidatePlugins(availablePlugins, errorMessages);
+        }
+
+        private async Task ValidatePlugins(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
+        {
+            if (Plugins == null)
+            {
+                errorMessages.Add("Plugins cannot be null.");
                 return;
             }
-
-            if (Hosts?.Any(string.IsNullOrWhiteSpace) == true)
-            {
-                errorMessages.Add("Route Hosts cannot contain null or empty values");
-            }
-
-            if (Methods?.Any(string.IsNullOrWhiteSpace) == true)
-            {
-                errorMessages.Add("Route Methods cannot contain null or empty values");
-            }
-
-            if (Paths?.Any(string.IsNullOrWhiteSpace) == true)
-            {
-                errorMessages.Add("Route Paths cannot contain null or empty values");
-            }
-
             foreach (var plugin in Plugins)
             {
                 await plugin.Validate(availablePlugins, errorMessages);

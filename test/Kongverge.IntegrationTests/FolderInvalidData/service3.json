@@ -28,6 +28,12 @@
           "config": { }
         }
       ]
+    },
+    {
+      "hosts": null,
+      "paths": null,
+      "protocols": null,
+      "methods": null
     }
   ]
 }
