@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
 using AutoFixture;
+using AutoFixture.Dsl;
 using FluentAssertions;
 using Kongverge.DTOs;
-using Moq;
 using TestStack.BDDfy;
 using TestStack.BDDfy.Xunit;
 
@@ -22,76 +20,70 @@ namespace Kongverge.Tests.DTOs
     [Story(Title = nameof(KongService) + nameof(IValidatableObject.Validate))]
     public class KongServiceValidationScenarios : ValidatableObjectSteps<KongService>
     {
-        protected Mock<KongRoute> RouteMock = new Mock<KongRoute>();
-        protected Mock<KongPlugin> PluginMock = new Mock<KongPlugin>();
+        protected CollectionExample Plugins;
+        protected CollectionExample Routes;
+        protected string Protocol;
+        protected string Host;
+        protected string Path;
+        protected byte Retries;
+        protected uint ConnectTimeout;
+        protected uint WriteTimeout;
+        protected uint ReadTimeout;
 
-        protected bool PluginsValid;
-        protected bool RoutesValid;
-        protected RoutesExample Routes;
-
-        [BddfyFact(DisplayName = nameof(ARandomInstanceWithMockedPluginsAndRoutes))]
+        [BddfyFact(DisplayName = nameof(AValidInstanceWithExamplePluginsAndRoutes))]
         public void Scenario1() =>
-            this.Given(x => x.ARandomInstanceWithMockedPluginsAndRoutes())
+            this.Given(x => x.AValidInstanceWithExamplePluginsAndRoutes())
                 .When(x => x.Validating())
                 .Then(x => x.TheErrorMessagesCountIsCorrect())
-                .WithExamples(new ExampleTable(nameof(PluginsValid), nameof(RoutesValid), nameof(ErrorMessagesCount))
+                .WithExamples(new ExampleTable(nameof(Plugins), nameof(Routes), nameof(ErrorMessagesCount))
                 {
-                    { true, false, 1 },
-                    { false, true, 1 },
-                    { false, false, 2 },
-                    { true, true, 0 }
+                    { CollectionExample.Null, CollectionExample.Null, 2 },
+                    { CollectionExample.Empty, CollectionExample.Empty, 1 },
+                    { CollectionExample.Valid, CollectionExample.Valid, 0 },
+                    { CollectionExample.Invalid, CollectionExample.Valid, 1 },
+                    { CollectionExample.Valid, CollectionExample.Invalid, 1 },
+                    { CollectionExample.Invalid, CollectionExample.Invalid, 2 }
                 })
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(ARandomInstanceWithExampleRoutes))]
+        [BddfyFact(DisplayName = nameof(AnInstanceWithValidRoutesAndExamplePropertyValues))]
         public void Scenario2() =>
-            this.Given(x => x.ARandomInstanceWithExampleRoutes())
+            this.Given(x => x.AnInstanceWithValidRoutesAndExamplePropertyValues())
                 .When(x => x.Validating())
                 .Then(x => x.TheErrorMessagesCountIsCorrect())
-                .WithExamples(new ExampleTable(nameof(Routes), nameof(ErrorMessagesCount))
+                .WithExamples(new ExampleTable(nameof(Protocol), nameof(Host), nameof(Path), nameof(Retries), nameof(ConnectTimeout), nameof(WriteTimeout), nameof(ReadTimeout), nameof(ErrorMessagesCount))
                 {
-                    { RoutesExample.Null, 1 },
-                    { RoutesExample.Empty, 1 },
-                    { RoutesExample.Valid, 0 }
+                    { "http", "localhost", "path", 0, 0, 0, 0, 0 },
+                    { "http", "www.example.com", "path", 0, 0, 0, 0, 0 },
+                    { "https", "127.0.0.1", null, 25, 300000, 300000, 300000, 0 },
+                    { "https", null, null, 25, 300000, 300000, 300000, 1 },
+                    { "junk", ":", "path:invalid", 26, 300001, 300001, 300001, 7 }
                 })
                 .BDDfy();
 
-        protected void ARandomInstanceWithMockedPluginsAndRoutes()
-        {
-            SetupMock(PluginMock, PluginsValid);
-            SetupMock(RouteMock, RoutesValid);
+        protected void AValidInstanceWithExamplePluginsAndRoutes() => Instance = BuildValidService()
+            .With(x => x.Plugins, GetExampleCollection<KongPlugin>(Plugins))
+            .With(x => x.Routes, GetExampleCollection<KongRoute>(Routes))
+            .Create();
 
-            Instance = Build<KongService>()
-                .With(x => x.Plugins, new[] { PluginMock.Object })
-                .With(x => x.Routes, new[] { RouteMock.Object })
-                .Create();
-        }
+        protected void AnInstanceWithValidRoutesAndExamplePropertyValues() => Instance = Build<KongService>()
+            .With(x => x.Plugins, GetExampleCollection<KongPlugin>(CollectionExample.Empty))
+            .With(x => x.Routes, GetExampleCollection<KongRoute>(CollectionExample.Valid))
+            .With(x => x.Protocol, Protocol)
+            .With(x => x.Host, Host)
+            .With(x => x.Path, Path)
+            .With(x => x.Retries, Retries)
+            .With(x => x.ConnectTimeout, ConnectTimeout)
+            .With(x => x.WriteTimeout, WriteTimeout)
+            .With(x => x.ReadTimeout, ReadTimeout)
+            .Create();
 
-        protected void ARandomInstanceWithExampleRoutes()
-        {
-            IReadOnlyList<KongRoute> routes = null;
-            if (Routes == RoutesExample.Empty)
-            {
-                routes = Array.Empty<KongRoute>();
-            }
-            else if (Routes ==  RoutesExample.Valid)
-            {
-                SetupMock(RouteMock, true);
-                routes = new[] { RouteMock.Object };
-            }
-
-            Instance = Build<KongService>()
-                .With(x => x.Plugins, new KongPlugin[0])
-                .With(x => x.Routes, routes)
-                .Create();
-        }
-
-        public enum RoutesExample
-        {
-            Null,
-            Empty,
-            Valid
-        }
+        protected IPostprocessComposer<KongService> BuildValidService() => Build<KongService>()
+            .With(x => x.Protocol, "https")
+            .With(x => x.Retries, 5)
+            .With(x => x.ConnectTimeout, 1000U)
+            .With(x => x.WriteTimeout, 1000U)
+            .With(x => x.ReadTimeout, 1000U);
     }
 
     [Story(Title = nameof(KongService) + nameof(KongObject.ToJsonStringContent))]

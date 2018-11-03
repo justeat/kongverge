@@ -21,22 +21,22 @@ namespace Kongverge.DTOs
         public string Host { get; set; }
 
         [JsonProperty("port")]
-        public int Port { get; set; } = 80;
+        public ushort Port { get; set; } = 80;
 
         [JsonProperty("protocol")]
         public string Protocol { get; set; } = "http";
 
         [JsonProperty("retries")]
-        public int Retries { get; set; } = 5;
+        public byte Retries { get; set; } = 5;
 
         [JsonProperty("connect_timeout")]
-        public int ConnectTimeout { get; set; } = DefaultTimeout;
+        public uint ConnectTimeout { get; set; } = DefaultTimeout;
 
         [JsonProperty("write_timeout")]
-        public int WriteTimeout { get; set; } = DefaultTimeout;
+        public uint WriteTimeout { get; set; } = DefaultTimeout;
 
         [JsonProperty("read_timeout")]
-        public int ReadTimeout { get; set; } = DefaultTimeout;
+        public uint ReadTimeout { get; set; } = DefaultTimeout;
 
         [JsonProperty("path")]
         public string Path { get; set; }
@@ -88,11 +88,57 @@ namespace Kongverge.DTOs
 
         public async Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
         {
+            if (!new[] { "http", "https" }.Contains(Protocol))
+            {
+                errorMessages.Add("Protocol is invalid (must be either 'http' or 'https').");
+            }
+
+            if (Uri.CheckHostName(Host) == UriHostNameType.Unknown)
+            {
+                errorMessages.Add("Host is invalid.");
+            }
+
+            if (!string.IsNullOrEmpty(Path) && !Uri.IsWellFormedUriString(Path, UriKind.Relative))
+            {
+                errorMessages.Add("Path is invalid.");
+            }
+
+            if (Retries > 25)
+            {
+                errorMessages.Add("Retries is invalid (must be between 0 and 25).");
+            }
+
+            if (ConnectTimeout > 300000)
+            {
+                errorMessages.Add("ConnectTimeout is invalid (must be between 0 and 300000).");
+            }
+
+            if (WriteTimeout > 300000)
+            {
+                errorMessages.Add("WriteTimeout is invalid (must be between 0 and 300000).");
+            }
+
+            if (ReadTimeout > 300000)
+            {
+                errorMessages.Add("ReadTimeout is invalid (must be between 0 and 300000).");
+            }
+
+            await ValidatePlugins(availablePlugins, errorMessages);
+
+            await ValidateRoutes(availablePlugins, errorMessages);
+        }
+
+        private async Task ValidatePlugins(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
+        {
+            if (Plugins == null)
+            {
+                errorMessages.Add("Plugins cannot be null.");
+                return;
+            }
             foreach (var plugin in Plugins)
             {
                 await plugin.Validate(availablePlugins, errorMessages);
             }
-            await ValidateRoutes(availablePlugins, errorMessages);
         }
 
         private async Task ValidateRoutes(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)

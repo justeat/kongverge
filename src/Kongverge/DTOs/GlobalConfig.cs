@@ -13,6 +13,16 @@ namespace Kongverge.DTOs
 
         public async Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
         {
+            await ValidatePlugins(availablePlugins, errorMessages);
+        }
+
+        private async Task ValidatePlugins(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
+        {
+            if (Plugins == null)
+            {
+                errorMessages.Add("Plugins cannot be null.");
+                return;
+            }
             foreach (var plugin in Plugins)
             {
                 await plugin.Validate(availablePlugins, errorMessages);

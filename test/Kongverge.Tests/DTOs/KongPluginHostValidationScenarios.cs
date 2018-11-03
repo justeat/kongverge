@@ -1,6 +1,4 @@
-using AutoFixture;
 using Kongverge.DTOs;
-using Moq;
 using TestStack.BDDfy;
 using TestStack.BDDfy.Xunit;
 
@@ -9,29 +7,30 @@ namespace Kongverge.Tests.DTOs
     public abstract class KongPluginHostValidationScenarios<T> : ValidatableObjectSteps<T>
         where T : IKongPluginHost, IValidatableObject
     {
-        protected Mock<KongPlugin> PluginMock = new Mock<KongPlugin>();
+        protected CollectionExample Plugins;
 
-        protected bool PluginsValid;
-
-        [BddfyFact(DisplayName = nameof(ARandomInstanceWithMockedPlugins))]
+        [BddfyFact(DisplayName = nameof(AValidInstanceWithExamplePlugins))]
         public void Scenario1() =>
-            this.Given(x => x.ARandomInstanceWithMockedPlugins())
+            this.Given(x => x.AValidInstanceWithExamplePlugins())
                 .When(x => x.Validating())
                 .Then(x => x.TheErrorMessagesCountIsCorrect())
-                .WithExamples(new ExampleTable(nameof(PluginsValid), nameof(ErrorMessagesCount))
+                .WithExamples(new ExampleTable(nameof(Plugins), nameof(ErrorMessagesCount))
                 {
-                    { true, 0 },
-                    { false, 1 }
+                    { CollectionExample.Null, 1 },
+                    { CollectionExample.Empty, 0 },
+                    { CollectionExample.Valid, 0 },
+                    { CollectionExample.Invalid, 1 }
                 })
                 .BDDfy();
 
-        protected void ARandomInstanceWithMockedPlugins()
-        {
-            SetupMock(PluginMock, PluginsValid);
+        protected abstract void AValidInstanceWithExamplePlugins();
+    }
 
-            Instance = Build<T>()
-                .With(x => x.Plugins, new[] { PluginMock.Object })
-                .Create();
-        }
+    public enum CollectionExample
+    {
+        Null,
+        Empty,
+        Valid,
+        Invalid
     }
 }
