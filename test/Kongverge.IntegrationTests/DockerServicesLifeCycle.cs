@@ -12,6 +12,7 @@ namespace Kongverge.IntegrationTests
         {
             try
             {
+                // ReSharper disable once PossibleNullReferenceException
                 Process.Start("docker-compose", "start").WaitForExit();
                 Thread.Sleep(3000);
             }
@@ -25,6 +26,7 @@ namespace Kongverge.IntegrationTests
         {
             try
             {
+                // ReSharper disable once PossibleNullReferenceException
                 Process.Start("docker-compose", "stop").WaitForExit();
             }
             catch (Exception e)
