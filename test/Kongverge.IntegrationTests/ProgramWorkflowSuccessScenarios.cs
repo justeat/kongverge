@@ -3,9 +3,11 @@ using Kongverge.Workflow;
 using NCrunch.Framework;
 using TestStack.BDDfy;
 using TestStack.BDDfy.Xunit;
+using Xunit;
 
 namespace Kongverge.IntegrationTests
 {
+    [Collection(Host)]
     [ExclusivelyUses(Host)]
     [Story(Title = nameof(Program) + nameof(Program.Main) + nameof(KongvergeWorkflow) + "Success")]
     public class ProgramWorkflowSuccessScenarios : ProgramSteps
