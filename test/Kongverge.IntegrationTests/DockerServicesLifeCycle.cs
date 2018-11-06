@@ -10,29 +10,29 @@ namespace Kongverge.IntegrationTests
     {
         public DockerServicesLifecycle()
         {
-            try
-            {
-                // ReSharper disable once PossibleNullReferenceException
-                Process.Start("docker-compose", "start").WaitForExit();
-                Thread.Sleep(3000);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            //try
+            //{
+            //    // ReSharper disable once PossibleNullReferenceException
+            //    Process.Start("docker-compose", "start").WaitForExit();
+            //    Thread.Sleep(3000);
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e);
+            //}
         }
 
         public void Dispose()
         {
-            try
-            {
-                // ReSharper disable once PossibleNullReferenceException
-                Process.Start("docker-compose", "stop").WaitForExit();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            //try
+            //{
+            //    // ReSharper disable once PossibleNullReferenceException
+            //    Process.Start("docker-compose", "stop").WaitForExit();
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine(e);
+            //}
         }
     }
 }
