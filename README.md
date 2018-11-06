@@ -41,9 +41,3 @@ These objects also handle matching - i.e. reconciling the state described by fil
 
 Kong's plugin model is more complex, as each plugin has its own set of properties used to configure it. We model this as a `Dictionary<string, object>` and the equality comparison checks the value of this object graph.
 Beware that in order to prevent a plugin from being seen as different when it is actually the same, all optional values need to be supplied in the input files.
-
-## Testing
-
-Integration tests exist to test Kongverge against a real instance of Kong running in Docker. In order to build the integration tests project, you will need to have Docker installed locally. For development and CI-build purposes, the following steps are required:
-* Before running the integration tests, start the docker services by running `docker-compose start` from within the integration tests project folder.
-* After running the integration tests (or when required), stop the docker services by running `docker-compose stop` from within the integration tests project folder.
