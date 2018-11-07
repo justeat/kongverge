@@ -1,0 +1,13 @@
+{
+  "plugins": [
+    {
+      "name": "udp-log",
+      "config": {
+        "host": "www.udp-log.com",
+        "port": 9090,
+        "timeout": 200,
+        "some_unknown_property": "value"
+      }
+    }
+  ]
+}

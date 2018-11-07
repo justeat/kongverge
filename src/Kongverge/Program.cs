@@ -47,8 +47,7 @@ namespace Kongverge
             }
             catch (Exception e)
             {
-                Log.Error(e, $"Error running program: {e}");
-                return (int)ExitCode.UnspecifiedError;
+                return ExitWithCode.Return(ExitCode.UnspecifiedError, $"Error running program: {e}");
             }
         }
 

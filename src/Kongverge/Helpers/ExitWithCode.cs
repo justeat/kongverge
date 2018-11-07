@@ -54,6 +54,10 @@ namespace Kongverge.Helpers
                     Log.Error(message ?? "Invalid configuration file(s)");
                     break;
 
+                case ExitCode.UnspecifiedError:
+                    Log.Error(message ?? "Unspecified error");
+                    break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(exitCode), exitCode, null);
             }

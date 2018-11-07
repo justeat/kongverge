@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Kongverge.DTOs;
 using Kongverge.Helpers;
@@ -52,18 +53,43 @@ namespace Kongverge.Workflow
 
             var existingConfiguration = await _configBuilder.FromKong(KongReader);
             
+            try
+            {
+                await ConvergeConfiguration(existingConfiguration, targetConfiguration);
+            }
+            catch (KongException e) when (e.StatusCode == HttpStatusCode.BadRequest)
+            {
+                Log.Error(e, $"Error converging target configuration: {e}");
+                Log.Information("Attempting rollback to previous configuration...");
+                var currentConfiguration = await _configBuilder.FromKong(KongReader);
+                await ConvergeConfiguration(currentConfiguration, existingConfiguration);
+                return ExitWithCode.Return(ExitCode.UnspecifiedError, "An error occurred while attempting to converge target configuration. Rollback was successful.");
+            }
+            
+            return ExitWithCode.Return(ExitCode.Success);
+        }
+
+        private async Task ConvergeConfiguration(KongvergeConfiguration existingConfiguration, KongvergeConfiguration targetConfiguration)
+        {
+            async Task DeleteService(KongService service)
+            {
+                await _kongWriter.DeleteService(service.Id);
+                _deletedStats.Increment<KongRoute>(service.Routes.Count);
+                _deletedStats.Increment<KongPlugin>(service.Plugins.Count + service.Routes.Sum(x => x.Plugins.Count));
+            }
+
             _createdStats = new OperationStats();
             _updatedStats = new OperationStats();
             _deletedStats = new OperationStats();
 
             await ConvergeChildrenPlugins(null, existingConfiguration.GlobalConfig, targetConfiguration.GlobalConfig);
-            
+
             await ConvergeObjects(
                 null,
                 KongService.ObjectName,
                 existingConfiguration.Services,
                 targetConfiguration.Services,
-                x => _kongWriter.DeleteService(x.Id),
+                DeleteService,
                 x => _kongWriter.AddService(x),
                 x => _kongWriter.UpdateService(x),
                 ConvergeServiceChildren);
@@ -71,8 +97,6 @@ namespace Kongverge.Workflow
             Log.Information($"Created {_createdStats}");
             Log.Information($"Updated {_updatedStats}");
             Log.Information($"Deleted {_deletedStats}");
-
-            return ExitWithCode.Return(ExitCode.Success);
         }
 
         private async Task ConvergeObjects<T>(
@@ -91,12 +115,12 @@ namespace Kongverge.Workflow
 
             if (existingObjects.Count == 0 && targetObjects.Count == 0)
             {
-                Log.Verbose($"Target {parent ?? "configuration"} and existing both have zero {GetName(0, objectName)}");
+                Log.Verbose($"Target {parent ?? "configuration"} and existing both have zero {KongObject.GetName(0, objectName)}");
                 return;
             }
 
-            var targetPhrase = $"{targetObjects.Count} target {GetName(targetObjects.Count, objectName)}";
-            var existingPhrase = $"{existingObjects.Count} existing {GetName(existingObjects.Count, objectName)}";
+            var targetPhrase = $"{targetObjects.Count} target {KongObject.GetName(targetObjects.Count, objectName)}";
+            var existingPhrase = $"{existingObjects.Count} existing {KongObject.GetName(existingObjects.Count, objectName)}";
             var parentPhrase = parent == null ? string.Empty : $" attached to {parent}";
             Log.Verbose($"Converging {targetPhrase}{parentPhrase} with {existingPhrase}");
 
@@ -136,7 +160,14 @@ namespace Kongverge.Workflow
 
         private Task ConvergeChildrenPlugins(string parent, IKongPluginHost existing, IKongPluginHost target)
         {
-            Task UpsertPlugin(KongPlugin plugin, IKongPluginHost host)
+            Task CreatePlugin(KongPlugin plugin, IKongPluginHost host)
+            {
+                plugin.Id = null;
+                host.AssignParentId(plugin);
+                return _kongWriter.UpsertPlugin(plugin);
+            }
+
+            Task UpdatePlugin(KongPlugin plugin, IKongPluginHost host)
             {
                 host.AssignParentId(plugin);
                 return _kongWriter.UpsertPlugin(plugin);
@@ -148,12 +179,18 @@ namespace Kongverge.Workflow
                 existing?.Plugins,
                 target.Plugins,
                 x => _kongWriter.DeletePlugin(x.Id),
-                x => UpsertPlugin(x, target),
-                x => UpsertPlugin(x, target));
+                x => CreatePlugin(x, target),
+                x => UpdatePlugin(x, target));
         }
 
         private async Task ConvergeServiceChildren(KongService existing, KongService target)
         {
+            async Task DeleteRoute(KongRoute route)
+            {
+                await _kongWriter.DeleteRoute(route.Id);
+                _deletedStats.Increment<KongPlugin>(route.Plugins.Count);
+            }
+
             var parent = $"{KongService.ObjectName} {target}";
             await ConvergeChildrenPlugins(parent, existing, target);
             await ConvergeObjects(
@@ -161,17 +198,10 @@ namespace Kongverge.Workflow
                 KongRoute.ObjectName,
                 existing?.Routes,
                 target.Routes,
-                x => _kongWriter.DeleteRoute(x.Id),
+                DeleteRoute,
                 x => _kongWriter.AddRoute(target.Id, x),
                 null,
                 (e, t) => ConvergeChildrenPlugins($"{KongRoute.ObjectName} {t} attached to {KongService.ObjectName} {target}", e, t));
-        }
-
-        private static string GetName(int count, string singular)
-        {
-            return count == 1
-                ? singular
-                : singular + "s";
         }
 
         private class OperationCount
@@ -194,14 +224,14 @@ namespace Kongverge.Workflow
                 Add(typeof(KongRoute), new OperationCount(KongRoute.ObjectName));
             }
 
-            public void Increment<T>()
+            public void Increment<T>(int count = 1)
             {
-                this[typeof(T)].Count++;
+                this[typeof(T)].Count += count;
             }
 
             public override string ToString()
             {
-                return string.Join(", ", Keys.Select(x => $"{this[x].Count} {GetName(this[x].Count, this[x].ObjectName)}"));
+                return string.Join(", ", Keys.Select(x => $"{this[x].Count} {KongObject.GetName(this[x].Count, this[x].ObjectName)}"));
             }
         }
     }
