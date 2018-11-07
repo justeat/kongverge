@@ -19,7 +19,8 @@ namespace Kongverge.IntegrationTests
 
         protected const string And = "_";
         protected const string NonExistent = nameof(NonExistent);
-        protected const string InvalidData = nameof(InvalidData);
+        protected const string InvalidDataA = nameof(InvalidDataA);
+        protected const string InvalidDataB = nameof(InvalidDataB);
         protected const string A = nameof(A);
         protected const string B = nameof(B);
         protected const string Output = nameof(Output);
@@ -35,7 +36,7 @@ namespace Kongverge.IntegrationTests
 
         protected void InvokingMainAgainForExport()
         {
-            TheExitCodeIs(ExitCode.Success);
+            TheExitCodeIs(InputFolder.Contains(InvalidDataB) ? ExitCode.UnspecifiedError : ExitCode.Success);
             Arguments = new CommandLineArguments();
             AValidHost();
             AValidPort();
@@ -101,8 +102,12 @@ namespace Kongverge.IntegrationTests
 
         protected void TheExitCodeIs(ExitCode exitCode) => ExitCode.Should().Be(exitCode);
 
-        protected async Task OutputFolderContentsMatchInputFolderContents()
+        protected Task OutputFolderContentsMatchInputFolderContents() => OutputFolderContentsMatchesFolderContentsOf(InputFolder);
+
+        protected async Task OutputFolderContentsMatchesFolderContentsOf(string name)
         {
+            var folder = name.StartsWith("Folder") ? name : MakeFolderName(name);
+
             Debug.WriteLine(Directory.GetCurrentDirectory());
 
             var settings = new Settings
@@ -113,23 +118,23 @@ namespace Kongverge.IntegrationTests
             var kongConfiguration = await kongReader.GetConfiguration();
             var availablePlugins = kongConfiguration.Plugins.Available.Where(x => x.Value).Select(x => x.Key).ToArray();
             var configReader = new ConfigFileReader();
-            var inputConfiguration = await configReader.ReadConfiguration(InputFolder, availablePlugins);
+            var folderConfiguration = await configReader.ReadConfiguration(folder, availablePlugins);
             var outputConfiguration = await configReader.ReadConfiguration(OutputFolder, availablePlugins);
 
-            inputConfiguration.GlobalConfig.Plugins.Should().NotBeEmpty();
-            inputConfiguration.Services.Count.Should().Be(3);
+            folderConfiguration.GlobalConfig.Plugins.Should().NotBeEmpty();
+            folderConfiguration.Services.Count.Should().Be(3);
 
-            outputConfiguration.GlobalConfig.Plugins.Should().BeEquivalentTo(inputConfiguration.GlobalConfig.Plugins);
-            outputConfiguration.Services.Should().BeEquivalentTo(inputConfiguration.Services);
+            outputConfiguration.GlobalConfig.Plugins.Should().BeEquivalentTo(folderConfiguration.GlobalConfig.Plugins);
+            outputConfiguration.Services.Should().BeEquivalentTo(folderConfiguration.Services);
             foreach (var outputService in outputConfiguration.Services)
             {
-                var inputService = inputConfiguration.Services.Single(x => x.Name == outputService.Name);
-                outputService.Plugins.Should().BeEquivalentTo(inputService.Plugins);
-                outputService.Routes.Should().BeEquivalentTo(inputService.Routes);
+                var folderService = folderConfiguration.Services.Single(x => x.Name == outputService.Name);
+                outputService.Plugins.Should().BeEquivalentTo(folderService.Plugins);
+                outputService.Routes.Should().BeEquivalentTo(folderService.Routes);
                 foreach (var outputServiceRoute in outputService.Routes)
                 {
-                    var inputServiceRoute = inputService.Routes.Single(x => x.Equals(outputServiceRoute));
-                    outputServiceRoute.Plugins.Should().BeEquivalentTo(inputServiceRoute.Plugins);
+                    var folderServiceRoute = folderService.Routes.Single(x => x.Equals(outputServiceRoute));
+                    outputServiceRoute.Plugins.Should().BeEquivalentTo(folderServiceRoute.Plugins);
                 }
             }
         }

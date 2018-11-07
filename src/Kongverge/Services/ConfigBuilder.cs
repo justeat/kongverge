@@ -26,6 +26,8 @@ namespace Kongverge.Services
                 PopulateServiceTree(existingService, routes, plugins);
             }
 
+            Log.Information($"Configuration from Kong contains {services.Count} {KongObject.GetName(0, "service")}, {plugins.Count} {KongObject.GetName(0, "plugin")}, {routes.Count} {KongObject.GetName(0, "route")}");
+
             return new KongvergeConfiguration
             {
                 Services = services.ToArray(),

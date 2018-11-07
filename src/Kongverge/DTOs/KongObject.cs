@@ -38,5 +38,12 @@ namespace Kongverge.DTOs
         {
             return Id == null ? string.Empty : $"Id: {Id}, ";
         }
+
+        public static string GetName(int count, string singular)
+        {
+            return count == 1
+                ? singular
+                : singular + "s";
+        }
     }
 }
