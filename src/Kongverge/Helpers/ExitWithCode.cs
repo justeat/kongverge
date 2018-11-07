@@ -12,7 +12,7 @@ namespace Kongverge.Helpers
         MissingPort,
         InputFolderUnreachable,
         IncompatibleArguments,
-        InvalidConfigurationFile,
+        InvalidConfigurationFiles,
         UnspecifiedError
     }
 
@@ -50,8 +50,8 @@ namespace Kongverge.Helpers
                     Log.Error(message ?? "Incompatible command line arguments");
                     break;
 
-                case ExitCode.InvalidConfigurationFile:
-                    Log.Error(message ?? "Invalid configuration file");
+                case ExitCode.InvalidConfigurationFiles:
+                    Log.Error(message ?? "Invalid configuration file(s)");
                     break;
 
                 default:

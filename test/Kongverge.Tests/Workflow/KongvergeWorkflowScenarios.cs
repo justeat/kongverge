@@ -86,7 +86,7 @@ namespace Kongverge.Tests.Workflow
             this.Given(s => s.KongIsReachable())
                 .And(s => s.InvalidTargetConfiguration())
                 .When(s => s.Executing())
-                .Then(s => s.TheExitCodeIs(ExitCode.InvalidConfigurationFile))
+                .Then(s => s.TheExitCodeIs(ExitCode.InvalidConfigurationFiles))
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(KongIsReachable) + And + nameof(NoExistingServicesOrGlobalConfig) + And + nameof(NoTargetServicesOrGlobalConfig))]
@@ -177,7 +177,7 @@ namespace Kongverge.Tests.Workflow
             GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder)).ThrowsAsync(new DirectoryNotFoundException());
 
         protected void InvalidTargetConfiguration() =>
-            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder)).ThrowsAsync(new InvalidConfigurationFileException(string.Empty, string.Empty));
+            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder)).ThrowsAsync(new InvalidConfigurationFilesException(string.Empty));
 
         protected void AnAssortmentOfExistingServicesAndGlobalConfig()
         {

@@ -1,6 +1,6 @@
 {
-  "host": "www.example.com",
-  "name": "healthcheck",
+  "host": "www.service2.com",
+  "name": "service2",
   "port": 80,
   "protocol": "http",
   "retries": 5,
