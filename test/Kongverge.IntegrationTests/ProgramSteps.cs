@@ -17,9 +17,7 @@ namespace Kongverge.IntegrationTests
 
         protected const string And = "_";
         protected const string NonExistent = nameof(NonExistent);
-        protected const string InvalidData1 = nameof(InvalidData1);
-        protected const string InvalidData2 = nameof(InvalidData2);
-        protected const string BadFormat = nameof(BadFormat);
+        protected const string InvalidData = nameof(InvalidData);
         protected const string A = nameof(A);
         protected const string B = nameof(B);
         protected const string Output = nameof(Output);

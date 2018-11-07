@@ -1,26 +1,33 @@
 {
-  "host": "www.example.com",
-  "name": "healthcheck",
+  "host": "www.service3.com",
+  "name": "service3",
   "port": 80,
   "protocol": "http",
   "retries": 5,
   "connect_timeout": 60000,
   "read_timeout": 60000,
   "write_timeout": 60000,
-  "plug
+  "plugins": [
+    {
+      "name": "unavailable1",
+      "config": { }
     }
   ],
   "routes": [
     {
       "paths": [
-        "/health/check"
+        "/path"
       ],
       "protocols": [
         "http",
         "https"
       ],
-      "regex_priority": 20,
-      "strip_path": true
+      "plugins": [
+        {
+          "name": "unavailable2",
+          "config": { }
+        }
+      ]
     }
   ]
 }

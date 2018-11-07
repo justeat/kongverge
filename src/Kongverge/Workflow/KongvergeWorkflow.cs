@@ -44,9 +44,9 @@ namespace Kongverge.Workflow
             {
                 return ExitWithCode.Return(ExitCode.InputFolderUnreachable, ex.Message);
             }
-            catch (InvalidConfigurationFileException ex)
+            catch (InvalidConfigurationFilesException ex)
             {
-                return ExitWithCode.Return(ExitCode.InvalidConfigurationFile, $"Invalid configuration file {ex.Path}{Environment.NewLine}{ex.Message}");
+                return ExitWithCode.Return(ExitCode.InvalidConfigurationFiles, ex.Message);
             }
 
             var existingConfiguration = await _configBuilder.FromKong(KongReader);

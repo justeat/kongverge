@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Kongverge.DTOs;
 using Newtonsoft.Json;
@@ -15,24 +16,32 @@ namespace Kongverge.Services
         {
             Log.Information($"Reading files from {folderPath}");
 
-            var filePaths = Directory.EnumerateFiles(folderPath, $"*{Settings.FileExtension}", SearchOption.AllDirectories);
+            var filePaths = Directory.EnumerateFiles(folderPath, $"*{Settings.FileExtension}", SearchOption.AllDirectories).ToArray();
 
+            var fileErrorMessages = new FileErrorMessages();
             var services = new List<KongService>();
             GlobalConfig globalConfig = null;
-            foreach (var configFilePath in filePaths)
+            var globalConfigFilePaths = filePaths.Where(x => x.EndsWith(Settings.GlobalConfigFileName)).ToArray();
+            if (globalConfigFilePaths.Length > 1)
             {
-                if (configFilePath.EndsWith(Settings.GlobalConfigFileName))
+                foreach (var globalConfigFilePath in globalConfigFilePaths)
                 {
-                    if (globalConfig != null)
-                    {
-                        throw new InvalidConfigurationFileException(configFilePath, $"Cannot have more than one {Settings.GlobalConfigFileName} file.");
-                    }
-                    globalConfig = await ParseFile<GlobalConfig>(configFilePath);
+                    fileErrorMessages.AddErrors(globalConfigFilePath, $"Cannot have more than one {Settings.GlobalConfigFileName} file.");
+                    await ParseFile<GlobalConfig>(globalConfigFilePath, fileErrorMessages);
                 }
-                else
-                {
-                    services.Add(await ParseFile<KongService>(configFilePath));
-                }
+            }
+            else if (globalConfigFilePaths.Any())
+            {
+                globalConfig = await ParseFile<GlobalConfig>(globalConfigFilePaths.Single(), fileErrorMessages);
+            }
+            foreach (var serviceConfigFilePath in filePaths.Except(globalConfigFilePaths))
+            {
+                services.Add(await ParseFile<KongService>(serviceConfigFilePath, fileErrorMessages));
+            }
+
+            if (fileErrorMessages.Any())
+            {
+                throw new InvalidConfigurationFilesException(fileErrorMessages.CreateMessage());
             }
             
             return new KongvergeConfiguration
@@ -42,7 +51,7 @@ namespace Kongverge.Services
             };
         }
 
-        private static async Task<T> ParseFile<T>(string path) where T : IKongvergeConfigObject
+        private static async Task<T> ParseFile<T>(string path, FileErrorMessages fileErrorMessages) where T : class, IKongvergeConfigObject
         {
             Log.Verbose($"Reading {path}");
             string text;
@@ -51,24 +60,55 @@ namespace Kongverge.Services
                 text = await reader.ReadToEndAsync();
             }
 
-            T data;
             var errorMessages = new List<string>();
             try
             {
-                data = JsonConvert.DeserializeObject<T>(text);
+                var data = JsonConvert.DeserializeObject<T>(text);
                 await data.Validate(errorMessages);
+                if (errorMessages.Any())
+                {
+                    fileErrorMessages.AddErrors(path, errorMessages.ToArray());
+                }
+                return data;
             }
             catch (Exception e)
             {
-                throw new InvalidConfigurationFileException(path, e.Message, e);
-            }
-
-            if (errorMessages.Any())
-            {
-                throw new InvalidConfigurationFileException(path, string.Join(Environment.NewLine, errorMessages));
+                fileErrorMessages.AddErrors(path, e.Message);
             }
             
-            return data;
+            return null;
+        }
+
+        private class FileErrorMessages : Dictionary<string, List<string>>
+        {
+            public void AddErrors(string filePath, params string[] errorMessages)
+            {
+                if (!ContainsKey(filePath))
+                {
+                    Add(filePath, new List<string>());
+                }
+                this[filePath].AddRange(errorMessages);
+            }
+
+            public string CreateMessage()
+            {
+                if (Keys.Count == 0)
+                {
+                    throw new InvalidOperationException();
+                }
+
+                var messageHeader = "Invalid configuration file" + (Keys.Count > 1 ? "s" : string.Empty) + ":";
+                var message = new StringBuilder(messageHeader, Keys.Count + 1);
+                foreach (var filePath in Keys)
+                {
+                    foreach (var errorMessage in this[filePath])
+                    {
+                        message.Append($"{Environment.NewLine}{filePath} => {errorMessage}");
+                    }
+                }
+
+                return message.ToString();
+            }
         }
     }
 }

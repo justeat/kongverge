@@ -1,0 +1,10 @@
+{
+  "plugins": [
+    {
+      "name": "request-size-limiting",
+      "config": {
+        "allowed_payload_size": 256
+      }
+    }
+  ]
+}
