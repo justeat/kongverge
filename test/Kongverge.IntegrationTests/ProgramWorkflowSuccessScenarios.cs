@@ -7,8 +7,8 @@ using Xunit;
 
 namespace Kongverge.IntegrationTests
 {
-    [Collection(Host)]
     [ExclusivelyUses(Host)]
+    [Collection(Host)]
     [Story(Title = nameof(Program) + nameof(Program.Main) + nameof(KongvergeWorkflow) + "Success")]
     public class ProgramWorkflowSuccessScenarios : ProgramSteps
     {

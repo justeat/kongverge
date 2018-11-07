@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Kongverge.IntegrationTests
 {
-	[ExclusivelyUses(Host)]
+    [ExclusivelyUses(Host)]
     [Collection(Host)]
     [Story(Title = nameof(Program) + nameof(Program.Main) + nameof(KongvergeWorkflow) + "Failure")]
     public class ProgramWorkflowFailureScenarios : ProgramSteps
