@@ -17,7 +17,6 @@ namespace Kongverge
                 .MinimumLevel.Is(verbose ? LogEventLevel.Verbose : LogEventLevel.Information)
                 .WriteTo.Console()
                 .CreateLogger();
-            Log.Information("Starting up");
         }
 
         public static IServiceCollection ConfigureServices(this IServiceCollection services)
@@ -25,18 +24,18 @@ namespace Kongverge
             var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
             services.Configure<Settings>(x => configuration.Bind(x));
 
-            services.AddSingleton<ConfigFileReader>();
-            services.AddSingleton<ConfigFileWriter>();
-            services.AddSingleton<ConfigBuilder>();
-            services.AddSingleton<KongAdminHttpClient>();
-            services.AddSingleton<KongAdminDryRun>();
-            services.AddSingleton<KongAdminWriter>();
-            services.AddSingleton<KongvergeWorkflow>();
-            services.AddSingleton<ExportWorkflow>();
+            services.AddTransient<ConfigFileReader>();
+            services.AddTransient<ConfigFileWriter>();
+            services.AddTransient<ConfigBuilder>();
+            services.AddTransient<KongAdminHttpClient>();
+            services.AddTransient<KongAdminDryRun>();
+            services.AddTransient<KongAdminWriter>();
+            services.AddTransient<KongvergeWorkflow>();
+            services.AddTransient<ExportWorkflow>();
 
-            services.AddSingleton<IKongAdminReader, KongAdminReader>();
+            services.AddTransient<IKongAdminReader, KongAdminReader>();
 
-            services.AddSingleton<IKongAdminWriter>(s =>
+            services.AddTransient<IKongAdminWriter>(s =>
             {
                 var config = s.GetService<IOptions<Settings>>();
 
@@ -50,7 +49,7 @@ namespace Kongverge
                 return s.GetService<KongAdminWriter>();
             });
 
-            services.AddSingleton<Workflow.Workflow>(s =>
+            services.AddTransient<Workflow.Workflow>(s =>
             {
                 var config = s.GetService<IOptions<Settings>>();
 

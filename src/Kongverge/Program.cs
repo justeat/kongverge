@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using Kongverge.DTOs;
 using Kongverge.Helpers;
 using McMaster.Extensions.CommandLineUtils;
@@ -12,10 +13,13 @@ namespace Kongverge
     {
         public static int Main(string[] args)
         {
+            var assembly = typeof(Program).Assembly;
+            var product = assembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
+            var description = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>().Description;
             var app = new CommandLineApplication
             {
-                Name = "Kongverge",
-                Description = "Kong configuration convergence."
+                Name = product,
+                Description = description
             };
 
             var options = new Options(app);
@@ -23,6 +27,9 @@ namespace Kongverge
             app.OnExecute(async () =>
             {
                 ServiceRegistration.CreateConsoleLogger(options.Verbose.HasValue());
+
+                var version = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+                Log.Information($"************** {app.Name} {version} **************");
 
                 var exitCode = options.Validate();
                 if (exitCode.HasValue)
@@ -35,8 +42,6 @@ namespace Kongverge
                 options.Apply(serviceProvider);
 
                 var workflow = serviceProvider.GetService<Workflow.Workflow>();
-
-                Log.Information($"************** {app.Name} **************");
 
                 return await workflow.Execute();
             });
