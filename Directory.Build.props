@@ -2,9 +2,11 @@
   <PropertyGroup>
     <Authors>Just Eat</Authors>
     <Company>Just Eat</Company>
-	<PackageLicenseUrl>https://github.com/justeat/kongverge/blob/master/LICENSE</PackageLicenseUrl>
-	<PackageProjectUrl>https://github.com/justeat/kongverge</PackageProjectUrl>
-	<PackageIconUrl>https://raw.githubusercontent.com/justeat/kongverge/master/Kongverge.png</PackageIconUrl>
+    <PackageLicenseUrl>https://github.com/justeat/kongverge/blob/master/LICENSE</PackageLicenseUrl>
+    <!-- Suppress a warning about upcoming deprecation of PackageLicenseUrl. When embedding licenses are supported, replace PackageLicenseUrl with PackageLicenseExpression. -->
+    <NoWarn>$(NoWarn);NU5125</NoWarn>
+    <PackageProjectUrl>https://github.com/justeat/kongverge</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/justeat/kongverge/master/Kongverge.png</PackageIconUrl>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <LangVersion>latest</LangVersion>
     <Copyright>Copyright (c) JustEat 2018-$([System.DateTime]::Now.ToString(yyyy))</Copyright>
