@@ -87,7 +87,7 @@ namespace Kongverge.DTOs
                 errorMessages.Add("At least one of Route 'Hosts', 'Methods', or 'Paths' must be set.");
             }
 
-            if (Hosts == null || Hosts.Any(x => string.IsNullOrWhiteSpace(x) || Uri.CheckHostName(x) == UriHostNameType.Unknown))
+            if (Hosts == null || Hosts.Any(x => string.IsNullOrWhiteSpace(x) || x.StartsWith("*.") && x.EndsWith(".*") || Uri.CheckHostName(RemoveWildcards(x)) == UriHostNameType.Unknown))
             {
                 errorMessages.Add("Route Hosts is invalid (cannot be null, or contain null, empty or invalid values).");
             }
@@ -97,12 +97,26 @@ namespace Kongverge.DTOs
                 errorMessages.Add("Route Methods is invalid (cannot be null, or contain null or empty values).");
             }
 
-            if (Paths == null || Paths.Any(x => string.IsNullOrWhiteSpace(x) || !Uri.IsWellFormedUriString(x, UriKind.Relative)))
+            if (Paths == null || Paths.Any(string.IsNullOrWhiteSpace))
             {
-                errorMessages.Add("Route Paths is invalid (cannot be null, or contain null, empty or invalid values).");
+                errorMessages.Add("Route Paths is invalid (cannot be null, or contain null or empty values).");
             }
 
             await ValidatePlugins(availablePlugins, errorMessages);
+        }
+
+        private static string RemoveWildcards(string input)
+        {
+            if (input.StartsWith("*."))
+            {
+                input = input.Substring(2);
+            }
+            if (input.EndsWith(".*"))
+            {
+                input = input.Substring(0, input.Length - 2);
+            }
+
+            return input;
         }
 
         private async Task ValidatePlugins(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)

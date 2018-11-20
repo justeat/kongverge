@@ -77,17 +77,20 @@ namespace Kongverge.Tests.DTOs
                 {
                     { ProtocolsExample.Null, StringsExample.Null, StringsExample.Null, StringsExample.Null, 5 },
                     { ProtocolsExample.Empty, StringsExample.Empty, StringsExample.Empty, StringsExample.Empty, 2 },
-                    { ProtocolsExample.Invalid, StringsExample.Valid, StringsExample.Valid, StringsExample.Valid, 1 },
-                    { ProtocolsExample.Http, StringsExample.Valid, StringsExample.Valid, StringsExample.Valid, 0 },
-                    { ProtocolsExample.Https, StringsExample.Valid, StringsExample.Valid, StringsExample.Valid, 0 },
-                    { ProtocolsExample.Both, StringsExample.Valid, StringsExample.Empty, StringsExample.Empty, 0 },
-                    { ProtocolsExample.Both, StringsExample.Empty, StringsExample.Valid, StringsExample.Empty, 0 },
-                    { ProtocolsExample.Both, StringsExample.Empty, StringsExample.Empty, StringsExample.Valid, 0 },
-                    { ProtocolsExample.Invalid, StringsExample.Invalid, StringsExample.Valid, StringsExample.Valid, 2 },
-                    { ProtocolsExample.Invalid, StringsExample.Valid, StringsExample.Invalid, StringsExample.Valid, 2 },
-                    { ProtocolsExample.Invalid, StringsExample.Valid, StringsExample.Valid, StringsExample.Invalid, 2 },
-                    { ProtocolsExample.Invalid, StringsExample.Invalid, StringsExample.Empty, StringsExample.Invalid, 3 },
-                    { ProtocolsExample.Invalid, StringsExample.Invalid, StringsExample.Invalid, StringsExample.Invalid, 4 }
+                    { ProtocolsExample.Invalid, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.ValidPaths, 1 },
+                    { ProtocolsExample.Http, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.ValidPaths, 0 },
+                    { ProtocolsExample.Https, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.ValidPaths, 0 },
+                    { ProtocolsExample.Both, StringsExample.ValidHosts, StringsExample.Empty, StringsExample.Empty, 0 },
+                    { ProtocolsExample.Both, StringsExample.Empty, StringsExample.ValidMethods, StringsExample.Empty, 0 },
+                    { ProtocolsExample.Both, StringsExample.Empty, StringsExample.Empty, StringsExample.ValidPaths, 0 },
+                    { ProtocolsExample.Invalid, StringsExample.InvalidNull, StringsExample.ValidMethods, StringsExample.ValidPaths, 2 },
+                    { ProtocolsExample.Invalid, StringsExample.InvalidColon, StringsExample.Empty, StringsExample.Empty, 2 },
+                    { ProtocolsExample.Invalid, StringsExample.InvalidWildcard, StringsExample.Empty, StringsExample.Empty, 2 },
+                    { ProtocolsExample.Invalid, StringsExample.ValidHosts, StringsExample.InvalidNull, StringsExample.ValidPaths, 2 },
+                    { ProtocolsExample.Invalid, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.InvalidNull, 2 },
+                    { ProtocolsExample.Invalid, StringsExample.InvalidEmpty, StringsExample.Empty, StringsExample.InvalidEmpty, 3 },
+                    { ProtocolsExample.Invalid, StringsExample.LeadingAndTrailingWildcards, StringsExample.InvalidEmpty, StringsExample.InvalidWhitespace, 4 },
+                    { ProtocolsExample.Invalid, StringsExample.InvalidWhitespace, StringsExample.InvalidWhitespace, StringsExample.InvalidWhitespace, 4 }
                 })
                 .BDDfy();
 
@@ -96,7 +99,7 @@ namespace Kongverge.Tests.DTOs
             .With(x => x.Protocols, GetProtocolsExample(ProtocolsExample.Both))
             .With(x => x.Hosts, GetStringsExample(StringsExample.Empty))
             .With(x => x.Methods, GetStringsExample(StringsExample.Empty))
-            .With(x => x.Paths, GetStringsExample(StringsExample.Valid))
+            .With(x => x.Paths, GetStringsExample(StringsExample.ValidPaths))
             .Create();
 
         protected void AnInstanceWithExamplePropertyValues()
@@ -139,10 +142,24 @@ namespace Kongverge.Tests.DTOs
                     return null;
                 case StringsExample.Empty:
                     return Array.Empty<string>();
-                case StringsExample.Valid:
-                    return new[] { "valid1", "valid2", "valid3" };
-                case StringsExample.Invalid:
-                    return new[] { null, string.Empty, " ", ":" };
+                case StringsExample.ValidHosts:
+                    return new[] { "valid1", "*.example.com", "example.*", "10.0.0.1", "2001:0db8:85a3:0000:0000:8a2e:0370:7334" };
+                case StringsExample.ValidMethods:
+                    return new[] { "OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "CONNECT", "extension-method" };
+                case StringsExample.ValidPaths:
+                    return new[] { "valid1", "/(?i)orders/(?i)deliverystate/(?i)driverlocation$", "(?i)/restaurants/\\S+/temporary-offline-status$", "(?i)/invoices/\\d+" };
+                case StringsExample.InvalidNull:
+                    return new string[] { null };
+                case StringsExample.InvalidEmpty:
+                    return new[] { string.Empty };
+                case StringsExample.InvalidWhitespace:
+                    return new[] { " " };
+                case StringsExample.InvalidColon:
+                    return new[] { ":" };
+                case StringsExample.InvalidWildcard:
+                    return new[] { "*" };
+                case StringsExample.LeadingAndTrailingWildcards:
+                    return new[] { "*.example.*" };
                 default:
                     throw new ArgumentOutOfRangeException(nameof(example), example, null);
             }
@@ -162,8 +179,15 @@ namespace Kongverge.Tests.DTOs
         {
             Null,
             Empty,
-            Valid,
-            Invalid
+            ValidHosts,
+            ValidMethods,
+            ValidPaths,
+            InvalidNull,
+            InvalidEmpty,
+            InvalidWhitespace,
+            InvalidColon,
+            InvalidWildcard,
+            LeadingAndTrailingWildcards
         }
     }
 
