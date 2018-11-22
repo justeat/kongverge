@@ -75,7 +75,7 @@ namespace Kongverge.Tests.DTOs
                 .Then(x => x.TheErrorMessagesCountIsCorrect())
                 .WithExamples(new ExampleTable(nameof(Protocols), nameof(Hosts), nameof(Methods), nameof(Paths), nameof(ErrorMessagesCount))
                 {
-                    { ProtocolsExample.Null, StringsExample.Null, StringsExample.Null, StringsExample.Null, 5 },
+                    { ProtocolsExample.Null, StringsExample.InvalidAll, StringsExample.InvalidAll, StringsExample.InvalidAll, 6 },
                     { ProtocolsExample.Empty, StringsExample.Empty, StringsExample.Empty, StringsExample.Empty, 2 },
                     { ProtocolsExample.Invalid, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.ValidPaths, 1 },
                     { ProtocolsExample.Http, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.ValidPaths, 0 },
@@ -160,6 +160,8 @@ namespace Kongverge.Tests.DTOs
                     return new[] { "*" };
                 case StringsExample.LeadingAndTrailingWildcards:
                     return new[] { "*.example.*" };
+                case StringsExample.InvalidAll:
+                    return new[] { null, string.Empty, " ", ":", "*", "*.example.*" };
                 default:
                     throw new ArgumentOutOfRangeException(nameof(example), example, null);
             }
@@ -187,7 +189,8 @@ namespace Kongverge.Tests.DTOs
             InvalidWhitespace,
             InvalidColon,
             InvalidWildcard,
-            LeadingAndTrailingWildcards
+            LeadingAndTrailingWildcards,
+            InvalidAll
         }
     }
 
