@@ -12,6 +12,8 @@ namespace Kongverge.DTOs
     {
         public const string ObjectName = "route";
 
+        private static readonly string[] AllowedProtocols = { "http", "https" };
+
         [JsonProperty("plugins", NullValueHandling = NullValueHandling.Ignore)]
         public IReadOnlyList<KongPlugin> Plugins { get; set; } = Array.Empty<KongPlugin>();
 
@@ -19,16 +21,16 @@ namespace Kongverge.DTOs
         public ServiceReference Service { get; set; }
         
         [JsonProperty("hosts")]
-        public IEnumerable<string> Hosts { get; set; } = Array.Empty<string>();
+        public IEnumerable<string> Hosts { get; set; }
 
         [JsonProperty("protocols")]
         public IEnumerable<string> Protocols { get; set; } = new[] { "http", "https" };
 
         [JsonProperty("methods")]
-        public IEnumerable<string> Methods { get; set; } = Array.Empty<string>();
+        public IEnumerable<string> Methods { get; set; }
 
         [JsonProperty("paths")]
-        public IEnumerable<string> Paths { get; set; } = Array.Empty<string>();
+        public IEnumerable<string> Paths { get; set; }
 
         [JsonProperty("regex_priority")]
         public ushort RegexPriority { get; set; }
@@ -41,7 +43,16 @@ namespace Kongverge.DTOs
 
         public override string ToString()
         {
-            return $@"{{{ToStringIdSegment()}Paths: [{string.Join(", ", Paths)}], Methods: [{string.Join(", ", Methods)}], Protocols: [{string.Join(", ", Protocols)}]}}";
+            return $@"{{{ToStringIdSegment()}Hosts: [{EnumerableSegment(Hosts)}], Paths: [{EnumerableSegment(Paths)}], Methods: [{EnumerableSegment(Methods)}], Protocols: [{EnumerableSegment(Protocols)}]}}";
+        }
+
+        private static string EnumerableSegment(IEnumerable<string> values)
+        {
+            if (values == null)
+            {
+                return "null";
+            }
+            return $"[{string.Join(", ", values)}]";
         }
 
         public override StringContent ToJsonStringContent()
@@ -77,7 +88,7 @@ namespace Kongverge.DTOs
 
         public virtual async Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
         {
-            if (IsNullOrEmpty(Protocols) || Protocols.Any(x => !new[] { "http", "https" }.Contains(x)))
+            if (IsNullOrEmpty(Protocols) || Protocols.Any(x => !AllowedProtocols.Contains(x)))
             {
                 errorMessages.Add("Route Protocols is invalid (must contain one or both of 'http' or 'https').");
             }
@@ -87,19 +98,27 @@ namespace Kongverge.DTOs
                 errorMessages.Add("At least one of Route 'Hosts', 'Methods', or 'Paths' must be set.");
             }
 
-            if (Hosts == null || Hosts.Any(x => string.IsNullOrWhiteSpace(x) || x.StartsWith("*.") && x.EndsWith(".*") || Uri.CheckHostName(RemoveWildcards(x)) == UriHostNameType.Unknown))
+            if (Hosts?.Any(string.IsNullOrWhiteSpace) == true)
             {
-                errorMessages.Add("Route Hosts is invalid (cannot be null, or contain null, empty or invalid values).");
+                errorMessages.Add("Route Hosts is invalid (cannot contain null or empty values).");
+            }
+            if (Hosts?.Any(x => !string.IsNullOrWhiteSpace(x) && x.StartsWith("*.") && x.EndsWith(".*")) == true)
+            {
+                errorMessages.Add("Route Hosts is invalid (values cannot begin and end with a wildcard, only one wildcard at the start or end is allowed).");
+            }
+            if (Hosts?.Any(x => !string.IsNullOrWhiteSpace(x) && Uri.CheckHostName(RemoveWildcards(x)) == UriHostNameType.Unknown) == true)
+            {
+                errorMessages.Add("Route Hosts is invalid (values must be valid hostnames or IP addresses, with a single optional wildcard at the start or end).");
             }
 
-            if (Methods == null || Methods.Any(string.IsNullOrWhiteSpace))
+            if (Methods?.Any(string.IsNullOrWhiteSpace) == true)
             {
-                errorMessages.Add("Route Methods is invalid (cannot be null, or contain null or empty values).");
+                errorMessages.Add("Route Methods is invalid (cannot contain null or empty values).");
             }
 
-            if (Paths == null || Paths.Any(string.IsNullOrWhiteSpace))
+            if (Paths?.Any(string.IsNullOrWhiteSpace) == true)
             {
-                errorMessages.Add("Route Paths is invalid (cannot be null, or contain null or empty values).");
+                errorMessages.Add("Route Paths is invalid (cannot contain null or empty values).");
             }
 
             await ValidatePlugins(availablePlugins, errorMessages);
