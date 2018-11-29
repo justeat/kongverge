@@ -43,7 +43,7 @@ namespace Kongverge.DTOs
 
         public override string ToString()
         {
-            return $@"{{{ToStringIdSegment()}Hosts: [{EnumerableSegment(Hosts)}], Paths: [{EnumerableSegment(Paths)}], Methods: [{EnumerableSegment(Methods)}], Protocols: [{EnumerableSegment(Protocols)}]}}";
+            return $@"{{{ToStringIdSegment()}Hosts: {EnumerableSegment(Hosts)}, Paths: {EnumerableSegment(Paths)}, Methods: {EnumerableSegment(Methods)}, Protocols: {EnumerableSegment(Protocols)}}}";
         }
 
         private static string EnumerableSegment(IEnumerable<string> values)
