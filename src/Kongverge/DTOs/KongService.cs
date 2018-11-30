@@ -90,37 +90,37 @@ namespace Kongverge.DTOs
         {
             if (!new[] { "http", "https" }.Contains(Protocol))
             {
-                errorMessages.Add("Protocol is invalid (must be either 'http' or 'https').");
+                errorMessages.Add("Service Protocol is invalid (must be either 'http' or 'https').");
             }
 
             if (Uri.CheckHostName(Host) == UriHostNameType.Unknown)
             {
-                errorMessages.Add("Host is invalid.");
+                errorMessages.Add("Service Host is invalid.");
             }
 
             if (!string.IsNullOrEmpty(Path) && !Uri.IsWellFormedUriString(Path, UriKind.Relative))
             {
-                errorMessages.Add("Path is invalid.");
+                errorMessages.Add("Service Path is invalid.");
             }
 
             if (Retries > 25)
             {
-                errorMessages.Add("Retries is invalid (must be between 0 and 25).");
+                errorMessages.Add("Service Retries is invalid (must be between 0 and 25).");
             }
 
             if (ConnectTimeout > 300000)
             {
-                errorMessages.Add("ConnectTimeout is invalid (must be between 0 and 300000).");
+                errorMessages.Add("Service ConnectTimeout is invalid (must be between 0 and 300000).");
             }
 
             if (WriteTimeout > 300000)
             {
-                errorMessages.Add("WriteTimeout is invalid (must be between 0 and 300000).");
+                errorMessages.Add("Service WriteTimeout is invalid (must be between 0 and 300000).");
             }
 
             if (ReadTimeout > 300000)
             {
-                errorMessages.Add("ReadTimeout is invalid (must be between 0 and 300000).");
+                errorMessages.Add("Service ReadTimeout is invalid (must be between 0 and 300000).");
             }
 
             await ValidatePlugins(availablePlugins, errorMessages);
@@ -132,7 +132,7 @@ namespace Kongverge.DTOs
         {
             if (Plugins == null)
             {
-                errorMessages.Add("Plugins cannot be null.");
+                errorMessages.Add("Service Plugins cannot be null.");
                 return;
             }
             foreach (var plugin in Plugins)
@@ -145,7 +145,7 @@ namespace Kongverge.DTOs
         {
             if (Routes == null || !Routes.Any())
             {
-                errorMessages.Add("Routes cannot be null or empty.");
+                errorMessages.Add("Service Routes cannot be null or empty.");
                 return;
             }
             foreach (var route in Routes)
