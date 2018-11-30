@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kongverge.Helpers;
 using Newtonsoft.Json;
+using Nito.AsyncEx;
 
 namespace Kongverge.DTOs
 {
@@ -11,12 +12,12 @@ namespace Kongverge.DTOs
         [JsonProperty("plugins")]
         public IReadOnlyList<KongPlugin> Plugins { get; set; } = Array.Empty<KongPlugin>();
 
-        public async Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
+        public async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
         {
             await ValidatePlugins(availablePlugins, errorMessages);
         }
 
-        private async Task ValidatePlugins(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
+        private async Task ValidatePlugins(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
         {
             if (Plugins == null)
             {

@@ -72,7 +72,7 @@ namespace Kongverge.Tests.DTOs
         public void Scenario2() =>
             this.Given(x => x.AnInstanceWithExamplePropertyValues())
                 .When(x => x.Validating())
-                .Then(x => x.TheErrorMessagesCountIsCorrect())
+                .Then(x => x.TheErrorMessagesCountIs(ErrorMessagesCount))
                 .WithExamples(new ExampleTable(nameof(Protocols), nameof(Hosts), nameof(Methods), nameof(Paths), nameof(ErrorMessagesCount))
                 {
                     { ProtocolsExample.Null, StringsExample.InvalidAll, StringsExample.InvalidAll, StringsExample.InvalidAll, 6 },

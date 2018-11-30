@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AutoFixture;
@@ -16,17 +18,22 @@ namespace Kongverge.Tests.Workflow
         protected KongConfiguration KongConfiguration;
         protected Settings Settings;
         protected ExitCode ExitCode;
+        
+        protected IReadOnlyList<KongPlugin> Plugins;
 
         protected WorkflowSteps()
         {
             Settings = Fixture.Create<Settings>();
             GetMock<IOptions<Settings>>().Setup(x => x.Value).Returns(Settings);
             GetMock<ConfigBuilder>().Setup(x => x.FromKong(Get<IKongAdminReader>())).ReturnsAsync(Existing);
+            GetMock<IKongAdminReader>().Setup(x => x.GetPluginSchema(It.IsAny<string>())).ReturnsAsync(new KongPluginSchema { Fields = new Dictionary<string, FieldDefinition>() });
         }
 
         protected void KongIsNotReachable() => GetMock<IKongAdminReader>().Setup(x => x.GetConfiguration()).Throws<HttpRequestException>();
 
-        protected void KongIsReachable() => GetMock<IKongAdminReader>().Setup(x => x.GetConfiguration()).ReturnsAsync(KongConfiguration = Fixture.Create<KongConfiguration>());
+        protected void KongIsReachable() => GetMock<IKongAdminReader>()
+            .Setup(x => x.GetConfiguration())
+            .ReturnsAsync(KongConfiguration = Fixture.Build<KongConfiguration>().With(x => x.Plugins, new Plugins { Available = Plugins.ToDictionary(x => x.Name, x => true) }).Create());
 
         protected async Task Executing() => ExitCode = (ExitCode)await Subject.Execute();
 

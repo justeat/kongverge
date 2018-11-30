@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Kongverge.Helpers;
 using Newtonsoft.Json;
+using Nito.AsyncEx;
 
 namespace Kongverge.DTOs
 {
@@ -86,7 +87,7 @@ namespace Kongverge.DTOs
             plugin.RouteId = Id;
         }
 
-        public virtual async Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
+        public virtual async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
         {
             if (IsNullOrEmpty(Protocols) || Protocols.Any(x => !AllowedProtocols.Contains(x)))
             {
@@ -138,7 +139,7 @@ namespace Kongverge.DTOs
             return input;
         }
 
-        private async Task ValidatePlugins(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
+        private async Task ValidatePlugins(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
         {
             if (Plugins == null)
             {

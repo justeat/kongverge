@@ -34,7 +34,7 @@ namespace Kongverge.Tests.DTOs
         public void Scenario1() =>
             this.Given(x => x.AValidInstanceWithExamplePluginsAndRoutes())
                 .When(x => x.Validating())
-                .Then(x => x.TheErrorMessagesCountIsCorrect())
+                .Then(x => x.TheErrorMessagesCountIs(ErrorMessagesCount))
                 .WithExamples(new ExampleTable(nameof(Plugins), nameof(Routes), nameof(ErrorMessagesCount))
                 {
                     { CollectionExample.Null, CollectionExample.Null, 2 },
@@ -50,7 +50,7 @@ namespace Kongverge.Tests.DTOs
         public void Scenario2() =>
             this.Given(x => x.AnInstanceWithValidRoutesAndExamplePropertyValues())
                 .When(x => x.Validating())
-                .Then(x => x.TheErrorMessagesCountIsCorrect())
+                .Then(x => x.TheErrorMessagesCountIs(ErrorMessagesCount))
                 .WithExamples(new ExampleTable(nameof(Protocol), nameof(Host), nameof(Path), nameof(Retries), nameof(ConnectTimeout), nameof(WriteTimeout), nameof(ReadTimeout), nameof(ErrorMessagesCount))
                 {
                     { "http", "localhost", "path", 0, 0, 0, 0, 0 },

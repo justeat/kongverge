@@ -7,6 +7,7 @@ using Kongverge.Helpers;
 using Kongverge.Services;
 using Kongverge.Workflow;
 using Moq;
+using Nito.AsyncEx;
 using TestStack.BDDfy;
 using TestStack.BDDfy.Xunit;
 
@@ -22,7 +23,6 @@ namespace Kongverge.Tests.Workflow
         protected IReadOnlyList<GlobalConfig> GlobalConfigs;
         protected IReadOnlyList<KongService> Services;
         protected IReadOnlyList<KongRoute> Routes;
-        protected IReadOnlyList<KongPlugin> Plugins;
 
         protected List<KongPlugin> InsertedPlugins = new List<KongPlugin>();
 
@@ -174,10 +174,10 @@ namespace Kongverge.Tests.Workflow
         }
 
         protected void NonExistentInputFolder() =>
-            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IReadOnlyCollection<string>>())).ThrowsAsync(new DirectoryNotFoundException());
+            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ThrowsAsync(new DirectoryNotFoundException());
 
         protected void InvalidTargetConfiguration() =>
-            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IReadOnlyCollection<string>>())).ThrowsAsync(new InvalidConfigurationFilesException(string.Empty));
+            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ThrowsAsync(new InvalidConfigurationFilesException(string.Empty));
 
         protected void AnAssortmentOfExistingServicesAndGlobalConfig()
         {
@@ -306,7 +306,7 @@ namespace Kongverge.Tests.Workflow
             SetupTargetConfiguration();
         }
 
-        protected void SetupTargetConfiguration() => GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IReadOnlyCollection<string>>())).ReturnsAsync(Target);
+        protected void SetupTargetConfiguration() => GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ReturnsAsync(Target);
 
         protected void NoServicesAreAdded() =>
             GetMock<IKongAdminWriter>().Verify(x => x.AddService(It.IsAny<KongService>()), Times.Never);

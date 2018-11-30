@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Kongverge.Helpers;
 using Newtonsoft.Json;
+using Nito.AsyncEx;
 
 namespace Kongverge.DTOs
 {
@@ -86,7 +87,7 @@ namespace Kongverge.DTOs
             plugin.ServiceId = Id;
         }
 
-        public async Task Validate(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
+        public async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
         {
             if (!new[] { "http", "https" }.Contains(Protocol))
             {
@@ -128,7 +129,7 @@ namespace Kongverge.DTOs
             await ValidateRoutes(availablePlugins, errorMessages);
         }
 
-        private async Task ValidatePlugins(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
+        private async Task ValidatePlugins(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
         {
             if (Plugins == null)
             {
@@ -141,7 +142,7 @@ namespace Kongverge.DTOs
             }
         }
 
-        private async Task ValidateRoutes(IReadOnlyCollection<string> availablePlugins, ICollection<string> errorMessages)
+        private async Task ValidateRoutes(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
         {
             if (Routes == null || !Routes.Any())
             {

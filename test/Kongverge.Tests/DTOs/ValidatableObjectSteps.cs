@@ -5,6 +5,8 @@ using AutoFixture;
 using FluentAssertions;
 using Kongverge.DTOs;
 using Moq;
+using Newtonsoft.Json.Linq;
+using Nito.AsyncEx;
 
 namespace Kongverge.Tests.DTOs
 {
@@ -14,14 +16,101 @@ namespace Kongverge.Tests.DTOs
 
         protected T Instance;
         protected int ErrorMessagesCount;
-        protected IReadOnlyList<string> AvailablePlugins = new [] { "plugin1", "plugin2", "plugin3" };
+        protected IDictionary<string, AsyncLazy<KongPluginSchema>> AvailablePlugins = new Dictionary<string, AsyncLazy<KongPluginSchema>>();
+
+        protected KongPlugin ExamplePlugin;
+        protected KongPlugin ExamplePluginWithMissingDefaultConfigFields;
+        protected KongPlugin ExamplePluginWithOneInvalidConfigField;
+        protected KongPlugin ExamplePluginWithTwoUnknownConfigFields;
+
+        protected ValidatableObjectSteps()
+        {
+            var examplePluginSchema = new KongPluginSchema
+            {
+                Fields = new Dictionary<string, FieldDefinition>
+                {
+                    {
+                        "field1",
+                        new FieldDefinition
+                        {
+                            Type = "number",
+                            Default = JToken.FromObject(0)
+                        }
+                    },
+                    {
+                        "field2",
+                        new FieldDefinition
+                        {
+                            Type = "string"
+                        }
+                    },
+                    {
+                        "field3",
+                        new FieldDefinition
+                        {
+                            Type = "table",
+                            Schema = new KongPluginSchema
+                            {
+                                Fields = new Dictionary<string, FieldDefinition>
+                                {
+                                    {
+                                        "field1",
+                                        new FieldDefinition
+                                        {
+                                            Type = "boolean"
+                                        }
+                                    },
+                                    {
+                                        "field2",
+                                        new FieldDefinition
+                                        {
+                                            Type = "string",
+                                            Default = JToken.FromObject(this.Create<string>())
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            ExamplePlugin = new KongPlugin
+            {
+                Name = "plugin1",
+                Config = JObject.FromObject(new
+                {
+                    field1 = 1,
+                    field2 = this.Create<string>(),
+                    field3 = new
+                    {
+                        field1 = this.Create<bool>(),
+                        field2 = this.Create<string>()
+                    }
+                })
+            };
+
+            ExamplePluginWithMissingDefaultConfigFields = ExamplePlugin.Clone();
+            ExamplePluginWithMissingDefaultConfigFields.Config.Remove("field1");
+            ((JObject)ExamplePluginWithMissingDefaultConfigFields.Config.SelectToken("field3")).Remove("field2");
+
+            ExamplePluginWithOneInvalidConfigField = ExamplePlugin.Clone();
+            ExamplePluginWithOneInvalidConfigField.Config.Remove("field3");
+            ExamplePluginWithOneInvalidConfigField.Config.Add("field3", JToken.FromObject(this.Create<string>()));
+
+            ExamplePluginWithTwoUnknownConfigFields = ExamplePlugin.Clone();
+            ExamplePluginWithTwoUnknownConfigFields.Config.Add(this.Create<string>(), JToken.FromObject(1));
+            ((JObject)ExamplePluginWithTwoUnknownConfigFields.Config.SelectToken("field3")).Add(this.Create<string>(), JToken.FromObject(this.Create<bool>()));
+
+            AvailablePlugins.Add(ExamplePlugin.Name, new AsyncLazy<KongPluginSchema>(() => Task.FromResult(examplePluginSchema)));
+        }
 
         private Mock<TMock> SetupMock<TMock>(bool isValid) where TMock : class, IValidatableObject
         {
             var mock = new Mock<TMock>();
             mock
                 .Setup(x => x.Validate(AvailablePlugins, It.IsAny<ICollection<string>>()))
-                .Callback<IReadOnlyCollection<string>, ICollection<string>>((ep, em) =>
+                .Callback<IDictionary<string, AsyncLazy<KongPluginSchema>>, ICollection<string>>((ep, em) =>
                 {
                     if (!isValid)
                     {
@@ -54,6 +143,6 @@ namespace Kongverge.Tests.DTOs
             return Instance.Validate(AvailablePlugins, _errorMessages);
         }
 
-        protected void TheErrorMessagesCountIsCorrect() => _errorMessages.Count.Should().Be(ErrorMessagesCount);
+        protected void TheErrorMessagesCountIs(int count) => _errorMessages.Count.Should().Be(count);
     }
 }

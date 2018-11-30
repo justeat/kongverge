@@ -26,7 +26,7 @@
             "second": 8,
             "minute": 300,
             "hour": 15000
-          } 
+          }
         }
       }
     },
@@ -60,20 +60,6 @@
           "name": "request-transformer",
           "config": {
             "http_method": "get",
-            "add": {
-              "body": [
-                "value-1:a",
-                "value-2:b"
-              ],
-              "headers": [
-                "header-1:a",
-                "header-2:b"
-              ],
-              "querystring": [
-                "param-1:a",
-                "param-2:b"
-              ]
-            },
             "append": {
               "body": [
                 "value-1:a",
@@ -82,10 +68,6 @@
               "headers": [
                 "header-1:a",
                 "header-2:b"
-              ],
-              "querystring": [
-                "param-1:a",
-                "param-2:b"
               ]
             },
             "remove": {
