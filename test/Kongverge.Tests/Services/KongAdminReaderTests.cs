@@ -60,6 +60,13 @@ namespace Kongverge.Tests.Services
                 .WithExamples(new ExampleTable(nameof(MultiplePages)) { false, true })
                 .BDDfy();
 
+        [BddfyFact(DisplayName = nameof(KongAdminReader.GetPluginSchema))]
+        public void Scenario5() =>
+            this.Given(s => s.KongHasData("/plugins/schema/test-plugin", () => new KongPluginSchema()))
+                .When(async () => Result = await Subject.GetPluginSchema("test-plugin"), Invoking(nameof(KongAdminReader.GetPluginSchema)))
+                .Then(s => s.TheResultIsEquivalentToTheKongData())
+                .BDDfy();
+
         protected void KongHasPagedData<T>(string route, Func<T> makeObject)
         {
             var data = Enumerable.Range(0, 3).Select(x => makeObject()).ToArray();

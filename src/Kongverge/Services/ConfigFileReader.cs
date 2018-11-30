@@ -6,13 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Kongverge.DTOs;
 using Newtonsoft.Json;
+using Nito.AsyncEx;
 using Serilog;
 
 namespace Kongverge.Services
 {
     public class ConfigFileReader
     {
-        public virtual async Task<KongvergeConfiguration> ReadConfiguration(string folderPath, IReadOnlyCollection<string> availablePlugins)
+        public virtual async Task<KongvergeConfiguration> ReadConfiguration(string folderPath, IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins)
         {
             Log.Information($"Reading files from {folderPath}");
 
@@ -62,7 +63,10 @@ namespace Kongverge.Services
             Log.Information($"Configuration from files contains {configuration.Services.Count} {KongObject.GetName(0, "service")}, {pluginsCount} {KongObject.GetName(0, "plugin")}, {routes.Length} {KongObject.GetName(0, "route")}");
         }
 
-        private static async Task<T> ParseFile<T>(string path, IReadOnlyCollection<string> availablePlugins, FileErrorMessages fileErrorMessages) where T : class, IKongvergeConfigObject
+        private static async Task<T> ParseFile<T>(
+            string path,
+            IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins,
+            FileErrorMessages fileErrorMessages) where T : class, IKongvergeConfigObject
         {
             Log.Verbose($"Reading {path}");
             string text;

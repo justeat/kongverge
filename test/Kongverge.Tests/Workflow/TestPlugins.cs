@@ -44,9 +44,9 @@ namespace Kongverge.Tests.Workflow
             var target = kongPlugin.Clone();
             if (modified)
             {
-                if (target.Config.Any())
+                if (target.Config.HasValues)
                 {
-                    target.Config[target.Config.Keys.First()] = Guid.NewGuid().ToString();
+                    target.Config[0] = Guid.NewGuid().ToString();
                 }
                 else
                 {

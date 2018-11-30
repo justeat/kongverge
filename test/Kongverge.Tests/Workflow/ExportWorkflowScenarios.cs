@@ -9,6 +9,8 @@ namespace Kongverge.Tests.Workflow
     [Story(Title = nameof(ExportWorkflow) + nameof(ExportWorkflow.DoExecute))]
     public class ExportWorkflowScenarios : WorkflowSteps<ExportWorkflow>
     {
+        public ExportWorkflowScenarios() => Plugins = Fixture.CreatePlugins(1);
+
         [BddfyFact(DisplayName = nameof(KongIsNotReachable))]
         public void Scenario1() =>
             this.Given(s => s.KongIsNotReachable())

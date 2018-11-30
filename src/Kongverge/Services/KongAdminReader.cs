@@ -30,6 +30,13 @@ namespace Kongverge.Services
         public async Task<IReadOnlyCollection<KongPlugin>> GetPlugins() =>
             await GetPagedResponse<KongPlugin>("/plugins");
 
+        public async Task<KongPluginSchema> GetPluginSchema(string pluginName)
+        {
+            var response = await HttpClient.GetAsync($"/plugins/schema/{pluginName}");
+            var value = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<KongPluginSchema>(value);
+        }
+
         protected Task<IReadOnlyList<KongRoute>> GetServiceRoutes(string serviceId) =>
             GetPagedResponse<KongRoute>($"/services/{serviceId}/routes");
 

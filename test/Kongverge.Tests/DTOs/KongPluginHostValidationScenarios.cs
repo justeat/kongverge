@@ -13,7 +13,7 @@ namespace Kongverge.Tests.DTOs
         public void Scenario1() =>
             this.Given(x => x.AValidInstanceWithExamplePlugins())
                 .When(x => x.Validating())
-                .Then(x => x.TheErrorMessagesCountIsCorrect())
+                .Then(x => x.TheErrorMessagesCountIs(ErrorMessagesCount))
                 .WithExamples(new ExampleTable(nameof(Plugins), nameof(ErrorMessagesCount))
                 {
                     { CollectionExample.Null, 1 },

@@ -8,6 +8,7 @@ using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
 using Microsoft.Extensions.Options;
+using Nito.AsyncEx;
 using Serilog;
 
 namespace Kongverge.Workflow
@@ -18,6 +19,7 @@ namespace Kongverge.Workflow
         private readonly ConfigFileReader _configReader;
         private readonly ConfigBuilder _configBuilder;
 
+        private Dictionary<string, AsyncLazy<KongPluginSchema>> _availablePlugins;
         private OperationStats _createdStats;
         private OperationStats _updatedStats;
         private OperationStats _deletedStats;
@@ -36,11 +38,14 @@ namespace Kongverge.Workflow
 
         public override async Task<int> DoExecute()
         {
-            var availablePlugins = KongConfiguration.Plugins.Available.Where(x => x.Value).Select(x => x.Key).ToArray();
+            _availablePlugins = KongConfiguration.Plugins.Available
+                .Where(x => x.Value)
+                .Select(x => x.Key)
+                .ToDictionary(x => x, x => new AsyncLazy<KongPluginSchema>(() => KongReader.GetPluginSchema(x)));
             KongvergeConfiguration targetConfiguration;
             try
             {
-                targetConfiguration = await _configReader.ReadConfiguration(Configuration.InputFolder, availablePlugins);
+                targetConfiguration = await _configReader.ReadConfiguration(Configuration.InputFolder, _availablePlugins);
             }
             catch (DirectoryNotFoundException ex)
             {

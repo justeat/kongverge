@@ -9,6 +9,7 @@ using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
 using Microsoft.Extensions.Options;
+using Nito.AsyncEx;
 
 namespace Kongverge.IntegrationTests
 {
@@ -36,7 +37,7 @@ namespace Kongverge.IntegrationTests
 
         protected void InvokingMainAgainForExport()
         {
-            TheExitCodeIs(InputFolder.Contains(InvalidDataB) ? ExitCode.UnspecifiedError : ExitCode.Success);
+            TheExitCodeIs(InputFolder.Contains(InvalidDataB) ? ExitCode.InvalidConfigurationFiles : ExitCode.Success);
             Arguments = new CommandLineArguments();
             AValidHost();
             AValidPort();
@@ -116,7 +117,7 @@ namespace Kongverge.IntegrationTests
             };
             var kongReader = new KongAdminReader(new KongAdminHttpClient(Options.Create(settings)));
             var kongConfiguration = await kongReader.GetConfiguration();
-            var availablePlugins = kongConfiguration.Plugins.Available.Where(x => x.Value).Select(x => x.Key).ToArray();
+            var availablePlugins = kongConfiguration.Plugins.Available.Where(x => x.Value).Select(x => x.Key).ToDictionary(x => x, x => new AsyncLazy<KongPluginSchema>(() => kongReader.GetPluginSchema(x)));
             var configReader = new ConfigFileReader();
             var folderConfiguration = await configReader.ReadConfiguration(folder, availablePlugins);
             var outputConfiguration = await configReader.ReadConfiguration(OutputFolder, availablePlugins);

@@ -43,7 +43,7 @@ namespace Kongverge.Tests.DTOs
                 .Then(x => x.TheyAreEqual())
                 .BDDfy();
 
-        protected void ARandomInstance() => Instance = this.Create<T>();
+        protected virtual void ARandomInstance() => Instance = this.Create<T>();
 
         protected void AnotherRandomInstance() => OtherInstance = this.Create<T>();
 
