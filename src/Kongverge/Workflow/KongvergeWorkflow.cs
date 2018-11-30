@@ -97,6 +97,10 @@ namespace Kongverge.Workflow
             Log.Information($"Created {_createdStats}");
             Log.Information($"Updated {_updatedStats}");
             Log.Information($"Deleted {_deletedStats}");
+            if (_updatedStats.Any())
+            {
+                Log.Verbose("See https://github.com/benjamine/jsondiffpatch/blob/master/docs/deltas.md for delta format");
+            }
         }
 
         private async Task ConvergeObjects<T>(
@@ -233,6 +237,8 @@ namespace Kongverge.Workflow
             {
                 return string.Join(", ", Keys.Select(x => $"{this[x].Count} {KongObject.GetName(this[x].Count, this[x].ObjectName)}"));
             }
+
+            public bool Any() => Keys.Any(x => this[x].Count > 0);
         }
     }
 }
