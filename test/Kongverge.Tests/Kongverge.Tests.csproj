@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoFixture" Version="4.5.0" />
+    <PackageReference Include="AutoFixture" Version="4.5.1" />
     <PackageReference Include="FluentAssertions" Version="5.5.3" />
     <PackageReference Include="Moq.AutoMock" Version="1.2.0.111" />
     <PackageReference Include="TestStack.BDDfy.Xunit" Version="1.0.0" />
