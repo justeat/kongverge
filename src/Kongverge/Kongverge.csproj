@@ -8,16 +8,6 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>kongverge</ToolCommandName>
   </PropertyGroup>
-  <PropertyGroup>
-    <VersionPrefix>1.2.0</VersionPrefix>
-    <VersionSuffix></VersionSuffix>
-    <BuildNumber Condition=" '$(BuildNumber)' == '' ">$(APPVEYOR_BUILD_NUMBER)</BuildNumber>
-    <BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
-    <FileVersion>$(VersionPrefix).$(BuildNumber)</FileVersion>
-    <VersionSuffix Condition=" '$(APPVEYOR_REPO_TAG)' != 'true' AND '$(VersionSuffix)' != '' ">$(VersionSuffix)-build$(BuildNumber)</VersionSuffix>
-    <VersionSuffix Condition=" '$(APPVEYOR_REPO_TAG)' != 'true' AND '$(VersionSuffix)' == '' ">build$(BuildNumber)</VersionSuffix>
-    <VersionSuffix Condition=" '$(APPVEYOR_REPO_TAG)' == 'true' AND '$(APPVEYOR_REPO_TAG_NAME)' != '' AND '$(APPVEYOR_REPO_TAG_NAME.Contains(`-`))' == 'true' ">$(APPVEYOR_REPO_TAG_NAME.Substring($(APPVEYOR_REPO_TAG_NAME.IndexOf(`-`))).Substring(1))</VersionSuffix>
-  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="JsonDiffPatch.Net" Version="2.1.0" />
     <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.3.0-beta" />
@@ -26,6 +16,10 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.2.0" />
+    <PackageReference Include="MinVer" Version="1.0.0-beta.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Nito.AsyncEx.Coordination" Version="1.0.2" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
   </ItemGroup>
