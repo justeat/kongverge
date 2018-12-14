@@ -7,7 +7,6 @@ using FluentAssertions;
 using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
-using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Kongverge.Tests.Workflow
@@ -16,15 +15,12 @@ namespace Kongverge.Tests.Workflow
     {
         protected KongvergeConfiguration Existing = new KongvergeConfiguration();
         protected KongConfiguration KongConfiguration;
-        protected Settings Settings;
         protected ExitCode ExitCode;
         
         protected IReadOnlyList<KongPlugin> Plugins;
 
         protected WorkflowSteps()
         {
-            Settings = Fixture.Create<Settings>();
-            GetMock<IOptions<Settings>>().Setup(x => x.Value).Returns(Settings);
             GetMock<ConfigBuilder>().Setup(x => x.FromKong(Get<IKongAdminReader>())).ReturnsAsync(Existing);
             GetMock<IKongAdminReader>().Setup(x => x.GetPluginSchema(It.IsAny<string>())).ReturnsAsync(new KongPluginSchema { Fields = new Dictionary<string, FieldDefinition>() });
         }

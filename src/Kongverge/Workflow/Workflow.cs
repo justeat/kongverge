@@ -1,21 +1,20 @@
+using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
-using Microsoft.Extensions.Options;
 
 namespace Kongverge.Workflow
 {
     public abstract class Workflow
     {
-        protected Workflow(IKongAdminReader kongReader, IOptions<Settings> configuration)
+        protected Workflow(IKongAdminReader kongReader)
         {
             KongReader = kongReader;
-            Configuration = configuration.Value;
         }
 
         protected IKongAdminReader KongReader { get; }
-        protected Settings Configuration { get; }
         protected KongConfiguration KongConfiguration { get; private set; }
 
         public async Task<int> Execute()
@@ -24,9 +23,9 @@ namespace Kongverge.Workflow
             {
                 KongConfiguration = await KongReader.GetConfiguration();
             }
-            catch
+            catch (Exception e) when (e is KongException || e is HttpRequestException)
             {
-                return ExitWithCode.Return(ExitCode.HostUnreachable);
+                return ExitWithCode.Return(ExitCode.HostUnreachable, e.Message);
             }
 
             return await DoExecute();

@@ -17,17 +17,17 @@ namespace Kongverge.Services
         {
             Log.Information($"Reading files from {folderPath}");
 
-            var filePaths = Directory.EnumerateFiles(folderPath, $"*{Settings.FileExtension}", SearchOption.AllDirectories).ToArray();
+            var filePaths = Directory.EnumerateFiles(folderPath, $"*{Constants.FileExtension}", SearchOption.AllDirectories).ToArray();
 
             var fileErrorMessages = new FileErrorMessages();
             var services = new List<KongService>();
             GlobalConfig globalConfig = null;
-            var globalConfigFilePaths = filePaths.Where(x => x.EndsWith(Settings.GlobalConfigFileName)).ToArray();
+            var globalConfigFilePaths = filePaths.Where(x => x.EndsWith(Constants.GlobalConfigFileName)).ToArray();
             if (globalConfigFilePaths.Length > 1)
             {
                 foreach (var globalConfigFilePath in globalConfigFilePaths)
                 {
-                    fileErrorMessages.AddErrors(globalConfigFilePath, $"Cannot have more than one {Settings.GlobalConfigFileName} file.");
+                    fileErrorMessages.AddErrors(globalConfigFilePath, $"Cannot have more than one {Constants.GlobalConfigFileName} file.");
                     await ParseFile<GlobalConfig>(globalConfigFilePath, availablePlugins, fileErrorMessages);
                 }
             }

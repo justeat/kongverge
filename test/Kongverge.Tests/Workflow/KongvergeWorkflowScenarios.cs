@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using AutoFixture;
 using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
@@ -20,6 +21,7 @@ namespace Kongverge.Tests.Workflow
 
         protected KongvergeConfiguration Target = new KongvergeConfiguration();
 
+        protected KongvergeWorkflowArguments Arguments;
         protected IReadOnlyList<GlobalConfig> GlobalConfigs;
         protected IReadOnlyList<KongService> Services;
         protected IReadOnlyList<KongRoute> Routes;
@@ -28,6 +30,8 @@ namespace Kongverge.Tests.Workflow
 
         public KongvergeWorkflowScenarios()
         {
+            Arguments = Fixture.Create<KongvergeWorkflowArguments>();
+            Use(Arguments);
             GlobalConfigs = Fixture.CreateGlobalConfigs(2);
             Services = Fixture.CreateServices(4);
             Routes = Fixture.CreateRoutes(6);
@@ -174,10 +178,10 @@ namespace Kongverge.Tests.Workflow
         }
 
         protected void NonExistentInputFolder() =>
-            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ThrowsAsync(new DirectoryNotFoundException());
+            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Arguments.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ThrowsAsync(new DirectoryNotFoundException());
 
         protected void InvalidTargetConfiguration() =>
-            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ThrowsAsync(new InvalidConfigurationFilesException(string.Empty));
+            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Arguments.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ThrowsAsync(new InvalidConfigurationFilesException(string.Empty));
 
         protected void AnAssortmentOfExistingServicesAndGlobalConfig()
         {
@@ -306,7 +310,7 @@ namespace Kongverge.Tests.Workflow
             SetupTargetConfiguration();
         }
 
-        protected void SetupTargetConfiguration() => GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Settings.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ReturnsAsync(Target);
+        protected void SetupTargetConfiguration() => GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Arguments.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ReturnsAsync(Target);
 
         protected void NoServicesAreAdded() =>
             GetMock<IKongAdminWriter>().Verify(x => x.AddService(It.IsAny<KongService>()), Times.Never);

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 using Nito.AsyncEx;
 
 namespace Kongverge.IntegrationTests
@@ -25,24 +26,40 @@ namespace Kongverge.IntegrationTests
         protected const string A = nameof(A);
         protected const string B = nameof(B);
         protected const string Output = nameof(Output);
+        protected const string User = nameof(User);
+        protected const string Password = nameof(Password);
 
         protected CommandLineArguments Arguments = new CommandLineArguments();
         protected string InputFolder;
         protected string OutputFolder;
         protected ExitCode ExitCode;
+        protected FakeConsole Console;
+
+        protected ProgramSteps()
+        {
+            Program.Console = Console = new FakeConsole
+            {
+                Out = new StringWriter(new StringBuilder()),
+                Error = new StringWriter(new StringBuilder())
+            };
+        }
 
         private static string MakeFolderName(string name) => Path.IsPathRooted(name) ? name : $"Folder{name}";
 
-        protected void InvokingMain() => ExitCode = (ExitCode)Program.Main(Arguments.ToArray());
+        protected void InvokingMain()
+        {
+            var arguments = Arguments.ToArray();
+            Arguments.Clear();
+            ExitCode = (ExitCode)Program.Main(arguments);
+        }
 
         protected void InvokingMainAgainForExport()
         {
             TheExitCodeIs(InputFolder.Contains(InvalidDataB) ? ExitCode.InvalidConfigurationFiles : ExitCode.Success);
-            Arguments = new CommandLineArguments();
             AValidHost();
-            AValidPort();
+            TheExportCommand();
             OutputFolderIs(Output);
-            ExitCode = (ExitCode)Program.Main(Arguments.ToArray());
+            InvokingMain();
         }
 
         protected void NoArguments() { }
@@ -51,30 +68,49 @@ namespace Kongverge.IntegrationTests
 
         protected void AValidHost() => Arguments.AddPair("--host", Host);
 
-        protected void AValidPort() => Arguments.AddPair("--port", Port);
+        protected void TheRunCommand() => Arguments.Add("run");
 
-        protected void VerboseOutput() => Arguments.Add("--verbose");
+        protected void TheDryRunCommand() => Arguments.Add("dry-run");
 
-        protected void NoPort() { }
+        protected void TheExportCommand() => Arguments.Add("export");
 
-        protected void NoInputOrOutputFolder() { }
+        protected void VerboseOutputIsSpecified() => Arguments.Add("--verbose");
 
-        protected void InputAndOutputFolders()
+        protected void AValidUser() => Arguments.AddPair("--user", User);
+
+        protected void AValidPasswordFromOptions() => Arguments.Add($"--password={Password}");
+
+        protected void AValidPasswordFromRedirectedStdIn()
         {
-            InputFolderIs(Guid.NewGuid().ToString());
-            OutputFolderIs(Guid.NewGuid().ToString());
+            Arguments.Add("--password");
+            Console.IsInputRedirected = true;
+            Console.In = new StringReader(Password);
         }
+
+        protected void AnInvalidInputFolder() => Arguments.Add(NonExistent);
+
+        protected void NoUser() { }
+
+        protected void NoPassword() { }
+
+        protected void NoCommand() { }
+
+        protected void NoInputFolder() { }
+
+        protected void NoOutputFolder() { }
+
+        protected void AnUnrecognizedArgument(string argument) => Arguments.Add(argument);
 
         protected void InputFolderIs(string name)
         {
             InputFolder = MakeFolderName(name);
-            Arguments.AddPair("--input", InputFolder);
+            Arguments.Add(InputFolder);
         }
 
         protected void OutputFolderIs(string name)
         {
             OutputFolder = MakeFolderName(name);
-            Arguments.AddPair("--output", OutputFolder);
+            Arguments.Add(OutputFolder);
         }
 
         protected void KongIsBlank()
@@ -92,16 +128,34 @@ namespace Kongverge.IntegrationTests
 
         protected void KongMatchesInputFolder(string folder)
         {
-            Arguments = new CommandLineArguments();
             AValidHost();
-            AValidPort();
+            TheRunCommand();
             InputFolderIs(folder);
-            ExitCode = (ExitCode)Program.Main(Arguments.ToArray());
+            InvokingMain();
             TheExitCodeIs(ExitCode.Success);
-            Arguments = new CommandLineArguments();
+        }
+
+        protected void TheAuthenticationHeaderIsSet()
+        {
+            var connectionDetails = Program.ServiceProvider.GetRequiredService<KongAdminApiConnectionDetails>();
+            connectionDetails.AuthenticationHeader.Should().NotBeNull();
+            connectionDetails.AuthenticationHeader.Scheme.Should().Be("Basic");
+            var decodedBytes = Convert.FromBase64String(connectionDetails.AuthenticationHeader.Parameter);
+            var decodedString = Encoding.ASCII.GetString(decodedBytes);
+            decodedString.Should().Be($"{User}:{Password}");
         }
 
         protected void TheExitCodeIs(ExitCode exitCode) => ExitCode.Should().Be(exitCode);
+
+        protected void AnErrorMessageIsShownContaining(params string[] messages)
+        {
+            foreach (var message in messages)
+            {
+                Console.Error.ToString().Should().Contain(message);
+            }
+        }
+
+        protected void TheHelpTextIsShownContaining(string message) => Console.Out.ToString().Should().Contain(message);
 
         protected Task OutputFolderContentsMatchInputFolderContents() => OutputFolderContentsMatchesFolderContentsOf(InputFolder);
 
@@ -111,11 +165,7 @@ namespace Kongverge.IntegrationTests
 
             Debug.WriteLine(Directory.GetCurrentDirectory());
 
-            var settings = new Settings
-            {
-                Admin = new Admin { Host = Host, Port = Port }
-            };
-            var kongReader = new KongAdminReader(new KongAdminHttpClient(Options.Create(settings)));
+            var kongReader = new KongAdminReader(new KongAdminHttpClient(new KongAdminApiConnectionDetails()));
             var kongConfiguration = await kongReader.GetConfiguration();
             var availablePlugins = kongConfiguration.Plugins.Available.Where(x => x.Value).Select(x => x.Key).ToDictionary(x => x, x => new AsyncLazy<KongPluginSchema>(() => kongReader.GetPluginSchema(x)));
             var configReader = new ConfigFileReader();
