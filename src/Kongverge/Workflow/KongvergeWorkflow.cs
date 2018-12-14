@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
-using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
 using Serilog;
 
@@ -15,6 +14,7 @@ namespace Kongverge.Workflow
 {
     public class KongvergeWorkflow : Workflow
     {
+        private readonly KongvergeWorkflowArguments _arguments;
         private readonly IKongAdminWriter _kongWriter;
         private readonly ConfigFileReader _configReader;
         private readonly ConfigBuilder _configBuilder;
@@ -26,11 +26,12 @@ namespace Kongverge.Workflow
 
         public KongvergeWorkflow(
             IKongAdminReader kongReader,
-            IOptions<Settings> configuration,
+            KongvergeWorkflowArguments arguments,
             IKongAdminWriter kongWriter,
             ConfigFileReader configReader,
-            ConfigBuilder configBuilder) : base(kongReader, configuration)
+            ConfigBuilder configBuilder) : base(kongReader)
         {
+            _arguments = arguments;
             _kongWriter = kongWriter;
             _configReader = configReader;
             _configBuilder = configBuilder;
@@ -45,7 +46,7 @@ namespace Kongverge.Workflow
             KongvergeConfiguration targetConfiguration;
             try
             {
-                targetConfiguration = await _configReader.ReadConfiguration(Configuration.InputFolder, _availablePlugins);
+                targetConfiguration = await _configReader.ReadConfiguration(_arguments.InputFolder, _availablePlugins);
             }
             catch (DirectoryNotFoundException ex)
             {

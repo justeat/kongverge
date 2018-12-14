@@ -2,21 +2,22 @@ using System.Threading.Tasks;
 using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
-using Microsoft.Extensions.Options;
 
 namespace Kongverge.Workflow
 {
     public class ExportWorkflow : Workflow
     {
+        private readonly ExportWorkflowArguments _arguments;
         private readonly ConfigFileWriter _configWriter;
         private readonly ConfigBuilder _configBuilder;
 
         public ExportWorkflow(
             IKongAdminReader kongReader,
-            IOptions<Settings> configuration,
+            ExportWorkflowArguments arguments,
             ConfigFileWriter configWriter,
-            ConfigBuilder configBuilder) : base(kongReader, configuration)
+            ConfigBuilder configBuilder) : base(kongReader)
         {
+            _arguments = arguments;
             _configWriter = configWriter;
             _configBuilder = configBuilder;
         }
@@ -25,7 +26,7 @@ namespace Kongverge.Workflow
         {
             var existingConfiguration = await _configBuilder.FromKong(KongReader);
 
-            await _configWriter.WriteConfiguration(existingConfiguration, Configuration.OutputFolder);
+            await _configWriter.WriteConfiguration(existingConfiguration, _arguments.OutputFolder);
 
             return ExitWithCode.Return(ExitCode.Success);
         }

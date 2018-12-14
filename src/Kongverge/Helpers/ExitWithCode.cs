@@ -6,14 +6,10 @@ namespace Kongverge.Helpers
     public enum ExitCode
     {
         Success = 0,
-        HostUnreachable,
-        InvalidPort,
-        MissingHost,
-        MissingPort,
-        InputFolderUnreachable,
-        IncompatibleArguments,
-        InvalidConfigurationFiles,
-        UnspecifiedError
+        UnspecifiedError = 1,
+        HostUnreachable = 2,
+        InputFolderUnreachable = 3,
+        InvalidConfigurationFiles = 4
     }
 
     public class ExitWithCode
@@ -26,16 +22,8 @@ namespace Kongverge.Helpers
                     Log.Information(message ?? "************** Finished **************");
                     break;
 
-                case ExitCode.InvalidPort:
-                    Log.Error(message ?? "Invalid port specified");
-                    break;
-
-                case ExitCode.MissingHost:
-                    Log.Error(message ?? "Host must be specified");
-                    break;
-
-                case ExitCode.MissingPort:
-                    Log.Error(message ?? "Port must be specified");
+                case ExitCode.UnspecifiedError:
+                    Log.Error(message ?? "Unspecified error");
                     break;
 
                 case ExitCode.HostUnreachable:
@@ -46,16 +34,8 @@ namespace Kongverge.Helpers
                     Log.Error(message ?? "Unable to access input folder");
                     break;
 
-                case ExitCode.IncompatibleArguments:
-                    Log.Error(message ?? "Incompatible command line arguments");
-                    break;
-
                 case ExitCode.InvalidConfigurationFiles:
                     Log.Error(message ?? "Invalid configuration file(s)");
-                    break;
-
-                case ExitCode.UnspecifiedError:
-                    Log.Error(message ?? "Unspecified error");
                     break;
 
                 default:

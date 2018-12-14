@@ -15,12 +15,12 @@ namespace Kongverge.Services
 
             foreach (var service in configuration.Services)
             {
-                await WriteConfigObject(service, folderPath, $"{service.Name}{Settings.FileExtension}");
+                await WriteConfigObject(service, folderPath, $"{service.Name}{Constants.FileExtension}");
             }
 
             if (configuration.GlobalConfig.Plugins.Any())
             {
-                await WriteConfigObject(configuration.GlobalConfig, folderPath, Settings.GlobalConfigFileName);
+                await WriteConfigObject(configuration.GlobalConfig, folderPath, Constants.GlobalConfigFileName);
             }
         }
 

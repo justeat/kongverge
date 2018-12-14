@@ -1,3 +1,5 @@
+using AutoFixture;
+using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
 using Kongverge.Workflow;
@@ -9,7 +11,14 @@ namespace Kongverge.Tests.Workflow
     [Story(Title = nameof(ExportWorkflow) + nameof(ExportWorkflow.DoExecute))]
     public class ExportWorkflowScenarios : WorkflowSteps<ExportWorkflow>
     {
-        public ExportWorkflowScenarios() => Plugins = Fixture.CreatePlugins(1);
+        protected ExportWorkflowArguments Arguments;
+
+        public ExportWorkflowScenarios()
+        {
+            Plugins = Fixture.CreatePlugins(1);
+            Arguments = Fixture.Create<ExportWorkflowArguments>();
+            Use(Arguments);
+        }
 
         [BddfyFact(DisplayName = nameof(KongIsNotReachable))]
         public void Scenario1() =>
@@ -28,6 +37,6 @@ namespace Kongverge.Tests.Workflow
                 .BDDfy();
 
         protected void TheConfigurationIsWrittenToOutputFolder() =>
-            GetMock<ConfigFileWriter>().Verify(x => x.WriteConfiguration(Existing, Settings.OutputFolder));
+            GetMock<ConfigFileWriter>().Verify(x => x.WriteConfiguration(Existing, Arguments.OutputFolder));
     }
 }

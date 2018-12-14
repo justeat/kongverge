@@ -9,7 +9,7 @@ A Desired State Configuration tool for Kong.
 
 A command-line tool written in cross-platform [.NET Core 2.1](http://dot.net).
 
-[Tutorial](Tutorial.md)
+See the [tutorial](Tutorial.md) for examples of how to use Kongverge.
 
 ## Installation
 

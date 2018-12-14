@@ -12,20 +12,20 @@ namespace Kongverge.IntegrationTests
     [Story(Title = nameof(Program) + nameof(Program.Main) + nameof(KongvergeWorkflow) + "Failure")]
     public class ProgramWorkflowFailureScenarios : ProgramSteps
     {
-        [BddfyFact(DisplayName = nameof(AValidHost) + And + nameof(AValidPort) + And + nameof(InputFolderIs) + InvalidDataA)]
+        [BddfyFact(DisplayName = nameof(AValidHost) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + InvalidDataA)]
         public void Scenario1() =>
             this.Given(x => x.AValidHost())
-                .And(x => x.AValidPort())
+                .And(x => x.TheRunCommand())
                 .And(x => x.InputFolderIs(InvalidDataA))
                 .When(x => x.InvokingMain())
                 .Then(x => x.TheExitCodeIs(ExitCode.InvalidConfigurationFiles))
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(KongMatchesInputFolder) + A + And + nameof(AValidHost) + And + nameof(AValidPort) + And + nameof(InputFolderIs) + InvalidDataB)]
+        [BddfyFact(DisplayName = nameof(KongMatchesInputFolder) + A + And + nameof(AValidHost) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + InvalidDataB)]
         public void Scenario2() =>
             this.Given(x => x.KongMatchesInputFolder(A))
                 .And(x => x.AValidHost())
-                .And(x => x.AValidPort())
+                .And(x => x.TheRunCommand())
                 .And(x => x.InputFolderIs(InvalidDataB))
                 .When(x => x.InvokingMain())
                 .And(x => x.InvokingMainAgainForExport())
