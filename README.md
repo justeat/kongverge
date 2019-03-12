@@ -5,7 +5,7 @@
 
 # Kongverge
 
-A Desired State Configuration tool for Kong.
+A Desired State Configuration tool for [Kong](https://github.com/kong/kong).
 
 A command-line tool written in cross-platform [.NET Core 2.1](http://dot.net).
 
