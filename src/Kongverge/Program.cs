@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
@@ -13,6 +14,8 @@ namespace Kongverge
     public class Program
     {
         public static IConsole Console = PhysicalConsole.Singleton;
+
+        public static HttpMessageHandler HttpMessageHandler = new HttpClientHandler();
 
         public static IServiceProvider ServiceProvider { get; private set; }
 
@@ -42,6 +45,7 @@ namespace Kongverge
             var services = new ServiceCollection();
 
             services.AddSingleton(Console);
+            services.AddSingleton(HttpMessageHandler);
             services.AddSingleton<KongAdminApiConnectionDetails>();
             services.AddSingleton<KongvergeWorkflowArguments>();
             services.AddSingleton<ExportWorkflowArguments>();

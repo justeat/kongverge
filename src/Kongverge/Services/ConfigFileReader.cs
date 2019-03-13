@@ -51,16 +51,8 @@ namespace Kongverge.Services
                 GlobalConfig = globalConfig ?? new GlobalConfig()
             };
 
-            LogObjectCounts(configuration);
+            Log.Information($"Configuration from files: {configuration}");
             return configuration;
-        }
-
-        private static void LogObjectCounts(KongvergeConfiguration configuration)
-        {
-            var routes = configuration.Services.SelectMany(x => x.Routes).ToArray();
-            var pluginsCount = configuration.GlobalConfig.Plugins.Count;
-            pluginsCount += configuration.Services.Sum(x => x.Plugins.Count) + routes.Sum(x => x.Plugins.Count);
-            Log.Information($"Configuration from files contains {configuration.Services.Count} {KongObject.GetName(0, "service")}, {pluginsCount} {KongObject.GetName(0, "plugin")}, {routes.Length} {KongObject.GetName(0, "route")}");
         }
 
         private static async Task<T> ParseFile<T>(
