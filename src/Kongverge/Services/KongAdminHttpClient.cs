@@ -1,17 +1,15 @@
+using Kongverge.DTOs;
 using System;
 using System.Net.Http;
-using Kongverge.DTOs;
 
 namespace Kongverge.Services
 {
     public class KongAdminHttpClient : HttpClient
     {
-        public KongAdminHttpClient(KongAdminApiConnectionDetails connectionDetails) : base(new EnsureSuccessHandler())
+        public KongAdminHttpClient(KongAdminApiConnectionDetails connectionDetails, HttpMessageHandler innerHandler = null) : base(new EnsureSuccessHandler(innerHandler))
         {
             BaseAddress = new Uri($"http://{connectionDetails.Host}:{connectionDetails.Port}");
             DefaultRequestHeaders.Authorization = connectionDetails.AuthenticationHeader;
         }
-
-        public KongAdminHttpClient(HttpMessageHandler innerHandler) : base(new EnsureSuccessHandler(innerHandler)) { }
     }
 }

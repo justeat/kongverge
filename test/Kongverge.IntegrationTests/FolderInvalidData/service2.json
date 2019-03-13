@@ -13,7 +13,8 @@
       "name": "request-termination",
       "config": {
         "message": "All good",
-        "status_code": 200
+        "status_code": 200,
+        "some_unknown_property": "value"
       }
     }
   ]

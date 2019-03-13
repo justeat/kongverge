@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -21,8 +23,7 @@ namespace Kongverge.IntegrationTests
 
         protected const string And = "_";
         protected const string NonExistent = nameof(NonExistent);
-        protected const string InvalidDataA = nameof(InvalidDataA);
-        protected const string InvalidDataB = nameof(InvalidDataB);
+        protected const string InvalidData = nameof(InvalidData);
         protected const string A = nameof(A);
         protected const string B = nameof(B);
         protected const string Output = nameof(Output);
@@ -42,6 +43,7 @@ namespace Kongverge.IntegrationTests
                 Out = new StringWriter(new StringBuilder()),
                 Error = new StringWriter(new StringBuilder())
             };
+            Program.HttpMessageHandler = new HttpClientHandler();
         }
 
         private static string MakeFolderName(string name) => Path.IsPathRooted(name) ? name : $"Folder{name}";
@@ -55,7 +57,6 @@ namespace Kongverge.IntegrationTests
 
         protected void InvokingMainAgainForExport()
         {
-            TheExitCodeIs(InputFolder.Contains(InvalidDataB) ? ExitCode.InvalidConfigurationFiles : ExitCode.Success);
             AValidHost();
             TheExportCommand();
             OutputFolderIs(Output);
@@ -143,6 +144,23 @@ namespace Kongverge.IntegrationTests
             var decodedBytes = Convert.FromBase64String(connectionDetails.AuthenticationHeader.Parameter);
             var decodedString = Encoding.ASCII.GetString(decodedBytes);
             decodedString.Should().Be($"{User}:{Password}");
+        }
+
+        protected void KongRespondsWithBadRequestAfterPartiallyApplyingNewConfiguration()
+        {
+            var mutationRequestCount = 0;
+            Program.HttpMessageHandler = new FakeHttpMessageHandler((handler, request, cancellationToken) =>
+            {
+                if (request.Method == HttpMethod.Delete || request.Method == HttpMethod.Patch || request.Method == HttpMethod.Post || request.Method == HttpMethod.Put)
+                {
+                    if (++mutationRequestCount == 5)
+                    {
+                        return Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = new StringContent("Error") });
+                    }
+                }
+
+                return handler.NormalSendAsync(request, cancellationToken);
+            });
         }
 
         protected void TheExitCodeIs(ExitCode exitCode) => ExitCode.Should().Be(exitCode);

@@ -6,9 +6,7 @@ namespace Kongverge.Services
 {
     public class EnsureSuccessHandler : DelegatingHandler
     {
-        public EnsureSuccessHandler() : base(new HttpClientHandler()) { }
-
-        public EnsureSuccessHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
+        public EnsureSuccessHandler(HttpMessageHandler innerHandler = null) : base(innerHandler ?? new HttpClientHandler()) { }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
