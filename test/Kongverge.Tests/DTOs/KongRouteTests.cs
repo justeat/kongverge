@@ -75,7 +75,7 @@ namespace Kongverge.Tests.DTOs
                 .Then(x => x.TheErrorMessagesCountIs(ErrorMessagesCount))
                 .WithExamples(new ExampleTable(nameof(Protocols), nameof(Hosts), nameof(Methods), nameof(Paths), nameof(ErrorMessagesCount))
                 {
-                    { ProtocolsExample.Null, StringsExample.InvalidAll, StringsExample.InvalidAll, StringsExample.InvalidAll, 6 },
+                    { ProtocolsExample.Null, StringsExample.InvalidAll, StringsExample.InvalidAll, StringsExample.InvalidAll, 7 },
                     { ProtocolsExample.Empty, StringsExample.Empty, StringsExample.Empty, StringsExample.Empty, 2 },
                     { ProtocolsExample.Invalid, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.ValidPaths, 1 },
                     { ProtocolsExample.Http, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.ValidPaths, 0 },
@@ -90,7 +90,7 @@ namespace Kongverge.Tests.DTOs
                     { ProtocolsExample.Invalid, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.InvalidNull, 2 },
                     { ProtocolsExample.Invalid, StringsExample.InvalidEmpty, StringsExample.Empty, StringsExample.InvalidEmpty, 3 },
                     { ProtocolsExample.Invalid, StringsExample.LeadingAndTrailingWildcards, StringsExample.InvalidEmpty, StringsExample.InvalidWhitespace, 4 },
-                    { ProtocolsExample.Invalid, StringsExample.InvalidWhitespace, StringsExample.InvalidWhitespace, StringsExample.InvalidWhitespace, 4 }
+                    { ProtocolsExample.Invalid, StringsExample.InvalidWhitespace, StringsExample.InvalidWhitespace, StringsExample.InvalidPaths, 4 }
                 })
                 .BDDfy();
 
@@ -147,7 +147,9 @@ namespace Kongverge.Tests.DTOs
                 case StringsExample.ValidMethods:
                     return new[] { "OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "CONNECT", "extension-method" };
                 case StringsExample.ValidPaths:
-                    return new[] { "valid1", "/(?i)orders/(?i)deliverystate/(?i)driverlocation$", "(?i)/restaurants/\\S+/temporary-offline-status$", "(?i)/invoices/\\d+" };
+                    return new[] { "/valid1", "/(?i)orders/(?i)deliverystate/(?i)driverlocation$", "/(?i)restaurants/\\S+/temporary-offline-status$", "/(?i)invoices/\\d+" };
+                case StringsExample.InvalidPaths:
+                    return new[] { "notvalid" };
                 case StringsExample.InvalidNull:
                     return new string[] { null };
                 case StringsExample.InvalidEmpty:
@@ -184,6 +186,7 @@ namespace Kongverge.Tests.DTOs
             ValidHosts,
             ValidMethods,
             ValidPaths,
+            InvalidPaths,
             InvalidNull,
             InvalidEmpty,
             InvalidWhitespace,
