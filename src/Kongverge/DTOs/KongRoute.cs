@@ -122,6 +122,11 @@ namespace Kongverge.DTOs
                 errorMessages.Add("Route Paths is invalid (cannot contain null or empty values).");
             }
 
+            if (Paths?.Any(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith('/')) == true)
+            {
+                errorMessages.Add("Route Paths is invalid (values must start with '/').");
+            }
+
             await ValidatePlugins(availablePlugins, errorMessages);
         }
 
