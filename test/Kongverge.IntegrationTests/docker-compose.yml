@@ -3,6 +3,7 @@ version: '3.5'
 services:
   kong:
     image: kong:0.14.1-alpine
+    restart: on-failure
     depends_on:
       - kong-database
       - kong-migration
