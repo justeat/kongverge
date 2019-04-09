@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,13 +10,20 @@ using Serilog;
 
 namespace Kongverge.Services
 {
-    public class ConfigFileReader
+    public class ConfigFileReader : IConfigFileReader
     {
-        public virtual async Task<KongvergeConfiguration> ReadConfiguration(string folderPath, IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins)
+        private readonly IFileProvider _fileProvider;
+
+        public ConfigFileReader(IFileProvider fileProvider)
+        {
+            _fileProvider = fileProvider;
+        }
+
+        public async Task<KongvergeConfiguration> ReadConfiguration(string folderPath, IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins)
         {
             Log.Information($"Reading files from {folderPath}");
 
-            var filePaths = Directory.EnumerateFiles(folderPath, $"*{Constants.FileExtension}", SearchOption.AllDirectories).ToArray();
+            var filePaths = _fileProvider.EnumerateFiles(folderPath).ToArray();
 
             var fileErrorMessages = new FileErrorMessages();
             var services = new List<KongService>();
@@ -55,17 +61,13 @@ namespace Kongverge.Services
             return configuration;
         }
 
-        private static async Task<T> ParseFile<T>(
+        private async Task<T> ParseFile<T>(
             string path,
             IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins,
             FileErrorMessages fileErrorMessages) where T : class, IKongvergeConfigObject
         {
             Log.Verbose($"Reading {path}");
-            string text;
-            using (var reader = File.OpenText(path))
-            {
-                text = await reader.ReadToEndAsync();
-            }
+            var text = await _fileProvider.LoadTextContent(path);
 
             var errorMessages = new List<string>();
             try

@@ -8,13 +8,13 @@ namespace Kongverge.Workflow
     public class ExportWorkflow : Workflow
     {
         private readonly ExportWorkflowArguments _arguments;
-        private readonly ConfigFileWriter _configWriter;
+        private readonly IConfigFileWriter _configWriter;
         private readonly ConfigBuilder _configBuilder;
 
         public ExportWorkflow(
             IKongAdminReader kongReader,
             ExportWorkflowArguments arguments,
-            ConfigFileWriter configWriter,
+            IConfigFileWriter configWriter,
             ConfigBuilder configBuilder) : base(kongReader)
         {
             _arguments = arguments;

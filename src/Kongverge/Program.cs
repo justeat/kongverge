@@ -50,8 +50,9 @@ namespace Kongverge
             services.AddSingleton<KongvergeWorkflowArguments>();
             services.AddSingleton<ExportWorkflowArguments>();
 
-            services.AddTransient<ConfigFileReader>();
-            services.AddTransient<ConfigFileWriter>();
+            services.AddTransient<IFileProvider, PhysicalFileProvider>();
+            services.AddTransient<IConfigFileReader, ConfigFileReader>();
+            services.AddTransient<IConfigFileWriter, ConfigFileWriter>();
             services.AddTransient<ConfigBuilder>();
             services.AddTransient<KongAdminHttpClient>();
             services.AddTransient<KongAdminDryRun>();

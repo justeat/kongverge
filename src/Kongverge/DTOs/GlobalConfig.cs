@@ -21,7 +21,7 @@ namespace Kongverge.DTOs
         {
             if (Plugins == null)
             {
-                errorMessages.Add("Plugins cannot be null.");
+                errorMessages.Add("Global Plugins cannot be null.");
                 return;
             }
             foreach (var plugin in Plugins)

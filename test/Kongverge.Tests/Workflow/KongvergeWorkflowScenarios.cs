@@ -178,10 +178,10 @@ namespace Kongverge.Tests.Workflow
         }
 
         protected void NonExistentInputFolder() =>
-            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Arguments.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ThrowsAsync(new DirectoryNotFoundException());
+            GetMock<IConfigFileReader>().Setup(x => x.ReadConfiguration(Arguments.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ThrowsAsync(new DirectoryNotFoundException());
 
         protected void InvalidTargetConfiguration() =>
-            GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Arguments.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ThrowsAsync(new InvalidConfigurationFilesException(string.Empty));
+            GetMock<IConfigFileReader>().Setup(x => x.ReadConfiguration(Arguments.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ThrowsAsync(new InvalidConfigurationFilesException(string.Empty));
 
         protected void AnAssortmentOfExistingServicesAndGlobalConfig()
         {
@@ -310,7 +310,7 @@ namespace Kongverge.Tests.Workflow
             SetupTargetConfiguration();
         }
 
-        protected void SetupTargetConfiguration() => GetMock<ConfigFileReader>().Setup(x => x.ReadConfiguration(Arguments.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ReturnsAsync(Target);
+        protected void SetupTargetConfiguration() => GetMock<IConfigFileReader>().Setup(x => x.ReadConfiguration(Arguments.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongPluginSchema>>>())).ReturnsAsync(Target);
 
         protected void NoServicesAreAdded() =>
             GetMock<IKongAdminWriter>().Verify(x => x.AddService(It.IsAny<KongService>()), Times.Never);
