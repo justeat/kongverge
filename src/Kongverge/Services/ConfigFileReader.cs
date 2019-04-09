@@ -26,7 +26,7 @@ namespace Kongverge.Services
             var filePaths = _fileProvider.EnumerateFiles(folderPath).ToArray();
 
             var fileErrorMessages = new FileErrorMessages();
-            var services = new List<KongService>();
+            var services = new Dictionary<string, KongService>();
             GlobalConfig globalConfig = null;
             var globalConfigFilePaths = filePaths.Where(x => x.EndsWith(Constants.GlobalConfigFileName)).ToArray();
             if (globalConfigFilePaths.Length > 1)
@@ -43,7 +43,14 @@ namespace Kongverge.Services
             }
             foreach (var serviceConfigFilePath in filePaths.Except(globalConfigFilePaths))
             {
-                services.Add(await ParseFile<KongService>(serviceConfigFilePath, availablePlugins, fileErrorMessages));
+                services.Add(serviceConfigFilePath, await ParseFile<KongService>(serviceConfigFilePath, availablePlugins, fileErrorMessages));
+            }
+            foreach (var serviceConfigFilePath in services.Keys)
+            {
+                if (services.Keys.Except(new [] { serviceConfigFilePath }).Any(x => services[x]?.Name == services[serviceConfigFilePath]?.Name))
+                {
+                    fileErrorMessages.AddErrors(serviceConfigFilePath, "Service Name must be unique.");
+                }
             }
 
             if (fileErrorMessages.Any())
@@ -53,7 +60,7 @@ namespace Kongverge.Services
 
             var configuration = new KongvergeConfiguration
             {
-                Services = services.AsReadOnly(),
+                Services = services.Values.ToArray(),
                 GlobalConfig = globalConfig ?? new GlobalConfig()
             };
 

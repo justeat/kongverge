@@ -40,8 +40,41 @@ namespace Kongverge.Tests.Services
                 .BDDfy();
         }
 
-        [BddfyFact(DisplayName = nameof(ConfigFileReader.ReadConfiguration) + "FilesAreInvalid")]
+        [BddfyFact(DisplayName = nameof(ConfigFileReader.ReadConfiguration) + "NonUniqueServiceNames")]
         public void Scenario2()
+        {
+            var serviceJson = new KongService
+            {
+                Name = "service",
+                Protocol = "http",
+                Host = "localhost",
+                Routes = new []
+                {
+                    new KongRoute
+                    {
+                        Paths = new [] { "/" }
+                    }
+                }
+            }.ToConfigJson();
+            var service1Path = Path.Combine(TestPath, $"service1{Constants.FileExtension}");
+            var service2Path = Path.Combine(TestPath, $"service2{Constants.FileExtension}");
+            Func<Task> awaiting = null;
+
+            this.Given(() =>
+                {
+                    Get<IFileProvider>().SaveTextContent(service1Path, serviceJson);
+                    Get<IFileProvider>().SaveTextContent(service2Path, serviceJson);
+                }, "a directory containing two services with the same name")
+                .When(() => awaiting = Subject.Awaiting(x => x.ReadConfiguration(TestPath, null)), "reading configuration")
+                .Then(() => awaiting.Should().Throw<InvalidConfigurationFilesException>().Which.Message.Should()
+                        .Contain($"{service1Path} => Service Name must be unique.").And
+                        .Contain($"{service2Path} => Service Name must be unique."),
+                    ExceptionThrownWithErrorMessages)
+                .BDDfy();
+        }
+
+        [BddfyFact(DisplayName = nameof(ConfigFileReader.ReadConfiguration) + "FilesAreInvalid")]
+        public void Scenario3()
         {
             var globalPath = Path.Combine(TestPath, Constants.GlobalConfigFileName);
             var servicePath = Path.Combine(TestPath, $"service{Constants.FileExtension}");
@@ -62,7 +95,7 @@ namespace Kongverge.Tests.Services
         }
 
         [BddfyFact(DisplayName = nameof(ConfigFileReader.ReadConfiguration) + "FileIsNotJson")]
-        public void Scenario3()
+        public void Scenario4()
         {
             var path = Path.Combine(TestPath, Constants.GlobalConfigFileName);
             Func<Task> awaiting = null;
@@ -77,7 +110,7 @@ namespace Kongverge.Tests.Services
         }
 
         [BddfyFact(DisplayName = nameof(ConfigFileReader.ReadConfiguration) + "NoFiles")]
-        public void Scenario4()
+        public void Scenario5()
         {
             KongvergeConfiguration configuration = null;
 
