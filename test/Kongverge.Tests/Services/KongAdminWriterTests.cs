@@ -91,7 +91,7 @@ namespace Kongverge.Tests.Services
         [BddfyFact(DisplayName = nameof(KongAdminWriter.AddRoute))]
         public void Scenario4()
         {
-            string serviceId = Guid.NewGuid().ToString();
+            var serviceId = Guid.NewGuid().ToString();
             KongRoute route = null;
 
             this.Given(() => route = Fixture.Build<KongRoute>().Without(x => x.Id).Create(), "A new kong route")

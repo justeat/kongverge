@@ -37,6 +37,6 @@ namespace Kongverge.Tests.Workflow
                 .BDDfy();
 
         protected void TheConfigurationIsWrittenToOutputFolder() =>
-            GetMock<ConfigFileWriter>().Verify(x => x.WriteConfiguration(Existing, Arguments.OutputFolder));
+            GetMock<IConfigFileWriter>().Verify(x => x.WriteConfiguration(Existing, Arguments.OutputFolder));
     }
 }
