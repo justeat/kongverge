@@ -90,6 +90,12 @@ namespace Kongverge.DTOs
                 {
                     if (fieldDefinition.Value.Schema == null)
                     {
+                        if (fieldDefinition.Value.Type != "array" && config[fieldDefinition.Key] is JContainer ||
+                            fieldDefinition.Value.Type == "array" && (config[fieldDefinition.Key] is JValue || !(config[fieldDefinition.Key] is JArray) && config[fieldDefinition.Key].HasValues))
+                        {
+                            errorMessages.Add($"Plugin Config is invalid (field '{config[fieldDefinition.Key].Path}') should be of type '{fieldDefinition.Value.Type}'.");
+                        }
+
                         continue;
                     }
                     
@@ -111,7 +117,7 @@ namespace Kongverge.DTOs
                     }
                     else
                     {
-                        errorMessages.Add($"Plugin Config is invalid (field '{config[fieldDefinition.Key].Path}') should be an object.");
+                        errorMessages.Add($"Plugin Config is invalid (field '{config[fieldDefinition.Key].Path}') should be of type 'object'.");
                     }
                 }
                 else

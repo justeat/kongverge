@@ -67,33 +67,89 @@ namespace Kongverge.Tests.DTOs
                 .Then(x => x.TheErrorMessagesCountIs(0))
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(AValidInstanceWithOneInvalidConfigField))]
+        [BddfyFact(DisplayName = nameof(AValidInstanceWithTwoInvalidConfigFields))]
         public void Scenario4() =>
-            this.Given(x => x.AValidInstanceWithOneInvalidConfigField())
-                .When(x => x.Validating())
-                .Then(x => x.TheErrorMessagesCountIs(1))
-                .BDDfy();
-
-        [BddfyFact(DisplayName = nameof(AnInstanceWithTwoUnknownConfigFields))]
-        public void Scenario5() =>
-            this.Given(x => x.AnInstanceWithTwoUnknownConfigFields())
+            this.Given(x => x.AValidInstanceWithTwoInvalidConfigFields())
                 .When(x => x.Validating())
                 .Then(x => x.TheErrorMessagesCountIs(2))
                 .BDDfy();
 
-        protected void AValidInstance() => Instance = ExamplePlugin;
+        [BddfyFact(DisplayName = nameof(AnInstanceWithThreeUnknownConfigFields))]
+        public void Scenario5() =>
+            this.Given(x => x.AnInstanceWithThreeUnknownConfigFields())
+                .When(x => x.Validating())
+                .Then(x => x.TheErrorMessagesCountIs(3))
+                .BDDfy();
 
-        protected void AnUnavailableInstance()
+        protected void AValidInstance() => Instance = new KongPlugin
         {
-            Instance = ExamplePlugin;
-            Instance.Name = Guid.NewGuid().ToString();
+            Name = "example",
+            Config = JObject.FromObject(new
+            {
+                field1 = 1,
+                field2 = this.Create<string>(),
+                field3 = new
+                {
+                    field1 = this.Create<bool>(),
+                    field2 = this.Create<string>()
+                },
+                field4 = this.Create<string[]>()
+            })
+        };
+
+        protected void AnUnavailableInstance() => Instance = new KongPlugin
+        {
+            Name = "nonexistent",
+            Config = new JObject()
+        };
+
+        protected void AValidInstanceWithMissingDefaultConfigFields()
+        {
+            Instance = new KongPlugin
+            {
+                Name = "example",
+                Config = JObject.FromObject(new
+                {
+                    field2 = this.Create<string>(),
+                    field3 = new
+                    {
+                        field1 = this.Create<bool>()
+                    },
+                    field4 = this.Create<object>() // A blank object is valid for an array
+                })
+            };
         }
 
-        protected void AValidInstanceWithMissingDefaultConfigFields() => Instance = ExamplePluginWithMissingDefaultConfigFields;
+        protected void AValidInstanceWithTwoInvalidConfigFields() => Instance = new KongPlugin
+        {
+            Name = "example",
+            Config = JObject.FromObject(new
+            {
+                field1 = 1,
+                field2 = this.Create<string>(),
+                field3 = this.Create<string>(),
+                field4 = this.Create<string>()
+            })
+        };
 
-        protected void AValidInstanceWithOneInvalidConfigField() => Instance = ExamplePluginWithOneInvalidConfigField;
-
-        protected void AnInstanceWithTwoUnknownConfigFields() => Instance = ExamplePluginWithTwoUnknownConfigFields;
+        protected void AnInstanceWithThreeUnknownConfigFields() => Instance = new KongPlugin
+        {
+            Name = "example",
+            Config = JObject.FromObject(new
+            {
+                field1 = this.Create<int>(),
+                field2 = this.Create<string>(),
+                field3 = new
+                {
+                    field1 = this.Create<bool>(),
+                    field2 = this.Create<string>(),
+                    field3 = this.Create<bool>()
+                },
+                field4 = this.Create<string[]>(),
+                field5 = this.Create<bool>(),
+                field6 = this.Create<bool>()
+            })
+        };
     }
 
     [Story(Title = nameof(KongPlugin) + nameof(KongObject.ToJsonStringContent))]
