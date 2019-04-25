@@ -85,7 +85,7 @@ namespace Kongverge.Workflow
             return ExitWithCode.Return(ExitCode.Success);
         }
 
-            private async Task ConvergeConfiguration(KongvergeConfiguration existingConfiguration, KongvergeConfiguration targetConfiguration)
+        private async Task ConvergeConfiguration(KongvergeConfiguration existingConfiguration, KongvergeConfiguration targetConfiguration)
         {
             async Task DeleteService(KongService service)
             {
