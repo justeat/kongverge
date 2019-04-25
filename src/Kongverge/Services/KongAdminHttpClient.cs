@@ -6,7 +6,7 @@ namespace Kongverge.Services
 {
     public class KongAdminHttpClient : HttpClient
     {
-        public KongAdminHttpClient(KongAdminApiConnectionDetails connectionDetails, HttpMessageHandler innerHandler = null, KongvergeWorkflowArguments kongvergeWorkflowArguments = null) : base(new EnsureSuccessHandler(kongvergeWorkflowArguments.FaultTolerance, innerHandler))
+        public KongAdminHttpClient(KongAdminApiConnectionDetails connectionDetails, HttpMessageHandler innerHandler = null, KongvergeWorkflowArguments kongvergeWorkflowArguments = null) : base(new EnsureSuccessHandler(kongvergeWorkflowArguments.FaultTolerance ?? false, innerHandler))
         {
             BaseAddress = new Uri($"http://{connectionDetails.Host}:{connectionDetails.Port}");
             DefaultRequestHeaders.Authorization = connectionDetails.AuthenticationHeader;
