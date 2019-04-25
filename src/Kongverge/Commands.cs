@@ -94,11 +94,14 @@ namespace Kongverge
         [DirectoryExists]
         [Argument(0, nameof(InputFolder), "Required. Folder for input data")]
         public string InputFolder { get; }
+        [Argument(1, nameof(FaultTolerance), "Required. Folder for input data")]
+        public bool FaultTolerance { get; }
 
         public override void Initialize(CommandLineApplication app)
         {
             Parent.Initialize(app);
             app.GetRequiredService<KongvergeWorkflowArguments>().InputFolder = InputFolder;
+            app.GetRequiredService<KongvergeWorkflowArguments>().FaultTolerance = FaultTolerance;
         }
 
         public Task<int> OnExecuteAsync(CommandLineApplication app)
