@@ -23,7 +23,7 @@ namespace Kongverge.Tests.Services
         public KongAdminWriterTests()
         {
             GetMock<FakeHttpMessageHandler>().CallBase = true;
-            Use(new KongAdminHttpClient(new KongAdminApiConnectionDetails(), Get<FakeHttpMessageHandler>()) { BaseAddress = new Uri("http://localhost") });
+            Use(new KongAdminHttpClient(new KongAdminApiConnectionDetails(), Get<FakeHttpMessageHandler>(), new KongvergeWorkflowArguments()) { BaseAddress = new Uri("http://localhost") });
         }
 
         [BddfyFact(DisplayName = nameof(KongAdminWriter.AddService))]
