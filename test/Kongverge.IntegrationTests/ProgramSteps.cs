@@ -26,6 +26,7 @@ namespace Kongverge.IntegrationTests
         protected const string InvalidData = nameof(InvalidData);
         protected const string A = nameof(A);
         protected const string B = nameof(B);
+        protected const string C = nameof(C);
         protected const string Output = nameof(Output);
         protected const string User = nameof(User);
         protected const string Password = nameof(Password);
@@ -68,6 +69,8 @@ namespace Kongverge.IntegrationTests
         protected void AnInvalidPort() => Arguments.AddPair("--port", 1);
 
         protected void AValidHost() => Arguments.AddPair("--host", Host);
+
+        protected void FaultToleranceOn() => Arguments.AddPair("--faultTolerance", true);
 
         protected void TheRunCommand() => Arguments.Add("run");
 

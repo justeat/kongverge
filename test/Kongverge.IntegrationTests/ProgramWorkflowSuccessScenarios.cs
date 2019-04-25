@@ -106,5 +106,16 @@ namespace Kongverge.IntegrationTests
                 .Then(x => x.TheExitCodeIs(ExitCode.Success))
                 .And(x => x.TheAuthenticationHeaderIsSet())
                 .BDDfy();
+
+        [BddfyFact(DisplayName = nameof(KongIsBlank) + And + nameof(AValidHost) + And + nameof(FaultToleranceOn) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + C)]
+        public void Scenario8() =>
+            this.Given(x => x.KongIsBlank())
+                .And(x => x.AValidHost())
+                .And(x => x.TheRunCommand())
+                .And(x => x.InputFolderIs(C))
+                .When(x => x.InvokingMain())
+                .And(x => x.TheExitCodeIs(ExitCode.Success))
+                .TearDownWith(s => KongIsBlank())
+                .BDDfy();
     }
 }
