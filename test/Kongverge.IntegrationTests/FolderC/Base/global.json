@@ -25,8 +25,8 @@
     {
       "name": "udp-log",
       "config": {
-        "host": "www.udp-log.com",
-        "port": 9090,
+        "host": "www.udp-log",
+        "port": 0,
         "timeout": 200
       }
     }
