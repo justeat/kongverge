@@ -34,7 +34,7 @@ namespace Kongverge
         [Option("-p|--password=<Password>", "Optional. Basic Auth protected Kong Admin API Password (can be passed via redirected stdin)", CommandOptionType.SingleOrNoValue)]
         public Password BasicAuthPassword { get; }
 
-        [Option("-ft|--faultTolerance <FaultTolerance>", "Optional. True or false. If true, allows Kongverge to complete a run through regardless of exceptions", CommandOptionType.SingleOrNoValue)]
+        [Option("-ft|--faultTolerance <FaultTolerance>", "Optional. True or false (defaults to false). If true, allows Kongverge to complete a run through regardless of exceptions", CommandOptionType.SingleValue)]
         public bool FaultTolerance { get; } = false;
 
         protected ValidationResult OnValidate(ValidationContext validationContext, CommandLineContext commandLineContext)
