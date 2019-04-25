@@ -29,13 +29,6 @@
         "port": 9090,
         "timeout": 200
       }
-    },
-    {
-      "name": "openid-connect",
-      "config": {
-        "issuer": "https://www.just-eat.co.uk/",
-        "auth_methods": [ "bearer" ]
-      }
     }
   ]
 }

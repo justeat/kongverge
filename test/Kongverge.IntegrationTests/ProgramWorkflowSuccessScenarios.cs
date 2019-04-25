@@ -40,7 +40,7 @@ namespace Kongverge.IntegrationTests
                 .TearDownWith(s => KongIsBlank())
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(KongIsBlank) + And + nameof(AValidHost) + And + nameof(FaultToleranceOn) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + C)]
+        [BddfyFact(DisplayName = nameof(KongIsBlank) + And + nameof(AValidHost) + And + nameof(TheRunCommand) + And + nameof(FaultToleranceOn) + And + nameof(InputFolderIs) + C)]
         public void Scenario3() =>
             this.Given(x => x.KongIsBlank())
                 .And(x => x.AValidHost())
