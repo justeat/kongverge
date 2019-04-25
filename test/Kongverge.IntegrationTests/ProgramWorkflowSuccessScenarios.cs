@@ -40,8 +40,19 @@ namespace Kongverge.IntegrationTests
                 .TearDownWith(s => KongIsBlank())
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(KongMatchesInputFolder) + A + And + nameof(AValidHost) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + B)]
+        [BddfyFact(DisplayName = nameof(KongIsBlank) + And + nameof(AValidHost) + And + nameof(FaultToleranceOn) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + C)]
         public void Scenario3() =>
+            this.Given(x => x.KongIsBlank())
+                .And(x => x.AValidHost())
+                .And(x => x.TheRunCommand())
+                .And(x => x.InputFolderIs(C))
+                .When(x => x.InvokingMain())
+                .And(x => x.TheExitCodeIs(ExitCode.Success))
+                .TearDownWith(s => KongIsBlank())
+                .BDDfy();
+
+        [BddfyFact(DisplayName = nameof(KongMatchesInputFolder) + A + And + nameof(AValidHost) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + B)]
+        public void Scenario4() =>
             this.Given(x => x.KongMatchesInputFolder(A))
                 .And(x => x.AValidHost())
                 .And(x => x.TheRunCommand())
@@ -55,7 +66,7 @@ namespace Kongverge.IntegrationTests
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(KongMatchesInputFolder) + B + And + nameof(AValidHost) + And + nameof(VerboseOutputIsSpecified) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + A)]
-        public void Scenario4() =>
+        public void Scenario5() =>
             this.Given(x => x.KongMatchesInputFolder(B))
                 .And(x => x.AValidHost())
                 .And(x => x.VerboseOutputIsSpecified())
@@ -70,7 +81,7 @@ namespace Kongverge.IntegrationTests
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(KongMatchesInputFolder) + A + And + nameof(AValidHost) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + A)]
-        public void Scenario5() =>
+        public void Scenario6() =>
             this.Given(x => x.KongMatchesInputFolder(A))
                 .And(x => x.AValidHost())
                 .And(x => x.TheRunCommand())
@@ -84,7 +95,7 @@ namespace Kongverge.IntegrationTests
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(AValidHost) + And + nameof(AValidUser) + And + nameof(AValidPasswordFromOptions) + And + nameof(TheExportCommand) + And + nameof(OutputFolder) + Output)]
-        public void Scenario6() =>
+        public void Scenario7() =>
             this.Given(x => x.AValidHost())
                 .And(x => x.AValidUser())
                 .And(x => x.AValidPasswordFromOptions())
@@ -96,7 +107,7 @@ namespace Kongverge.IntegrationTests
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(AValidHost) + And + nameof(AValidUser) + And + nameof(AValidPasswordFromRedirectedStdIn) + And + nameof(TheExportCommand) + And + nameof(OutputFolder) + Output)]
-        public void Scenario7() =>
+        public void Scenario8() =>
             this.Given(x => x.AValidHost())
                 .And(x => x.AValidUser())
                 .And(x => x.AValidPasswordFromRedirectedStdIn())
@@ -107,15 +118,5 @@ namespace Kongverge.IntegrationTests
                 .And(x => x.TheAuthenticationHeaderIsSet())
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(KongIsBlank) + And + nameof(AValidHost) + And + nameof(FaultToleranceOn) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + C)]
-        public void Scenario8() =>
-            this.Given(x => x.KongIsBlank())
-                .And(x => x.AValidHost())
-                .And(x => x.TheRunCommand())
-                .And(x => x.InputFolderIs(C))
-                .When(x => x.InvokingMain())
-                .And(x => x.TheExitCodeIs(ExitCode.Success))
-                .TearDownWith(s => KongIsBlank())
-                .BDDfy();
     }
 }

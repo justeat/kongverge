@@ -33,7 +33,7 @@
     {
       "name": "openid-connect",
       "config": {
-        "issuer": "http://localhost.com",
+        "issuer": "http://example.com/",
         "auth_methods": [ "bearer" ]
       }
     }
