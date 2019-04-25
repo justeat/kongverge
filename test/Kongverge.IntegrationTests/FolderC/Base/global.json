@@ -33,7 +33,7 @@
     {
       "name": "openid-connect",
       "config": {
-        "issuer": "http://example.com/",
+        "issuer": "https://www.just-eat.co.uk/",
         "auth_methods": [ "bearer" ]
       }
     }
