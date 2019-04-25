@@ -94,8 +94,8 @@ namespace Kongverge
         [DirectoryExists]
         [Argument(0, nameof(InputFolder), "Required. Folder for input data")]
         public string InputFolder { get; }
-        [Argument(1, nameof(FaultTolerance), "Required. Folder for input data")]
-        public bool FaultTolerance { get; }
+        [Argument(1, nameof(FaultTolerance), "Optional. If true kongverge will run and complete regardless of errors")]
+        public bool FaultTolerance { get; } = false;
 
         public override void Initialize(CommandLineApplication app)
         {
