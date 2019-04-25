@@ -33,7 +33,7 @@
     {
       "name": "openid-connect",
       "config": {
-        "issuer": "badurl",
+        "issuer": "http://localhost/",
         "auth_methods": [ "bearer" ]
       }
     }
