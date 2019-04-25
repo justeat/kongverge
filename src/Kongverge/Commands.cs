@@ -34,6 +34,9 @@ namespace Kongverge
         [Option("-p|--password=<Password>", "Optional. Basic Auth protected Kong Admin API Password (can be passed via redirected stdin)", CommandOptionType.SingleOrNoValue)]
         public Password BasicAuthPassword { get; }
 
+        [Option("-ft|--faultTolerance <FaultTolerance>", "Optional. True or false. If true, allows Kongverge to complete a run through regardless of exceptions", CommandOptionType.SingleOrNoValue)]
+        public bool FaultTolerance { get; } = false;
+
         protected ValidationResult OnValidate(ValidationContext validationContext, CommandLineContext commandLineContext)
         {
             if (!string.IsNullOrWhiteSpace(BasicAuthUser) && string.IsNullOrWhiteSpace(BasicAuthPassword.Value))
@@ -66,6 +69,8 @@ namespace Kongverge
                 var byteArray = Encoding.ASCII.GetBytes($"{BasicAuthUser}:{BasicAuthPassword.Value}");
                 connectionDetails.AuthenticationHeader = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
             }
+
+            app.GetRequiredService<KongvergeWorkflowArguments>().FaultTolerance = FaultTolerance;
         }
 
         public Task<int> OnExecuteAsync(CommandLineApplication app)

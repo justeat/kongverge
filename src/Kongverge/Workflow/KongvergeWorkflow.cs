@@ -57,7 +57,12 @@ namespace Kongverge.Workflow
             }
 
             var existingConfiguration = await _configBuilder.FromKong(KongReader);
-            
+
+            return await StartConverge(existingConfiguration, targetConfiguration);
+        }
+
+        public async Task<int> StartConverge(KongvergeConfiguration existingConfiguration, KongvergeConfiguration targetConfiguration)
+        {
             try
             {
                 await ConvergeConfiguration(existingConfiguration, targetConfiguration);
@@ -66,15 +71,21 @@ namespace Kongverge.Workflow
             {
                 Log.Error(e, $"Error converging target configuration: {e}");
                 var currentConfiguration = await _configBuilder.FromKong(KongReader);
-                Log.Information($"Attempting rollback to previous configuration: {existingConfiguration}");
-                await ConvergeConfiguration(currentConfiguration, existingConfiguration);
-                return ExitWithCode.Return(ExitCode.UnspecifiedError, "An error occurred while attempting to converge target configuration. Rollback was successful.");
+                if (_arguments.FaultTolerance)
+                {
+                    await StartConverge(currentConfiguration, targetConfiguration);
+                }
+                else
+                {
+                    Log.Information($"Attempting rollback to previous configuration: {existingConfiguration}");
+                    await ConvergeConfiguration(currentConfiguration, existingConfiguration);
+                    return ExitWithCode.Return(ExitCode.UnspecifiedError, "An error occurred while attempting to converge target configuration. Rollback was successful.");
+                }
             }
-            
             return ExitWithCode.Return(ExitCode.Success);
         }
 
-        private async Task ConvergeConfiguration(KongvergeConfiguration existingConfiguration, KongvergeConfiguration targetConfiguration)
+            private async Task ConvergeConfiguration(KongvergeConfiguration existingConfiguration, KongvergeConfiguration targetConfiguration)
         {
             async Task DeleteService(KongService service)
             {
