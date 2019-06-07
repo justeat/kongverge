@@ -4,6 +4,5 @@ namespace Kongverge.DTOs
     {
         public string InputFolder { get; set; }
         public bool DryRun { get; set; } = false;
-        public bool FaultTolerance { get; set; } = false;
     }
 }
