@@ -60,6 +60,7 @@ namespace Kongverge
             var connectionDetails = app.GetRequiredService<KongAdminApiConnectionDetails>();
             connectionDetails.Host = Host;
             connectionDetails.Port = Port;
+            Log.Information($"Targeting kong host: {connectionDetails.Host}");
 
             if (!string.IsNullOrWhiteSpace(BasicAuthUser))
             {
