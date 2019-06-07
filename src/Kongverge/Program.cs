@@ -64,13 +64,12 @@ namespace Kongverge
             {
                 var args = s.GetRequiredService<KongvergeWorkflowArguments>();
 
+                var connectionDetails = s.GetRequiredService<KongAdminApiConnectionDetails>();
                 if (args.DryRun)
                 {
-                    Log.Information("Performing dry run: No writes to Kong will occur");
+                    Log.Information($"Performing dry run: No changes will be made to {connectionDetails.Host}");
                     return s.GetRequiredService<KongAdminDryRun>();
                 }
-
-                var connectionDetails = s.GetRequiredService<KongAdminApiConnectionDetails>();
 
                 Log.Information($"Performing live integration: Changes will be made to {connectionDetails.Host}");
                 return s.GetRequiredService<KongAdminWriter>();
