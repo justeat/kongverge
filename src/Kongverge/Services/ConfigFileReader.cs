@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,16 +10,23 @@ using Serilog;
 
 namespace Kongverge.Services
 {
-    public class ConfigFileReader
+    public class ConfigFileReader : IConfigFileReader
     {
-        public virtual async Task<KongvergeConfiguration> ReadConfiguration(string folderPath, IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins)
+        private readonly IFileProvider _fileProvider;
+
+        public ConfigFileReader(IFileProvider fileProvider)
+        {
+            _fileProvider = fileProvider;
+        }
+
+        public async Task<KongvergeConfiguration> ReadConfiguration(string folderPath, IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins)
         {
             Log.Information($"Reading files from {folderPath}");
 
-            var filePaths = Directory.EnumerateFiles(folderPath, $"*{Constants.FileExtension}", SearchOption.AllDirectories).ToArray();
+            var filePaths = _fileProvider.EnumerateFiles(folderPath).ToArray();
 
             var fileErrorMessages = new FileErrorMessages();
-            var services = new List<KongService>();
+            var services = new Dictionary<string, KongService>();
             GlobalConfig globalConfig = null;
             var globalConfigFilePaths = filePaths.Where(x => x.EndsWith(Constants.GlobalConfigFileName)).ToArray();
             if (globalConfigFilePaths.Length > 1)
@@ -37,7 +43,14 @@ namespace Kongverge.Services
             }
             foreach (var serviceConfigFilePath in filePaths.Except(globalConfigFilePaths))
             {
-                services.Add(await ParseFile<KongService>(serviceConfigFilePath, availablePlugins, fileErrorMessages));
+                services.Add(serviceConfigFilePath, await ParseFile<KongService>(serviceConfigFilePath, availablePlugins, fileErrorMessages));
+            }
+            foreach (var serviceConfigFilePath in services.Keys)
+            {
+                if (services.Keys.Except(new [] { serviceConfigFilePath }).Any(x => services[x]?.Name == services[serviceConfigFilePath]?.Name))
+                {
+                    fileErrorMessages.AddErrors(serviceConfigFilePath, "Service Name must be unique.");
+                }
             }
 
             if (fileErrorMessages.Any())
@@ -47,7 +60,7 @@ namespace Kongverge.Services
 
             var configuration = new KongvergeConfiguration
             {
-                Services = services.AsReadOnly(),
+                Services = services.Values.ToArray(),
                 GlobalConfig = globalConfig ?? new GlobalConfig()
             };
 
@@ -55,17 +68,13 @@ namespace Kongverge.Services
             return configuration;
         }
 
-        private static async Task<T> ParseFile<T>(
+        private async Task<T> ParseFile<T>(
             string path,
             IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins,
             FileErrorMessages fileErrorMessages) where T : class, IKongvergeConfigObject
         {
             Log.Verbose($"Reading {path}");
-            string text;
-            using (var reader = File.OpenText(path))
-            {
-                text = await reader.ReadToEndAsync();
-            }
+            var text = await _fileProvider.LoadTextContent(path);
 
             var errorMessages = new List<string>();
             try

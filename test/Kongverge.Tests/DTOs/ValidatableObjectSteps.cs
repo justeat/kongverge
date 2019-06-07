@@ -18,11 +18,6 @@ namespace Kongverge.Tests.DTOs
         protected int ErrorMessagesCount;
         protected IDictionary<string, AsyncLazy<KongPluginSchema>> AvailablePlugins = new Dictionary<string, AsyncLazy<KongPluginSchema>>();
 
-        protected KongPlugin ExamplePlugin;
-        protected KongPlugin ExamplePluginWithMissingDefaultConfigFields;
-        protected KongPlugin ExamplePluginWithOneInvalidConfigField;
-        protected KongPlugin ExamplePluginWithTwoUnknownConfigFields;
-
         protected ValidatableObjectSteps()
         {
             var examplePluginSchema = new KongPluginSchema
@@ -71,38 +66,18 @@ namespace Kongverge.Tests.DTOs
                                 }
                             }
                         }
+                    },
+                    {
+                        "field4",
+                        new FieldDefinition
+                        {
+                            Type = "array"
+                        }
                     }
                 }
             };
 
-            ExamplePlugin = new KongPlugin
-            {
-                Name = "plugin1",
-                Config = JObject.FromObject(new
-                {
-                    field1 = 1,
-                    field2 = this.Create<string>(),
-                    field3 = new
-                    {
-                        field1 = this.Create<bool>(),
-                        field2 = this.Create<string>()
-                    }
-                })
-            };
-
-            ExamplePluginWithMissingDefaultConfigFields = ExamplePlugin.Clone();
-            ExamplePluginWithMissingDefaultConfigFields.Config.Remove("field1");
-            ((JObject)ExamplePluginWithMissingDefaultConfigFields.Config.SelectToken("field3")).Remove("field2");
-
-            ExamplePluginWithOneInvalidConfigField = ExamplePlugin.Clone();
-            ExamplePluginWithOneInvalidConfigField.Config.Remove("field3");
-            ExamplePluginWithOneInvalidConfigField.Config.Add("field3", JToken.FromObject(this.Create<string>()));
-
-            ExamplePluginWithTwoUnknownConfigFields = ExamplePlugin.Clone();
-            ExamplePluginWithTwoUnknownConfigFields.Config.Add(this.Create<string>(), JToken.FromObject(1));
-            ((JObject)ExamplePluginWithTwoUnknownConfigFields.Config.SelectToken("field3")).Add(this.Create<string>(), JToken.FromObject(this.Create<bool>()));
-
-            AvailablePlugins.Add(ExamplePlugin.Name, new AsyncLazy<KongPluginSchema>(() => Task.FromResult(examplePluginSchema)));
+            AvailablePlugins.Add("example", new AsyncLazy<KongPluginSchema>(() => Task.FromResult(examplePluginSchema)));
         }
 
         private Mock<TMock> SetupMock<TMock>(bool isValid) where TMock : class, IValidatableObject

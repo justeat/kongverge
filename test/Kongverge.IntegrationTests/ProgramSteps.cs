@@ -186,7 +186,7 @@ namespace Kongverge.IntegrationTests
             var kongReader = new KongAdminReader(new KongAdminHttpClient(new KongAdminApiConnectionDetails()));
             var kongConfiguration = await kongReader.GetConfiguration();
             var availablePlugins = kongConfiguration.Plugins.Available.Where(x => x.Value).Select(x => x.Key).ToDictionary(x => x, x => new AsyncLazy<KongPluginSchema>(() => kongReader.GetPluginSchema(x)));
-            var configReader = new ConfigFileReader();
+            var configReader = new ConfigFileReader(new PhysicalFileProvider());
             var folderConfiguration = await configReader.ReadConfiguration(folder, availablePlugins);
             var outputConfiguration = await configReader.ReadConfiguration(OutputFolder, availablePlugins);
 

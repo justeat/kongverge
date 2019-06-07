@@ -6,9 +6,16 @@ using Serilog;
 
 namespace Kongverge.Services
 {
-    public class ConfigFileWriter
+    public class ConfigFileWriter : IConfigFileWriter
     {
-        public virtual async Task WriteConfiguration(KongvergeConfiguration configuration, string folderPath)
+        private readonly IFileProvider _fileProvider;
+
+        public ConfigFileWriter(IFileProvider fileProvider)
+        {
+            _fileProvider = fileProvider;
+        }
+
+        public async Task WriteConfiguration(KongvergeConfiguration configuration, string folderPath)
         {
             Log.Information($"Writing files to {folderPath}");
             PrepareOutputFolder(folderPath);
@@ -24,31 +31,26 @@ namespace Kongverge.Services
             }
         }
 
-        private static async Task WriteConfigObject(IKongvergeConfigObject configObject, string folderPath, string fileName)
+        private async Task WriteConfigObject(IKongvergeConfigObject configObject, string folderPath, string fileName)
         {
             var json = configObject.ToConfigJson();
             var path = Path.Join(folderPath, fileName);
             Log.Verbose($"Writing {path}");
-            using (var stream = File.OpenWrite(path))
-            using (var writer = new StreamWriter(stream))
-            {
-                await writer.WriteAsync(json);
-                await writer.FlushAsync();
-            }
+            await _fileProvider.SaveTextContent(path, json);
         }
 
-        private static void PrepareOutputFolder(string folderPath)
+        private void PrepareOutputFolder(string folderPath)
         {
-            if (Directory.Exists(folderPath))
+            if (_fileProvider.DirectoryExists(folderPath))
             {
-                foreach (var path in Directory.EnumerateFiles(folderPath))
+                foreach (var path in _fileProvider.EnumerateFiles(folderPath))
                 {
-                    File.Delete(path);
+                    _fileProvider.Delete(path);
                 }
             }
             else
             {
-                Directory.CreateDirectory(folderPath);
+                _fileProvider.CreateDirectory(folderPath);
             }
         }
     }
