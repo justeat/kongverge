@@ -9,7 +9,7 @@ using Nito.AsyncEx;
 
 namespace Kongverge.DTOs
 {
-    public class KongService : KongObject, IKongPluginHost, IKongEquatable<KongService>, IKongvergeConfigObject
+    public sealed class KongService : KongObject, IKongPluginHost, IKongEquatable<KongService>, IKongvergeConfigObject
     {
         public const string ObjectName = "service";
 
