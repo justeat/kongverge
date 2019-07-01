@@ -40,9 +40,9 @@ namespace Kongverge.Tests.DTOs
                     { CollectionExample.Null, CollectionExample.Null, 2 },
                     { CollectionExample.Empty, CollectionExample.Empty, 1 },
                     { CollectionExample.Valid, CollectionExample.Valid, 0 },
-                    { CollectionExample.Invalid, CollectionExample.Valid, 1 },
-                    { CollectionExample.Valid, CollectionExample.Invalid, 1 },
-                    { CollectionExample.Invalid, CollectionExample.Invalid, 2 }
+                    { CollectionExample.OneError, CollectionExample.Valid, 1 },
+                    { CollectionExample.Valid, CollectionExample.OneError, 1 },
+                    { CollectionExample.OneError, CollectionExample.OneError, 2 }
                 })
                 .BDDfy();
 
@@ -62,14 +62,14 @@ namespace Kongverge.Tests.DTOs
                 })
                 .BDDfy();
 
-        protected void AValidInstanceWithExamplePluginsAndRoutes() => Instance = BuildValidService()
-            .With(x => x.Plugins, GetExampleCollection<KongPlugin>(Plugins))
-            .With(x => x.Routes, GetExampleCollection<KongRoute>(Routes))
+        protected void AValidInstanceWithExamplePluginsAndRoutes() => Instance = BuildValidServiceWithoutPluginsOrRoutes(this)
+            .With(x => x.Plugins, this.GetExampleCollection(Plugins, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
+            .With(x => x.Routes, this.GetExampleCollection(Routes, this.GetValidKongRoute, this.GetKongRouteWithOneError))
             .Create();
 
         protected void AnInstanceWithValidRoutesAndExamplePropertyValues() => Instance = Build<KongService>()
-            .With(x => x.Plugins, GetExampleCollection<KongPlugin>(CollectionExample.Empty))
-            .With(x => x.Routes, GetExampleCollection<KongRoute>(CollectionExample.Valid))
+            .With(x => x.Plugins, this.GetExampleCollection(CollectionExample.Empty, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
+            .With(x => x.Routes, this.GetExampleCollection(CollectionExample.Valid, this.GetValidKongRoute, this.GetKongRouteWithOneError))
             .With(x => x.Protocol, Protocol)
             .With(x => x.Host, Host)
             .With(x => x.Path, Path)
@@ -79,7 +79,10 @@ namespace Kongverge.Tests.DTOs
             .With(x => x.ReadTimeout, ReadTimeout)
             .Create();
 
-        protected IPostprocessComposer<KongService> BuildValidService() => Build<KongService>()
+        public static IPostprocessComposer<KongService> BuildValidServiceWithoutPluginsOrRoutes(Fixture fixture) => fixture.Build<KongService>()
+            .With(x => x.Plugins, fixture.GetExampleCollection(CollectionExample.Empty, fixture.GetValidKongPlugin, fixture.GetKongPluginWithOneError))
+            .With(x => x.Routes, fixture.GetExampleCollection(CollectionExample.Empty, fixture.GetValidKongRoute, fixture.GetKongRouteWithOneError))
+            .With(x => x.Name, "name")
             .With(x => x.Protocol, "https")
             .With(x => x.Retries, 5)
             .With(x => x.ConnectTimeout, 1000U)

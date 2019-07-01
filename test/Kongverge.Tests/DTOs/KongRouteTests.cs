@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using AutoFixture;
+using AutoFixture.Dsl;
 using FluentAssertions;
 using Kongverge.DTOs;
 using TestStack.BDDfy;
@@ -94,107 +95,24 @@ namespace Kongverge.Tests.DTOs
                 })
                 .BDDfy();
 
-        protected override void AValidInstanceWithExamplePlugins() => Instance = Build<KongRoute>()
-            .With(x => x.Plugins, GetExampleCollection<KongPlugin>(Plugins))
-            .With(x => x.Protocols, GetProtocolsExample(ProtocolsExample.Both))
-            .With(x => x.Hosts, GetStringsExample(StringsExample.Empty))
-            .With(x => x.Methods, GetStringsExample(StringsExample.Empty))
-            .With(x => x.Paths, GetStringsExample(StringsExample.ValidPaths))
+        protected override void AValidInstanceWithExamplePlugins() => Instance = BuildValidRouteWithoutPlugins(this)
+            .With(x => x.Plugins, this.GetExampleCollection(Plugins, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
             .Create();
 
-        protected void AnInstanceWithExamplePropertyValues()
-        {
-            Instance = Build<KongRoute>()
-                .With(x => x.Plugins, GetExampleCollection<KongPlugin>(CollectionExample.Empty))
-                .With(x => x.Protocols, GetProtocolsExample(Protocols))
-                .With(x => x.Hosts, GetStringsExample(Hosts))
-                .With(x => x.Methods, GetStringsExample(Methods))
-                .With(x => x.Paths, GetStringsExample(Paths))
-                .Create();
-        }
+        protected void AnInstanceWithExamplePropertyValues() => Instance = Build<KongRoute>()
+            .With(x => x.Plugins, this.GetExampleCollection(CollectionExample.Empty, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
+            .With(x => x.Protocols, this.GetExampleProtocols(Protocols))
+            .With(x => x.Hosts, this.GetExampleStrings(Hosts))
+            .With(x => x.Methods, this.GetExampleStrings(Methods))
+            .With(x => x.Paths, this.GetExampleStrings(Paths))
+            .Create();
 
-        protected string[] GetProtocolsExample(ProtocolsExample example)
-        {
-            switch (example)
-            {
-                case ProtocolsExample.Null:
-                    return null;
-                case ProtocolsExample.Empty:
-                    return Array.Empty<string>();
-                case ProtocolsExample.Http:
-                    return new[] { "http" };
-                case ProtocolsExample.Https:
-                    return new[] { "https" };
-                case ProtocolsExample.Both:
-                    return new[] { "http", "https" };
-                case ProtocolsExample.Invalid:
-                    return new[] { "junk" };
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(example), example, null);
-            }
-        }
-
-        protected string[] GetStringsExample(StringsExample example)
-        {
-            switch (example)
-            {
-                case StringsExample.Null:
-                    return null;
-                case StringsExample.Empty:
-                    return Array.Empty<string>();
-                case StringsExample.ValidHosts:
-                    return new[] { "valid1", "*.example.com", "example.*", "10.0.0.1", "2001:0db8:85a3:0000:0000:8a2e:0370:7334" };
-                case StringsExample.ValidMethods:
-                    return new[] { "OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "CONNECT", "extension-method" };
-                case StringsExample.ValidPaths:
-                    return new[] { "/valid1", "/(?i)orders/(?i)deliverystate/(?i)driverlocation$", "/(?i)restaurants/\\S+/temporary-offline-status$", "/(?i)invoices/\\d+" };
-                case StringsExample.InvalidPaths:
-                    return new[] { "notvalid" };
-                case StringsExample.InvalidNull:
-                    return new string[] { null };
-                case StringsExample.InvalidEmpty:
-                    return new[] { string.Empty };
-                case StringsExample.InvalidWhitespace:
-                    return new[] { " " };
-                case StringsExample.InvalidColon:
-                    return new[] { ":" };
-                case StringsExample.InvalidWildcard:
-                    return new[] { "*" };
-                case StringsExample.LeadingAndTrailingWildcards:
-                    return new[] { "*.example.*" };
-                case StringsExample.InvalidAll:
-                    return new[] { null, string.Empty, " ", ":", "*", "*.example.*" };
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(example), example, null);
-            }
-        }
-
-        public enum ProtocolsExample
-        {
-            Null,
-            Empty,
-            Http,
-            Https,
-            Both,
-            Invalid
-        }
-
-        public enum StringsExample
-        {
-            Null,
-            Empty,
-            ValidHosts,
-            ValidMethods,
-            ValidPaths,
-            InvalidPaths,
-            InvalidNull,
-            InvalidEmpty,
-            InvalidWhitespace,
-            InvalidColon,
-            InvalidWildcard,
-            LeadingAndTrailingWildcards,
-            InvalidAll
-        }
+        public static IPostprocessComposer<KongRoute> BuildValidRouteWithoutPlugins(Fixture fixture) => fixture.Build<KongRoute>()
+            .With(x => x.Plugins, fixture.GetExampleCollection(CollectionExample.Empty, fixture.GetValidKongPlugin, fixture.GetKongPluginWithOneError))
+            .With(x => x.Protocols, fixture.GetExampleProtocols(ProtocolsExample.Both))
+            .With(x => x.Hosts, fixture.GetExampleStrings(StringsExample.Empty))
+            .With(x => x.Methods, fixture.GetExampleStrings(StringsExample.Empty))
+            .With(x => x.Paths, fixture.GetExampleStrings(StringsExample.ValidPaths));
     }
 
     [Story(Title = nameof(KongRoute) + nameof(KongObject.ToJsonStringContent))]

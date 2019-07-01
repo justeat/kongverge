@@ -9,7 +9,7 @@ using Nito.AsyncEx;
 
 namespace Kongverge.DTOs
 {
-    public class KongPlugin : KongObject, IKongEquatable<KongPlugin>, IValidatableObject
+    public sealed class KongPlugin : KongObject, IKongEquatable<KongPlugin>, IValidatableObject
     {
         public const string ObjectName = "plugin";
 
@@ -51,7 +51,7 @@ namespace Kongverge.DTOs
             RouteId = null;
         }
 
-        public virtual async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
+        public async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
         {
             if (!availablePlugins.ContainsKey(Name))
             {

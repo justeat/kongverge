@@ -19,18 +19,10 @@ namespace Kongverge.Tests.DTOs
                     { CollectionExample.Null, 1 },
                     { CollectionExample.Empty, 0 },
                     { CollectionExample.Valid, 0 },
-                    { CollectionExample.Invalid, 1 }
+                    { CollectionExample.OneError, 1 }
                 })
                 .BDDfy();
 
         protected abstract void AValidInstanceWithExamplePlugins();
-    }
-
-    public enum CollectionExample
-    {
-        Null,
-        Empty,
-        Valid,
-        Invalid
     }
 }

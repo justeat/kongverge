@@ -81,21 +81,7 @@ namespace Kongverge.Tests.DTOs
                 .Then(x => x.TheErrorMessagesCountIs(3))
                 .BDDfy();
 
-        protected void AValidInstance() => Instance = new KongPlugin
-        {
-            Name = "example",
-            Config = JObject.FromObject(new
-            {
-                field1 = 1,
-                field2 = this.Create<string>(),
-                field3 = new
-                {
-                    field1 = this.Create<bool>(),
-                    field2 = this.Create<string>()
-                },
-                field4 = this.Create<string[]>()
-            })
-        };
+        protected void AValidInstance() => Instance = this.GetValidKongPlugin();
 
         protected void AnUnavailableInstance() => Instance = new KongPlugin
         {
@@ -103,22 +89,19 @@ namespace Kongverge.Tests.DTOs
             Config = new JObject()
         };
 
-        protected void AValidInstanceWithMissingDefaultConfigFields()
+        protected void AValidInstanceWithMissingDefaultConfigFields() => Instance = new KongPlugin
         {
-            Instance = new KongPlugin
+            Name = "example",
+            Config = JObject.FromObject(new
             {
-                Name = "example",
-                Config = JObject.FromObject(new
+                field2 = this.Create<string>(),
+                field3 = new
                 {
-                    field2 = this.Create<string>(),
-                    field3 = new
-                    {
-                        field1 = this.Create<bool>()
-                    },
-                    field4 = this.Create<object>() // A blank object is valid for an array
-                })
-            };
-        }
+                    field1 = this.Create<bool>()
+                },
+                field4 = this.Create<object>() // A blank object is valid for an array
+            })
+        };
 
         protected void AValidInstanceWithTwoInvalidConfigFields() => Instance = new KongPlugin
         {

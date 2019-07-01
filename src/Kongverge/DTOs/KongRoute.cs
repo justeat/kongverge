@@ -9,7 +9,7 @@ using Nito.AsyncEx;
 
 namespace Kongverge.DTOs
 {
-    public class KongRoute : KongObject, IKongPluginHost, IKongEquatable<KongRoute>, IValidatableObject
+    public sealed class KongRoute : KongObject, IKongPluginHost, IKongEquatable<KongRoute>, IValidatableObject
     {
         public const string ObjectName = "route";
 
@@ -87,7 +87,7 @@ namespace Kongverge.DTOs
             plugin.RouteId = Id;
         }
 
-        public virtual async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
+        public async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
         {
             if (IsNullOrEmpty(Protocols) || Protocols.Any(x => !AllowedProtocols.Contains(x)))
             {
