@@ -22,6 +22,7 @@ namespace Kongverge.Tests.DTOs
     {
         protected CollectionExample Plugins;
         protected CollectionExample Routes;
+        protected string Name;
         protected string Protocol;
         protected string Host;
         protected string Path;
@@ -51,14 +52,14 @@ namespace Kongverge.Tests.DTOs
             this.Given(x => x.AnInstanceWithValidRoutesAndExamplePropertyValues())
                 .When(x => x.Validating())
                 .Then(x => x.TheErrorMessagesCountIs(ErrorMessagesCount))
-                .WithExamples(new ExampleTable(nameof(Protocol), nameof(Host), nameof(Path), nameof(Retries), nameof(ConnectTimeout), nameof(WriteTimeout), nameof(ReadTimeout), nameof(ErrorMessagesCount))
+                .WithExamples(new ExampleTable(nameof(Name), nameof(Protocol), nameof(Host), nameof(Path), nameof(Retries), nameof(ConnectTimeout), nameof(WriteTimeout), nameof(ReadTimeout), nameof(ErrorMessagesCount))
                 {
-                    { "http", "localhost", "path", 0, 0, 0, 0, 0 },
-                    { "http", "www.example.com", "path/sub-path", 0, 0, 0, 0, 0 },
-                    { "http", "2001:0db8:85a3:0000:0000:8a2e:0370:7334", "path/sub-path/sub-sub-path", 0, 0, 0, 0, 0 },
-                    { "https", "127.0.0.1", null, 25, 300000, 300000, 300000, 0 },
-                    { "https", null, null, 25, 300000, 300000, 300000, 1 },
-                    { "junk", ":", "path:invalid", 26, 300001, 300001, 300001, 7 }
+                    { "name", "http", "localhost", "path", 0, 0, 0, 0, 0 },
+                    { "name", "http", "www.example.com", "path/sub-path", 0, 0, 0, 0, 0 },
+                    { "name", "http", "2001:0db8:85a3:0000:0000:8a2e:0370:7334", "path/sub-path/sub-sub-path", 0, 0, 0, 0, 0 },
+                    { "name", "https", "127.0.0.1", null, 25, 300000, 300000, 300000, 0 },
+                    { "name", "https", null, null, 25, 300000, 300000, 300000, 1 },
+                    { null, "junk", ":", "path:invalid", 26, 300001, 300001, 300001, 8 }
                 })
                 .BDDfy();
 
@@ -70,6 +71,7 @@ namespace Kongverge.Tests.DTOs
         protected void AnInstanceWithValidRoutesAndExamplePropertyValues() => Instance = Build<KongService>()
             .With(x => x.Plugins, this.GetExampleCollection(CollectionExample.Empty, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
             .With(x => x.Routes, this.GetExampleCollection(CollectionExample.Valid, this.GetValidKongRoute, this.GetKongRouteWithOneError))
+            .With(x => x.Name, Name)
             .With(x => x.Protocol, Protocol)
             .With(x => x.Host, Host)
             .With(x => x.Path, Path)
