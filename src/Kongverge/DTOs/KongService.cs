@@ -89,6 +89,11 @@ namespace Kongverge.DTOs
 
         public async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
         {
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                errorMessages.Add("Service Name is invalid (cannot be null or whitespace).");
+            }
+
             if (!new[] { "http", "https" }.Contains(Protocol))
             {
                 errorMessages.Add("Service Protocol is invalid (must be either 'http' or 'https').");
