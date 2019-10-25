@@ -9,7 +9,8 @@ namespace Kongverge.Helpers
         UnspecifiedError = 1,
         HostUnreachable = 2,
         InputFolderUnreachable = 3,
-        InvalidConfigurationFiles = 4
+        InvalidConfigurationFiles = 4,
+        HostVersionNotSupported = 5
     }
 
     public class ExitWithCode
@@ -36,6 +37,10 @@ namespace Kongverge.Helpers
 
                 case ExitCode.InvalidConfigurationFiles:
                     Log.Error(message ?? "Invalid configuration file(s)");
+                    break;
+
+                case ExitCode.HostVersionNotSupported:
+                    Log.Error(message ?? "Specified host's version is not supported");
                     break;
 
                 default:

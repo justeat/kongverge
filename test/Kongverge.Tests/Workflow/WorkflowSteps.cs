@@ -27,9 +27,14 @@ namespace Kongverge.Tests.Workflow
 
         protected void KongIsNotReachable() => GetMock<IKongAdminReader>().Setup(x => x.GetConfiguration()).Throws<HttpRequestException>();
 
-        protected void KongIsReachable() => GetMock<IKongAdminReader>()
+        protected void KongIsReachable() => KongIsReachable("0.14.1");
+
+        protected void KongIsReachable(string version) => GetMock<IKongAdminReader>()
             .Setup(x => x.GetConfiguration())
-            .ReturnsAsync(KongConfiguration = Fixture.Build<KongConfiguration>().With(x => x.Plugins, new Plugins { Available = Plugins.ToDictionary(x => x.Name, x => true) }).Create());
+            .ReturnsAsync(KongConfiguration = Fixture.Build<KongConfiguration>()
+                .With(x => x.Plugins, new Plugins { Available = Plugins.ToDictionary(x => x.Name, x => true) })
+                .With(x => x.Version, version)
+                .Create());
 
         protected async Task Executing() => ExitCode = (ExitCode)await Subject.Execute();
 

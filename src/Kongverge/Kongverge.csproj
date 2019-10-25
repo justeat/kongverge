@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <Description>A desired state configuration tool for Kong</Description>
     <PackageTags>kong api gateway desired state configuration json</PackageTags>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild Condition="$(NCrunch) != '1'">True</GeneratePackageOnBuild>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>kongverge</ToolCommandName>
   </PropertyGroup>
