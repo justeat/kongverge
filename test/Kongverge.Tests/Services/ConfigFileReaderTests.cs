@@ -6,6 +6,7 @@ using AutoFixture;
 using FluentAssertions;
 using Kongverge.DTOs;
 using Kongverge.Services;
+using Kongverge.Tests.DTOs;
 using Nito.AsyncEx;
 using TestStack.BDDfy;
 using TestStack.BDDfy.Xunit;
@@ -67,8 +68,8 @@ namespace Kongverge.Tests.Services
                 }, "a directory containing two services with the same name")
                 .When(() => awaiting = Subject.Awaiting(x => x.ReadConfiguration(TestPath, null)), "reading configuration")
                 .Then(() => awaiting.Should().Throw<InvalidConfigurationFilesException>().Which.Message.Should()
-                        .Contain($"{service1Path} => Service Name must be unique.").And
-                        .Contain($"{service2Path} => Service Name must be unique."),
+                        .Contain($"{service1Path} => {KongSchema.Violation<KongService>()} (field 'name' must be unique).").And
+                        .Contain($"{service2Path} => {KongSchema.Violation<KongService>()} (field 'name' must be unique)."),
                     ExceptionThrownWithErrorMessages)
                 .BDDfy();
         }
@@ -78,7 +79,6 @@ namespace Kongverge.Tests.Services
         {
             var globalPath = Path.Combine(TestPath, Constants.GlobalConfigFileName);
             var servicePath = Path.Combine(TestPath, $"service{Constants.FileExtension}");
-            var availablePlugins = new Dictionary<string, AsyncLazy<KongPluginSchema>>();
             Func<Task> awaiting = null;
 
             this.Given(() =>
@@ -86,10 +86,10 @@ namespace Kongverge.Tests.Services
                     Get<IFileProvider>().SaveTextContent(globalPath, new GlobalConfig { Plugins = new[] { new KongPlugin { Name = "test" } } }.ToConfigJson());
                     Get<IFileProvider>().SaveTextContent(servicePath, new KongService { Protocol = "ftp" }.ToConfigJson());
                 }, "a directory containing an invalid global file and an invalid service file")
-                .When(() => awaiting = Subject.Awaiting(x => x.ReadConfiguration(TestPath, availablePlugins)), "reading configuration")
+                .When(() => awaiting = Subject.Awaiting(x => x.ReadConfiguration(TestPath, ValidationFixture.Schemas)), "reading configuration")
                 .Then(() => awaiting.Should().Throw<InvalidConfigurationFilesException>().Which.Message.Should()
-                        .Contain($"{globalPath} => Plugin 'test' is not available on Kong server.").And
-                        .Contain($"{servicePath} => Service Protocol is invalid (must be either 'http' or 'https')."),
+                        .Contain($"{globalPath} => {KongSchema.Violation<KongPlugin>()} (plugin 'test' is not available on Kong server).").And
+                        .Contain($"{servicePath} => {KongSchema.Violation<KongService>()} (field 'protocol' should be one of 'grpc, grpcs, http, https, tcp, tls')."),
                     ExceptionThrownWithErrorMessages)
                 .BDDfy();
         }

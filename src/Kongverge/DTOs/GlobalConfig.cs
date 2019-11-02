@@ -12,12 +12,12 @@ namespace Kongverge.DTOs
         [JsonProperty("plugins")]
         public IReadOnlyList<KongPlugin> Plugins { get; set; } = Array.Empty<KongPlugin>();
 
-        public async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
+        public async Task Validate(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages, KongObject parent = null)
         {
-            await ValidatePlugins(availablePlugins, errorMessages);
+            await ValidatePlugins(schemas, errorMessages);
         }
 
-        private async Task ValidatePlugins(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
+        private async Task ValidatePlugins(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages)
         {
             if (Plugins == null)
             {
@@ -26,15 +26,15 @@ namespace Kongverge.DTOs
             }
             foreach (var plugin in Plugins)
             {
-                await plugin.Validate(availablePlugins, errorMessages);
+                await plugin.Validate(schemas, errorMessages);
             }
         }
 
         public virtual void AssignParentId(KongPlugin plugin)
         {
-            plugin.ConsumerId = null;
-            plugin.ServiceId = null;
-            plugin.RouteId = null;
+            plugin.Consumer = null;
+            plugin.Service = null;
+            plugin.Route = null;
         }
 
         public string ToConfigJson()

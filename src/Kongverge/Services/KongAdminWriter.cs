@@ -45,13 +45,19 @@ namespace Kongverge.Services
             await HttpClient.DeleteAsync($"/routes/{routeId}");
         }
 
-        public async Task UpsertPlugin(KongPlugin plugin)
+        public async Task AddPlugin(KongPlugin plugin)
         {
             var content = plugin.ToJsonStringContent();
-            var response = await HttpClient.PutAsync("/plugins", content);
+            var response = await HttpClient.PostAsync("/plugins", content);
             var responseBody = await response.Content.ReadAsStringAsync();
-            var updated = JsonConvert.DeserializeObject<KongPlugin>(responseBody);
-            plugin.Id = updated.Id;
+            var added = JsonConvert.DeserializeObject<KongPlugin>(responseBody);
+            plugin.Id = added.Id;
+        }
+
+        public async Task UpdatePlugin(KongPlugin plugin)
+        {
+            var content = plugin.ToJsonStringContent();
+            await HttpClient.PatchAsync($"/plugins/{plugin.Id}", content);
         }
 
         public async Task DeletePlugin(string pluginId)

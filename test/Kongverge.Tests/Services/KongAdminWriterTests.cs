@@ -115,21 +115,34 @@ namespace Kongverge.Tests.Services
                 .BDDfy();
         }
 
-        [BddfyFact(DisplayName = nameof(KongAdminWriter.UpsertPlugin))]
+        [BddfyFact(DisplayName = nameof(KongAdminWriter.AddPlugin))]
         public void Scenario6()
         {
             KongPlugin plugin = null;
 
-            this.Given(() => plugin = Fixture.Build<KongPlugin>().Without(x => x.Id).Create(), "A new plugin")
-                .And(s => s.KongRespondsCorrectly<KongService>(HttpMethod.Put, "/plugins", plugin.ToJsonStringContent(), x => x.WithIdAndCreatedAt()),
+            this.Given(() => plugin = Fixture.Build<KongPlugin>().Without(x => x.Id).Create(), "A new kong plugin")
+                .And(s => s.KongRespondsCorrectly<KongPlugin>(HttpMethod.Post, "/plugins", plugin.ToJsonStringContent(), x => x.WithIdAndCreatedAt()),
                     KongRespondsCorrectlyToMethodAtPathTextTemplate)
-                .When(async () => await Subject.UpsertPlugin(plugin), Invoking(nameof(KongAdminWriter.UpsertPlugin)))
+                .When(async () => await Subject.AddPlugin(plugin), Invoking(nameof(KongAdminWriter.AddPlugin)))
                 .Then(() => plugin.Id.Should().NotBeNullOrWhiteSpace(), "the Id is set")
                 .BDDfy();
         }
 
-        [BddfyFact(DisplayName = nameof(KongAdminWriter.DeletePlugin))]
+        [BddfyFact(DisplayName = nameof(KongAdminWriter.UpdatePlugin))]
         public void Scenario7()
+        {
+            KongPlugin plugin = null;
+
+            this.Given(() => plugin = Fixture.Create<KongPlugin>(), "An existing kong plugin")
+                .And(s => s.KongRespondsCorrectly<KongPlugin>(new HttpMethod("PATCH"), $"/plugins/{plugin.Id}", plugin.ToJsonStringContent(), x => x.WithIdAndCreatedAt()),
+                    KongRespondsCorrectlyToMethodAtPathTextTemplate)
+                .When(async () => await Subject.UpdatePlugin(plugin), Invoking(nameof(KongAdminWriter.UpdatePlugin)))
+                .Then("it succeeds")
+                .BDDfy();
+        }
+
+        [BddfyFact(DisplayName = nameof(KongAdminWriter.DeletePlugin))]
+        public void Scenario8()
         {
             KongPlugin plugin = null;
 

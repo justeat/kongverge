@@ -6,6 +6,6 @@ namespace Kongverge.DTOs
 {
     public interface IValidatableObject
     {
-        Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages);
+        Task Validate(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages, KongObject parent = null);
     }
 }

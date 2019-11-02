@@ -1,0 +1,40 @@
+{
+    "fields": [
+        {
+            "id": {
+                "auto": true,
+                "uuid": true,
+                "type": "string"
+            }
+        },
+        {
+            "created_at": {
+                "timestamp": true,
+                "auto": true,
+                "type": "integer"
+            }
+        },
+        {
+            "cert": {
+                "type": "string",
+                "required": true
+            }
+        },
+        {
+            "key": {
+                "type": "string",
+                "required": true
+            }
+        },
+        {
+            "tags": {
+                "elements": {
+                    "type": "string",
+                    "required": true,
+                    "match": "^[%w%.%-%_~]+$"
+                },
+                "type": "set"
+            }
+        }
+    ]
+}

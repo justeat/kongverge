@@ -22,12 +22,12 @@ namespace Kongverge.Tests.Workflow
         protected WorkflowSteps()
         {
             GetMock<ConfigBuilder>().Setup(x => x.FromKong(Get<IKongAdminReader>())).ReturnsAsync(Existing);
-            GetMock<IKongAdminReader>().Setup(x => x.GetPluginSchema(It.IsAny<string>())).ReturnsAsync(new KongPluginSchema { Fields = new Dictionary<string, FieldDefinition>() });
+            GetMock<IKongAdminReader>().Setup(x => x.GetSchema(It.IsAny<string>())).ReturnsAsync(new KongSchema());
         }
 
         protected void KongIsNotReachable() => GetMock<IKongAdminReader>().Setup(x => x.GetConfiguration()).Throws<HttpRequestException>();
 
-        protected void KongIsReachable() => KongIsReachable("0.14.1");
+        protected void KongIsReachable() => KongIsReachable("1.1.0");
 
         protected void KongIsReachable(string version) => GetMock<IKongAdminReader>()
             .Setup(x => x.GetConfiguration())

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoFixture;
@@ -37,9 +36,9 @@ namespace Kongverge.Tests.DTOs
         {
             OtherInstance.Id = this.Create<string>();
             OtherInstance.CreatedAt = this.Create<long>();
-            OtherInstance.ConsumerId = this.Create<string>();
-            OtherInstance.ServiceId = this.Create<string>();
-            OtherInstance.RouteId = this.Create<string>();
+            OtherInstance.Consumer = new KongObject.Reference { Id = this.Create<string>() };
+            OtherInstance.Service = new KongObject.Reference { Id = this.Create<string>() };
+            OtherInstance.Route = new KongObject.Reference { Id = this.Create<string>() };
         }
     }
 
@@ -60,25 +59,32 @@ namespace Kongverge.Tests.DTOs
                 .Then(x => x.TheErrorMessagesCountIs(1))
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(AValidInstanceWithMissingDefaultConfigFields))]
+        [BddfyFact(DisplayName = nameof(AValidInstanceWithMissingDefaultFields))]
         public void Scenario3() =>
-            this.Given(x => x.AValidInstanceWithMissingDefaultConfigFields())
+            this.Given(x => x.AValidInstanceWithMissingDefaultFields())
                 .When(x => x.Validating())
                 .Then(x => x.TheErrorMessagesCountIs(0))
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(AValidInstanceWithTwoInvalidConfigFields))]
+        [BddfyFact(DisplayName = nameof(AValidInstanceWithTwelveInvalidFields))]
         public void Scenario4() =>
-            this.Given(x => x.AValidInstanceWithTwoInvalidConfigFields())
+            this.Given(x => x.AValidInstanceWithTwelveInvalidFields())
                 .When(x => x.Validating())
-                .Then(x => x.TheErrorMessagesCountIs(2))
+                .Then(x => x.TheErrorMessagesCountIs(12))
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(AnInstanceWithThreeUnknownConfigFields))]
+        [BddfyFact(DisplayName = nameof(AnInstanceWithThreeUnknownFields))]
         public void Scenario5() =>
-            this.Given(x => x.AnInstanceWithThreeUnknownConfigFields())
+            this.Given(x => x.AnInstanceWithThreeUnknownFields())
                 .When(x => x.Validating())
                 .Then(x => x.TheErrorMessagesCountIs(3))
+                .BDDfy();
+
+        [BddfyFact(DisplayName = nameof(AnInstanceWithInvalidParent))]
+        public void Scenario6() =>
+            this.Given(x => x.AnInstanceWithInvalidParent())
+                .When(x => x.Validating())
+                .Then(x => x.TheErrorMessagesCountIs(1))
                 .BDDfy();
 
         protected void AValidInstance() => Instance = this.GetValidKongPlugin();
@@ -88,51 +94,46 @@ namespace Kongverge.Tests.DTOs
             Name = "nonexistent",
             Config = new JObject()
         };
-
-        protected void AValidInstanceWithMissingDefaultConfigFields() => Instance = new KongPlugin
+        
+        protected void AValidInstanceWithMissingDefaultFields()
         {
-            Name = "example",
-            Config = JObject.FromObject(new
-            {
-                field2 = this.Create<string>(),
-                field3 = new
-                {
-                    field1 = this.Create<bool>()
-                },
-                field4 = this.Create<object>() // A blank object is valid for an array
-            })
-        };
+            AValidInstance();
+            Instance.Config["field3"].Children().Last().Remove();
+        }
 
-        protected void AValidInstanceWithTwoInvalidConfigFields() => Instance = new KongPlugin
+        protected void AValidInstanceWithTwelveInvalidFields()
         {
-            Name = "example",
-            Config = JObject.FromObject(new
+            AValidInstance();
+            Instance.RunOn = this.Create<string>();
+            Instance.Protocols = new[] { this.Create<string>() };
+            Instance.Config["field3"] = JToken.FromObject(this.Create<string>());
+            Instance.Config["field4"] = JToken.FromObject(new[] { "foo" });
+            Instance.Config["field5"] = JToken.FromObject(this.Create<int>() + 10);
+            Instance.Config["field7"] = JToken.FromObject(this.Create<string>());
+            ((JObject)Instance.Config["field8"]).Add("something", JToken.FromObject(new
             {
-                field1 = 1,
-                field2 = this.Create<string>(),
-                field3 = this.Create<string>(),
-                field4 = this.Create<string>()
-            })
-        };
+                field1 = this.Create<string>().Substring(0, 5),
+                field2 = this.Create<string>().Substring(0, 5)
+            }));
+            ((JObject)Instance.Config["field8"]).Add("another", JToken.FromObject(new object()));
+            Instance.Config["field9"] = JToken.FromObject(5);
+            Instance.Config["field10"] = JToken.FromObject(new object());
+            Instance.Config.Children().Last().Remove();
+        }
 
-        protected void AnInstanceWithThreeUnknownConfigFields() => Instance = new KongPlugin
+        protected void AnInstanceWithThreeUnknownFields()
         {
-            Name = "example",
-            Config = JObject.FromObject(new
-            {
-                field1 = this.Create<int>(),
-                field2 = this.Create<string>(),
-                field3 = new
-                {
-                    field1 = this.Create<bool>(),
-                    field2 = this.Create<string>(),
-                    field3 = this.Create<bool>()
-                },
-                field4 = this.Create<string[]>(),
-                field5 = this.Create<bool>(),
-                field6 = this.Create<bool>()
-            })
-        };
+            AValidInstance();
+            ((JObject)Instance.Config["field3"]).Add("field3", JToken.FromObject(this.Create<bool>()));
+            Instance.Config.Add("field12", JToken.FromObject(this.Create<bool>()));
+            Instance.Config.Add("field13", JToken.FromObject(this.Create<bool>()));
+        }
+
+        protected void AnInstanceWithInvalidParent()
+        {
+            AValidInstance();
+            Parent = new KongConsumer();
+        }
     }
 
     [Story(Title = nameof(KongPlugin) + nameof(KongObject.ToJsonStringContent))]

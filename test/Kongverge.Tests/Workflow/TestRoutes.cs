@@ -32,7 +32,7 @@ namespace Kongverge.Tests.Workflow
         public static KongRoute WithIdAndCreatedAtAndServiceReference(this KongRoute kongRoute, string serviceId)
         {
             kongRoute.WithIdAndCreatedAt();
-            kongRoute.Service = new KongRoute.ServiceReference
+            kongRoute.Service = new KongObject.Reference
             {
                 Id = serviceId
             };

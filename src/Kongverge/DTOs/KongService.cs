@@ -5,13 +5,14 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Kongverge.Helpers;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Nito.AsyncEx;
 
 namespace Kongverge.DTOs
 {
     public sealed class KongService : KongObject, IKongPluginHost, IKongEquatable<KongService>, IKongvergeConfigObject
     {
-        public const string ObjectName = "service";
+        public static readonly string ObjectName = "service";
 
         private const int DefaultTimeout = 60000;
 
@@ -42,16 +43,20 @@ namespace Kongverge.DTOs
         [JsonProperty("path")]
         public string Path { get; set; }
 
+        [JsonProperty("client_certificate", NullValueHandling = NullValueHandling.Ignore)]
+        public Reference ClientCertificate { get; set; }
+
         [JsonProperty("plugins", NullValueHandling = NullValueHandling.Ignore)]
         public IReadOnlyList<KongPlugin> Plugins { get; set; } = Array.Empty<KongPlugin>();
         
         [JsonProperty("routes", NullValueHandling = NullValueHandling.Ignore)]
         public IReadOnlyList<KongRoute> Routes { get; set; } = Array.Empty<KongRoute>();
 
-        public override string ToString()
+        protected override string[] ToStringSegments => new[]
         {
-            return $"{{{ToStringIdSegment()}Name: {Name}}}";
-        }
+            ToStringSegment("Id", Id),
+            ToStringSegment("Name", Name)
+        };
 
         public override StringContent ToJsonStringContent()
         {
@@ -78,85 +83,52 @@ namespace Kongverge.DTOs
             {
                 route.StripPersistedValues();
             }
+            ClientCertificate = null;
         }
 
         public void AssignParentId(KongPlugin plugin)
         {
-            plugin.ConsumerId = null;
-            plugin.RouteId = null;
-            plugin.ServiceId = Id;
+            plugin.Consumer = null;
+            plugin.Route = null;
+            plugin.Service = new Reference { Id = Id };
         }
 
-        public async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
+        public async Task Validate(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages, KongObject parent = null)
         {
-            if (string.IsNullOrWhiteSpace(Name))
-            {
-                errorMessages.Add("Service Name is invalid (cannot be null or whitespace).");
-            }
+            var schema = await schemas["services"].Task;
+            var node = JObject.FromObject(this);
+            node.Property("plugins")?.Remove();
+            node.Property("routes")?.Remove();
+            schema.Validate<KongService>(node, errorMessages, parent);
 
-            if (!new[] { "http", "https" }.Contains(Protocol))
-            {
-                errorMessages.Add("Service Protocol is invalid (must be either 'http' or 'https').");
-            }
+            await ValidatePlugins(schemas, errorMessages);
 
-            if (Uri.CheckHostName(Host) == UriHostNameType.Unknown)
-            {
-                errorMessages.Add("Service Host is invalid.");
-            }
-
-            if (!string.IsNullOrEmpty(Path) && !Uri.IsWellFormedUriString(Path, UriKind.Relative))
-            {
-                errorMessages.Add("Service Path is invalid.");
-            }
-
-            if (Retries > 25)
-            {
-                errorMessages.Add("Service Retries is invalid (must be between 0 and 25).");
-            }
-
-            if (ConnectTimeout > 300000)
-            {
-                errorMessages.Add("Service ConnectTimeout is invalid (must be between 0 and 300000).");
-            }
-
-            if (WriteTimeout > 300000)
-            {
-                errorMessages.Add("Service WriteTimeout is invalid (must be between 0 and 300000).");
-            }
-
-            if (ReadTimeout > 300000)
-            {
-                errorMessages.Add("Service ReadTimeout is invalid (must be between 0 and 300000).");
-            }
-
-            await ValidatePlugins(availablePlugins, errorMessages);
-
-            await ValidateRoutes(availablePlugins, errorMessages);
+            await ValidateRoutes(schemas, errorMessages);
         }
 
-        private async Task ValidatePlugins(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
+        private async Task ValidatePlugins(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages)
         {
             if (Plugins == null)
             {
-                errorMessages.Add("Service Plugins cannot be null.");
+                errorMessages.Add($"{KongSchema.Violation<KongService>()} (plugins cannot be null).");
                 return;
             }
             foreach (var plugin in Plugins)
             {
-                await plugin.Validate(availablePlugins, errorMessages);
+                await plugin.Validate(schemas, errorMessages, this);
             }
         }
 
-        private async Task ValidateRoutes(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
+        private async Task ValidateRoutes(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages)
         {
             if (Routes == null || !Routes.Any())
             {
-                errorMessages.Add("Service Routes cannot be null or empty.");
+                errorMessages.Add($"{KongSchema.Violation<KongService>()} (routes cannot be null or empty).");
                 return;
             }
             foreach (var route in Routes)
             {
-                await route.Validate(availablePlugins, errorMessages);
+                await route.Validate(schemas, errorMessages, this);
             }
         }
 
@@ -171,6 +143,7 @@ namespace Kongverge.DTOs
         public object GetEqualityValues() =>
             new
             {
+                Tags,
                 Name,
                 Host,
                 Port,

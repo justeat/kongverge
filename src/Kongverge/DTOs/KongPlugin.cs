@@ -11,19 +11,25 @@ namespace Kongverge.DTOs
 {
     public sealed class KongPlugin : KongObject, IKongEquatable<KongPlugin>, IValidatableObject
     {
-        public const string ObjectName = "plugin";
+        public static readonly string ObjectName = "plugin";
 
-        [JsonProperty("consumer_id")]
-        public string ConsumerId { get; set; }
+        [JsonProperty("consumer", NullValueHandling = NullValueHandling.Ignore)]
+        public Reference Consumer { get; set; }
 
-        [JsonProperty("service_id")]
-        public string ServiceId { get; set; }
+        [JsonProperty("service", NullValueHandling = NullValueHandling.Ignore)]
+        public Reference Service { get; set; }
 
-        [JsonProperty("route_id")]
-        public string RouteId { get; set; }
+        [JsonProperty("route", NullValueHandling = NullValueHandling.Ignore)]
+        public Reference Route { get; set; }
 
         [JsonProperty("name")]
         public string Name { get; set; }
+
+        [JsonProperty("run_on")]
+        public string RunOn { get; set; } = "first";
+
+        [JsonProperty("protocols")]
+        public IEnumerable<string> Protocols { get; set; } = new[] { "http", "https", "grpc", "grpcs" };
 
         [JsonProperty("enabled")]
         public bool Enabled { get; set; } = true;
@@ -32,38 +38,44 @@ namespace Kongverge.DTOs
         public JObject Config { get; set; }
 
         public bool IsGlobal() =>
-            ConsumerId == null &&
-            ServiceId == null &&
-            RouteId == null;
+            Consumer?.Id == null &&
+            Service?.Id == null &&
+            Route?.Id == null;
 
-        public override string ToString()
+        protected override string[] ToStringSegments => new[]
         {
-            return $"{{{ToStringIdSegment()}Name: {Name}}}";
-        }
+            ToStringSegment("Id", Id),
+            ToStringSegment("Name", Name)
+        };
 
         public override StringContent ToJsonStringContent() => JsonConvert.SerializeObject(this).AsJsonStringContent();
 
         internal override void StripPersistedValues()
         {
             base.StripPersistedValues();
-            ConsumerId = null;
-            ServiceId = null;
-            RouteId = null;
+            Consumer = null;
+            Service = null;
+            Route = null;
         }
 
-        public async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
+        public async Task Validate(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages, KongObject parent = null)
         {
-            if (!availablePlugins.ContainsKey(Name))
+            var schemaPath = $"plugins/{Name}";
+            if (!schemas.ContainsKey(schemaPath))
             {
-                errorMessages.Add($"Plugin '{Name}' is not available on Kong server.");
+                errorMessages.Add($"{KongSchema.Violation<KongPlugin>()} (plugin '{Name}' is not available on Kong server).");
                 return;
             }
-            var schema = await availablePlugins[Name].Task;
-            if (Config == null)
+
+            var schema = await schemas[schemaPath].Task;
+            var baseSchema = await schemas["plugins"].Task;
+            var fallbackFields = baseSchema.Fields.Where(b => schema.Fields.All(f => f.Name != b.Name)).ToArray();
+            if (fallbackFields.Any())
             {
-                Config = new JObject();
+                schema.Fields = schema.Fields.Concat(fallbackFields).ToArray();
             }
-            ValidateField(schema, Config, errorMessages);
+            
+            schema.Validate<KongPlugin>(JObject.FromObject(this), errorMessages, parent);
         }
 
         public override object GetMatchValue() => Name;
@@ -71,9 +83,12 @@ namespace Kongverge.DTOs
         public object GetEqualityValues() =>
              new
              {
-                Name,
-                Config,
-                Enabled
+                 Tags,
+                 Name,
+                 RunOn,
+                 Protocols,
+                 Enabled,
+                 Config
              };
 
         public bool Equals(KongPlugin other) => this.KongEquals(other);
@@ -81,72 +96,5 @@ namespace Kongverge.DTOs
         public override bool Equals(object obj) => this.KongEqualsObject(obj);
 
         public override int GetHashCode() => this.GetKongHashCode();
-
-        private static void ValidateField(KongPluginSchema schema, JObject config, ICollection<string> errorMessages)
-        {
-            foreach (var fieldDefinition in schema.Fields)
-            {
-                if (config.ContainsKey(fieldDefinition.Key))
-                {
-                    if (fieldDefinition.Value.Schema == null)
-                    {
-                        if (fieldDefinition.Value.Type != "array" && config[fieldDefinition.Key] is JContainer ||
-                            fieldDefinition.Value.Type == "array" && (config[fieldDefinition.Key] is JValue || !(config[fieldDefinition.Key] is JArray) && config[fieldDefinition.Key].HasValues))
-                        {
-                            errorMessages.Add($"Plugin Config is invalid (field '{config[fieldDefinition.Key].Path}') should be of type '{fieldDefinition.Value.Type}'.");
-                        }
-
-                        continue;
-                    }
-                    
-                    if (config[fieldDefinition.Key] is JObject container)
-                    {
-                        // This config field is an object, so recurse to validate and fill in any blanks with their corresponding defaults
-                        if (fieldDefinition.Value.Schema.Flexible)
-                        {
-                            // Drill down into arbitrarily-named children that should each match the schema
-                            foreach (var child in container.Properties())
-                            {
-                                ValidateField(fieldDefinition.Value.Schema, (JObject)child.Value, errorMessages);
-                            }
-                        }
-                        else
-                        {
-                            ValidateField(fieldDefinition.Value.Schema, container, errorMessages);
-                        }
-                    }
-                    else
-                    {
-                        errorMessages.Add($"Plugin Config is invalid (field '{config[fieldDefinition.Key].Path}') should be of type 'object'.");
-                    }
-                }
-                else
-                {
-                    // Our config has a missing field
-                    if (fieldDefinition.Value.Default.ToString() != FieldDefinition.NoDefault)
-                    {
-                        // Schema field definition has a default value, so add that to our config
-                        config.Add(fieldDefinition.Key, fieldDefinition.Value.Default);
-                    }
-                    else if (fieldDefinition.Value.Schema != null && !fieldDefinition.Value.Schema.Flexible)
-                    {
-                        // This config field is an object, so add a new default object and recurse to populate any defaulted fields
-                        config.Add(fieldDefinition.Key, new JObject());
-                        ValidateField(fieldDefinition.Value.Schema, (JObject)config[fieldDefinition.Key], errorMessages);
-                    }
-                }
-            }
-
-            foreach (var field in config.Properties())
-            {
-                var key = field.Path.Contains('.')
-                    ? field.Path.Substring(field.Path.LastIndexOf('.') + 1)
-                    : field.Path;
-                if (!schema.Fields.Keys.Contains(key))
-                {
-                    errorMessages.Add($"Plugin Config is invalid (unknown field '{field.Path}').");
-                }
-            }
-        }
     }
 }

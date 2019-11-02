@@ -19,7 +19,7 @@ namespace Kongverge.Services
             _fileProvider = fileProvider;
         }
 
-        public async Task<KongvergeConfiguration> ReadConfiguration(string folderPath, IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins)
+        public async Task<KongvergeConfiguration> ReadConfiguration(string folderPath, IDictionary<string, AsyncLazy<KongSchema>> schemas)
         {
             Log.Information($"Reading files from {folderPath}");
 
@@ -34,22 +34,22 @@ namespace Kongverge.Services
                 foreach (var globalConfigFilePath in globalConfigFilePaths)
                 {
                     fileErrorMessages.AddErrors(globalConfigFilePath, $"Cannot have more than one {Constants.GlobalConfigFileName} file.");
-                    await ParseFile<GlobalConfig>(globalConfigFilePath, availablePlugins, fileErrorMessages);
+                    await ParseFile<GlobalConfig>(globalConfigFilePath, schemas, fileErrorMessages);
                 }
             }
             else if (globalConfigFilePaths.Any())
             {
-                globalConfig = await ParseFile<GlobalConfig>(globalConfigFilePaths.Single(), availablePlugins, fileErrorMessages);
+                globalConfig = await ParseFile<GlobalConfig>(globalConfigFilePaths.Single(), schemas, fileErrorMessages);
             }
             foreach (var serviceConfigFilePath in filePaths.Except(globalConfigFilePaths))
             {
-                services.Add(serviceConfigFilePath, await ParseFile<KongService>(serviceConfigFilePath, availablePlugins, fileErrorMessages));
+                services.Add(serviceConfigFilePath, await ParseFile<KongService>(serviceConfigFilePath, schemas, fileErrorMessages));
             }
             foreach (var serviceConfigFilePath in services.Keys)
             {
                 if (services.Keys.Except(new [] { serviceConfigFilePath }).Any(x => services[x]?.Name == services[serviceConfigFilePath]?.Name))
                 {
-                    fileErrorMessages.AddErrors(serviceConfigFilePath, "Service Name must be unique.");
+                    fileErrorMessages.AddErrors(serviceConfigFilePath, $"{KongSchema.Violation<KongService>()} (field 'name' must be unique).");
                 }
             }
 
@@ -70,7 +70,7 @@ namespace Kongverge.Services
 
         private async Task<T> ParseFile<T>(
             string path,
-            IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins,
+            IDictionary<string, AsyncLazy<KongSchema>> schemas,
             FileErrorMessages fileErrorMessages) where T : class, IKongvergeConfigObject
         {
             Log.Verbose($"Reading {path}");
@@ -80,7 +80,7 @@ namespace Kongverge.Services
             try
             {
                 var data = JsonConvert.DeserializeObject<T>(text);
-                await data.Validate(availablePlugins, errorMessages);
+                await data.Validate(schemas, errorMessages);
                 if (errorMessages.Any())
                 {
                     fileErrorMessages.AddErrors(path, errorMessages.ToArray());

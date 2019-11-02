@@ -46,6 +46,7 @@
   ],
   "routes": [
     {
+      "name": "first-resource",
       "paths": [
         "/resource1-1"
       ],
@@ -53,13 +54,24 @@
         "http",
         "https"
       ],
+      "headers": {
+        "foo": [
+          "1",
+          "2"
+        ],
+        "bar": [
+          "3",
+          "4"
+        ] 
+      },
       "regex_priority": 20,
       "strip_path": true,
       "plugins": [
         {
           "name": "request-transformer",
           "config": {
-            "http_method": "get",
+            "http_method": "GET",
+            "add": {}, 
             "append": {
               "body": [
                 "value-1:a",
@@ -125,7 +137,7 @@
         {
           "name": "key-auth",
           "config": {
-            "anonymous": "",
+            "anonymous": "a4810dcc-e438-43be-8887-0582c18f4d5a",
             "hide_credentials": true,
             "key_in_body": true,
             "key_names": [

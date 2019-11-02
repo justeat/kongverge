@@ -10,7 +10,8 @@ namespace Kongverge.Services
         Task DeleteService(string serviceId);
         Task AddRoute(string serviceId, KongRoute route);
         Task DeleteRoute(string routeId);
-        Task UpsertPlugin(KongPlugin plugin);
+        Task AddPlugin(KongPlugin plugin);
+        Task UpdatePlugin(KongPlugin plugin);
         Task DeletePlugin(string pluginId);
     }
 }

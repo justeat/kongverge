@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -12,6 +13,9 @@ namespace Kongverge.DTOs
 
         [JsonProperty("created_at", NullValueHandling = NullValueHandling.Ignore)]
         public long? CreatedAt { get; set; }
+
+        [JsonProperty("tags", NullValueHandling = NullValueHandling.Ignore)]
+        public IEnumerable<string> Tags { get; set; }
 
         internal virtual void StripPersistedValues()
         {
@@ -34,16 +38,29 @@ namespace Kongverge.DTOs
 
         public abstract StringContent ToJsonStringContent();
 
-        protected string ToStringIdSegment()
+        public override string ToString() => ToString(ToStringSegments);
+
+        protected static string ToString(params string[] segments) => "{" + string.Join(", ", segments.Where(x => !string.IsNullOrEmpty(x))) + "}";
+
+        protected static string ToStringSegment<T>(string name, T value, Func<T, string> serialize = null)
         {
-            return Id == null ? string.Empty : $"Id: {Id}, ";
+            serialize ??= x => x.ToString();
+            return value == null ? string.Empty : $"{name}: {serialize(value)}";
         }
+
+        protected abstract string[] ToStringSegments { get; }
 
         public static string GetName(int count, string singular)
         {
             return count == 1
                 ? singular
                 : singular + "s";
+        }
+
+        public class Reference
+        {
+            [JsonProperty("id")]
+            public string Id { get; set; }
         }
     }
 }

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Kongverge.DTOs;
 using Kongverge.Helpers;
 using Kongverge.Services;
-using Nito.AsyncEx;
 using Serilog;
 
 namespace Kongverge.Workflow
@@ -38,14 +37,11 @@ namespace Kongverge.Workflow
 
         public override async Task<int> DoExecute()
         {
-            var availablePlugins = KongConfiguration.Plugins.Available
-                .Where(x => x.Value)
-                .Select(x => x.Key)
-                .ToDictionary(x => x, x => new AsyncLazy<KongPluginSchema>(() => KongReader.GetPluginSchema(x)));
+            var schemas = KongConfiguration.GetSchemas(KongReader);
             KongvergeConfiguration targetConfiguration;
             try
             {
-                targetConfiguration = await _configReader.ReadConfiguration(_arguments.InputFolder, availablePlugins);
+                targetConfiguration = await _configReader.ReadConfiguration(_arguments.InputFolder, schemas);
             }
             catch (DirectoryNotFoundException ex)
             {
@@ -118,9 +114,9 @@ namespace Kongverge.Workflow
             Func<T, Task> updateObject = null,
             Func<T, T, Task> recurse = null) where T : KongObject, IKongEquatable
         {
-            existingObjects = existingObjects ?? Array.Empty<T>();
-            updateObject = updateObject ?? (x => Task.CompletedTask);
-            recurse = recurse ?? ((e, t) => Task.CompletedTask);
+            existingObjects ??= Array.Empty<T>();
+            updateObject ??= (x => Task.CompletedTask);
+            recurse ??= ((e, t) => Task.CompletedTask);
 
             if (existingObjects.Count == 0 && targetObjects.Count == 0)
             {
@@ -173,13 +169,13 @@ namespace Kongverge.Workflow
             {
                 plugin.Id = null;
                 host.AssignParentId(plugin);
-                return _kongWriter.UpsertPlugin(plugin);
+                return _kongWriter.AddPlugin(plugin);
             }
 
             Task UpdatePlugin(KongPlugin plugin, IKongPluginHost host)
             {
                 host.AssignParentId(plugin);
-                return _kongWriter.UpsertPlugin(plugin);
+                return _kongWriter.UpdatePlugin(plugin);
             }
 
             return ConvergeObjects(

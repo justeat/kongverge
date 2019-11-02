@@ -11,6 +11,13 @@
           "GET",
           "HEAD"
         ],
+        "headers": [
+          "foo",
+          "bar"
+        ],
+        "exposed_headers": [
+          "baz"
+        ],
         "credentials": false,
         "preflight_continue": false
       }

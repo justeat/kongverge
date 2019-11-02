@@ -32,20 +32,20 @@ namespace Kongverge.Workflow
             var version = double.Parse(versionSubStr[3] == '.' ? versionSubStr.Substring(0, 3) : versionSubStr);
             if (KongConfiguration.Version.Contains("enterprise-edition"))
             {
-                const double latestSupportedVersion = 0.34;
-                if (version > latestSupportedVersion)
+                const double lowestSupportedVersion = 0.36;
+                if (version < lowestSupportedVersion)
                 {
                     return ExitWithCode.Return(ExitCode.HostVersionNotSupported,
-                        $"This version of Kongverge can only support Kong enterprise up to version {latestSupportedVersion}.x");
+                        $"This version of Kongverge can only support Kong enterprise from version {lowestSupportedVersion}.x");
                 }
             }
             else
             {
-                const double latestSupportedVersion = 0.14;
-                if (version > latestSupportedVersion)
+                const double lowestSupportedVersion = 1.1;
+                if (version < lowestSupportedVersion)
                 {
                     return ExitWithCode.Return(ExitCode.HostVersionNotSupported,
-                        $"This version of Kongverge can only support Kong up to version {latestSupportedVersion}.x");
+                        $"This version of Kongverge can only support Kong from version {lowestSupportedVersion}.x");
                 }
             }
 
