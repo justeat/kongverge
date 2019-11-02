@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Kongverge.Services;
 using Newtonsoft.Json;
+using Nito.AsyncEx;
 
 namespace Kongverge.DTOs
 {
@@ -8,7 +11,7 @@ namespace Kongverge.DTOs
     {
         [JsonProperty("plugins")]
         public Plugins Plugins { get; set; }
-        
+
         [JsonProperty("tagline")]
         public string Tagline { get; set; }
 
@@ -23,6 +26,19 @@ namespace Kongverge.DTOs
 
         [JsonProperty("hostname")]
         public string Hostname { get; set; }
+
+        public IDictionary<string, AsyncLazy<KongSchema>> GetSchemas(IKongAdminReader kongReader)
+        {
+            return Plugins.Available
+                .Where(x => x.Value)
+                .Select(x => $"plugins/{x.Key}")
+                .Append("plugins")
+                .Append("consumers")
+                .Append("routes")
+                .Append("services")
+                .Append("certificates")
+                .ToDictionary(x => x, x => new AsyncLazy<KongSchema>(() => kongReader.GetSchema(x)));
+        }
     }
 
     public class Plugins

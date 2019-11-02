@@ -1,0 +1,110 @@
+{
+    "fields": [
+        {
+            "id": {
+                "len_min": 1,
+                "auto": true,
+                "uuid": true,
+                "type": "string"
+            }
+        },
+        {
+            "name": {
+                "len_min": 1,
+                "type": "string",
+                "required": true
+            }
+        },
+        {
+            "created_at": {
+                "timestamp": true,
+                "auto": true,
+                "type": "integer"
+            }
+        },
+        {
+            "route": {
+                "reference": "routes",
+                "on_delete": "cascade",
+                "default": null,
+                "type": "foreign"
+            }
+        },
+        {
+            "service": {
+                "reference": "services",
+                "on_delete": "cascade",
+                "default": null,
+                "type": "foreign"
+            }
+        },
+        {
+            "consumer": {
+                "reference": "consumers",
+                "on_delete": "cascade",
+                "default": null,
+                "type": "foreign"
+            }
+        },
+        {
+            "config": {
+                "abstract": true,
+                "type": "record"
+            }
+        },
+        {
+            "run_on": {
+                "required": true,
+                "len_min": 1,
+                "one_of": [
+                    "first",
+                    "second",
+                    "all"
+                ],
+                "default": "first",
+                "type": "string"
+            }
+        },
+        {
+            "protocols": {
+                "elements": {
+                    "len_min": 1,
+                    "one_of": [
+                        "grpc",
+                        "grpcs",
+                        "http",
+                        "https",
+                        "tcp",
+                        "tls"
+                    ],
+                    "type": "string",
+                    "required": true
+                },
+                "type": "set",
+                "default": [
+                    "grpc",
+                    "grpcs",
+                    "http",
+                    "https"
+                ],
+                "required": true
+            }
+        },
+        {
+            "enabled": {
+                "default": true,
+                "type": "boolean"
+            }
+        },
+        {
+            "tags": {
+                "elements": {
+                    "type": "string",
+                    "required": true,
+                    "match": "^[%w%.%-%_~]+$"
+                },
+                "type": "set"
+            }
+        }
+    ]
+}

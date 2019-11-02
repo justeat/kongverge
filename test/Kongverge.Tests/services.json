@@ -1,0 +1,136 @@
+{
+    "fields": [
+        {
+            "id": {
+                "len_min": 1,
+                "auto": true,
+                "uuid": true,
+                "type": "string"
+            }
+        },
+        {
+            "created_at": {
+                "timestamp": true,
+                "auto": true,
+                "type": "integer"
+            }
+        },
+        {
+            "updated_at": {
+                "timestamp": true,
+                "auto": true,
+                "type": "integer"
+            }
+        },
+        {
+            "name": {
+                "unique": true,
+                "len_min": 1,
+                "type": "string"
+            }
+        },
+        {
+            "retries": {
+                "between": [
+                    0,
+                    32767
+                ],
+                "default": 5,
+                "type": "integer"
+            }
+        },
+        {
+            "protocol": {
+                "required": true,
+                "len_min": 1,
+                "one_of": [
+                    "grpc",
+                    "grpcs",
+                    "http",
+                    "https",
+                    "tcp",
+                    "tls"
+                ],
+                "default": "http",
+                "type": "string"
+            }
+        },
+        {
+            "host": {
+                "len_min": 1,
+                "type": "string",
+                "required": true
+            }
+        },
+        {
+            "port": {
+                "type": "integer",
+                "between": [
+                    0,
+                    65535
+                ],
+                "default": 80,
+                "required": true
+            }
+        },
+        {
+            "path": {
+                "len_min": 1,
+                "match_none": [
+                    {
+                        "err": "must not have empty segments",
+                        "pattern": "\/\/"
+                    }
+                ],
+                "starts_with": "\/",
+                "type": "string"
+            }
+        },
+        {
+            "connect_timeout": {
+                "between": [
+                    1,
+                    2147483646
+                ],
+                "default": 60000,
+                "type": "integer"
+            }
+        },
+        {
+            "write_timeout": {
+                "between": [
+                    1,
+                    2147483646
+                ],
+                "default": 60000,
+                "type": "integer"
+            }
+        },
+        {
+            "read_timeout": {
+                "between": [
+                    1,
+                    2147483646
+                ],
+                "default": 60000,
+                "type": "integer"
+            }
+        },
+        {
+            "tags": {
+                "elements": {
+                    "type": "string",
+                    "required": true,
+                    "match": "^[%w%.%-%_~]+$"
+                },
+                "type": "set"
+            }
+        },
+        {
+            "client_certificate": {
+                "reference": "certificates",
+                "type": "foreign"
+            }
+        }
+    ]
+}

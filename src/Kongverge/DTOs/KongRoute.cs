@@ -5,24 +5,29 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Kongverge.Helpers;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Nito.AsyncEx;
 
 namespace Kongverge.DTOs
 {
     public sealed class KongRoute : KongObject, IKongPluginHost, IKongEquatable<KongRoute>, IValidatableObject
     {
-        public const string ObjectName = "route";
-
-        private static readonly string[] AllowedProtocols = { "http", "https" };
+        public static readonly string ObjectName = "route";
 
         [JsonProperty("plugins", NullValueHandling = NullValueHandling.Ignore)]
         public IReadOnlyList<KongPlugin> Plugins { get; set; } = Array.Empty<KongPlugin>();
 
         [JsonProperty("service", NullValueHandling = NullValueHandling.Ignore)]
-        public ServiceReference Service { get; set; }
-        
+        public Reference Service { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
         [JsonProperty("hosts")]
         public IEnumerable<string> Hosts { get; set; }
+
+        [JsonProperty("headers")]
+        public IDictionary<string, string[]> Headers { get; set; }
 
         [JsonProperty("protocols")]
         public IEnumerable<string> Protocols { get; set; } = new[] { "http", "https" };
@@ -33,6 +38,18 @@ namespace Kongverge.DTOs
         [JsonProperty("paths")]
         public IEnumerable<string> Paths { get; set; }
 
+        [JsonProperty("snis", NullValueHandling = NullValueHandling.Ignore)]
+        public IEnumerable<string> Snis { get; set; }
+
+        [JsonProperty("sources", NullValueHandling = NullValueHandling.Ignore)]
+        public IEnumerable<Endpoint> Sources { get; set; }
+
+        [JsonProperty("destinations", NullValueHandling = NullValueHandling.Ignore)]
+        public IEnumerable<Endpoint> Destinations { get; set; }
+
+        [JsonProperty("https_redirect_status_code")]
+        public ushort HttpsRedirectStatusCode { get; set; } = 426;
+
         [JsonProperty("regex_priority")]
         public ushort RegexPriority { get; set; }
 
@@ -42,19 +59,25 @@ namespace Kongverge.DTOs
         [JsonProperty("preserve_host")]
         public bool PreserveHost { get; set; }
 
-        public override string ToString()
+        protected override string[] ToStringSegments => new[]
         {
-            return $@"{{{ToStringIdSegment()}Hosts: {EnumerableSegment(Hosts)}, Paths: {EnumerableSegment(Paths)}, Methods: {EnumerableSegment(Methods)}, Protocols: {EnumerableSegment(Protocols)}}}";
-        }
+            ToStringSegment("Id", Id),
+            ToStringSegment("Name", Name),
+            ToStringSegment("Hosts", Hosts, EnumerableSegment),
+            ToStringSegment("Headers", Headers, DictionarySegment),
+            ToStringSegment("Paths", Paths, EnumerableSegment),
+            ToStringSegment("Snis", Snis, EnumerableSegment),
+            ToStringSegment("Sources", Sources, EnumerableSegment),
+            ToStringSegment("Destinations", Destinations, EnumerableSegment),
+            ToStringSegment("Methods", Methods, EnumerableSegment),
+            ToStringSegment("Protocols", Protocols, EnumerableSegment)
+        };
 
-        private static string EnumerableSegment(IEnumerable<string> values)
-        {
-            if (values == null)
-            {
-                return "null";
-            }
-            return $"[{string.Join(", ", values)}]";
-        }
+        private static string EnumerableSegment(IEnumerable<string> values) => $"[{string.Join(", ", values)}]";
+
+        private static string EnumerableSegment(IEnumerable<Endpoint> values) => $"[{string.Join(", ", values.Select(x => ToString(ToStringSegment(nameof(Endpoint.Ip), x.Ip), ToStringSegment(nameof(Endpoint.Port), x.Port))))}]";
+
+        private static string DictionarySegment(IDictionary<string, string[]> values) => ToString(values.Select(x => ToStringSegment(x.Key, x.Value, EnumerableSegment)).ToArray());
 
         public override StringContent ToJsonStringContent()
         {
@@ -82,84 +105,59 @@ namespace Kongverge.DTOs
 
         public void AssignParentId(KongPlugin plugin)
         {
-            plugin.ConsumerId = null;
-            plugin.ServiceId = null;
-            plugin.RouteId = Id;
+            plugin.Consumer = null;
+            plugin.Service = null;
+            plugin.Route = new Reference { Id = Id };
         }
 
-        public async Task Validate(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
+        public async Task Validate(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages, KongObject parent = null)
         {
-            if (IsNullOrEmpty(Protocols) || Protocols.Any(x => !AllowedProtocols.Contains(x)))
+            var schema = await schemas["routes"].Task;
+            var node = JObject.FromObject(this);
+            node.Property("plugins")?.Remove();
+            if (Protocols != null)
             {
-                errorMessages.Add("Route Protocols is invalid (must contain one or both of 'http' or 'https').");
+                if (Protocols.Contains("http") && Methods == null && Hosts == null && Headers == null && Paths == null)
+                {
+                    errorMessages.Add($"{KongSchema.Violation<KongRoute>()} (at least one of 'methods, hosts, headers, paths' must be set).");
+                }
+                else if (Protocols.Contains("https") && Methods == null && Hosts == null && Headers == null && Paths == null && Snis == null)
+                {
+                    errorMessages.Add($"{KongSchema.Violation<KongRoute>()} (at least one of 'methods, hosts, headers, paths, snis' must be set).");
+                }
+                else if (Protocols.Contains("tcp") && Sources == null && Destinations == null)
+                {
+                    errorMessages.Add($"{KongSchema.Violation<KongRoute>()} (at least one of 'sources, destinations' must be set).");
+                }
+                else if (Protocols.Contains("tls") && Sources == null && Destinations == null && Snis == null)
+                {
+                    errorMessages.Add($"{KongSchema.Violation<KongRoute>()} (at least one of 'sources, destinations, snis' must be set).");
+                }
+                else if (Protocols.Contains("grpc") && Hosts == null && Headers == null && Paths == null)
+                {
+                    errorMessages.Add($"{KongSchema.Violation<KongRoute>()} (at least one of 'hosts, headers, paths' must be set).");
+                }
+                else if (Protocols.Contains("grpcs") && Hosts == null && Headers == null && Paths == null && Snis == null)
+                {
+                    errorMessages.Add($"{KongSchema.Violation<KongRoute>()} (at least one of 'hosts, headers, paths, snis' must be set).");
+                }
             }
+            schema.Validate<KongRoute>(node, errorMessages, parent);
 
-            if (IsNullOrEmpty(Hosts) && IsNullOrEmpty(Methods) && IsNullOrEmpty(Paths))
-            {
-                errorMessages.Add("At least one of Route 'Hosts', 'Methods', or 'Paths' must be set.");
-            }
-
-            if (Hosts?.Any(string.IsNullOrWhiteSpace) == true)
-            {
-                errorMessages.Add("Route Hosts is invalid (cannot contain null or empty values).");
-            }
-            if (Hosts?.Any(x => !string.IsNullOrWhiteSpace(x) && x.StartsWith("*.") && x.EndsWith(".*")) == true)
-            {
-                errorMessages.Add("Route Hosts is invalid (values cannot begin and end with a wildcard, only one wildcard at the start or end is allowed).");
-            }
-            if (Hosts?.Any(x => !string.IsNullOrWhiteSpace(x) && Uri.CheckHostName(RemoveWildcards(x)) == UriHostNameType.Unknown) == true)
-            {
-                errorMessages.Add("Route Hosts is invalid (values must be valid hostnames or IP addresses, with a single optional wildcard at the start or end).");
-            }
-
-            if (Methods?.Any(string.IsNullOrWhiteSpace) == true)
-            {
-                errorMessages.Add("Route Methods is invalid (cannot contain null or empty values).");
-            }
-
-            if (Paths?.Any(string.IsNullOrWhiteSpace) == true)
-            {
-                errorMessages.Add("Route Paths is invalid (cannot contain null or empty values).");
-            }
-
-            if (Paths?.Any(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith('/')) == true)
-            {
-                errorMessages.Add("Route Paths is invalid (values must start with '/').");
-            }
-
-            await ValidatePlugins(availablePlugins, errorMessages);
+            await ValidatePlugins(schemas, errorMessages);
         }
 
-        private static string RemoveWildcards(string input)
-        {
-            if (input.StartsWith("*."))
-            {
-                input = input.Substring(2);
-            }
-            if (input.EndsWith(".*"))
-            {
-                input = input.Substring(0, input.Length - 2);
-            }
-
-            return input;
-        }
-
-        private async Task ValidatePlugins(IDictionary<string, AsyncLazy<KongPluginSchema>> availablePlugins, ICollection<string> errorMessages)
+        private async Task ValidatePlugins(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages)
         {
             if (Plugins == null)
             {
-                errorMessages.Add("Plugins cannot be null.");
+                errorMessages.Add($"{KongSchema.Violation<KongRoute>()} (plugins cannot be null).");
                 return;
             }
             foreach (var plugin in Plugins)
             {
-                await plugin.Validate(availablePlugins, errorMessages);
+                await plugin.Validate(schemas, errorMessages, this);
             }
-        }
-
-        private static bool IsNullOrEmpty(IEnumerable<string> values)
-        {
-            return values == null || !values.Any();
         }
 
         public override object GetMatchValue() => this;
@@ -167,10 +165,17 @@ namespace Kongverge.DTOs
         public object GetEqualityValues() =>
             new
             {
+                Tags,
+                Name,
                 Hosts,
+                Headers,
                 Protocols,
                 Methods,
                 Paths,
+                Snis,
+                Sources,
+                Destinations,
+                HttpsRedirectStatusCode,
                 RegexPriority,
                 StripPath
             };
@@ -181,10 +186,13 @@ namespace Kongverge.DTOs
 
         public override int GetHashCode() => this.GetKongHashCode();
 
-        public class ServiceReference
+        public class Endpoint
         {
-            [JsonProperty("id")]
-            public string Id { get; set; }
+            [JsonProperty("ip", NullValueHandling = NullValueHandling.Ignore)]
+            public string Ip { get; set; }
+
+            [JsonProperty("port", NullValueHandling = NullValueHandling.Ignore)]
+            public int? Port { get; set; }
         }
     }
 }

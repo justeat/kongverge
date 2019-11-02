@@ -11,12 +11,14 @@ namespace Kongverge.Tests.DTOs
         private ICollection<string> _errorMessages;
 
         protected T Instance;
+        protected KongObject Parent;
         protected int ErrorMessagesCount;
-        
+        protected Set Tags;
+
         protected Task Validating()
         {
             _errorMessages = new List<string>();
-            return Instance.Validate(ValidationFixture.AvailablePlugins, _errorMessages);
+            return Instance.Validate(ValidationFixture.Schemas, _errorMessages, Parent);
         }
 
         protected void TheErrorMessagesCountIs(int count) => _errorMessages.Count.Should().Be(count);

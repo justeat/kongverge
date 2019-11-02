@@ -8,7 +8,7 @@ namespace Kongverge.Tests.DTOs
     public class GlobalConfigValidationScenarios : KongPluginHostValidationScenarios<GlobalConfig>
     {
         protected override void AValidInstanceWithExamplePlugins() => Instance = Build<GlobalConfig>()
-            .With(x => x.Plugins, this.GetExampleCollection(Plugins, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
+            .With(x => x.Plugins, this.CreateChildren(Plugins, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
             .Create();
     }
 

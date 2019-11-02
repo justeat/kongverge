@@ -60,10 +60,10 @@ namespace Kongverge.Tests.Services
                 .WithExamples(new ExampleTable(nameof(MultiplePages)) { false, true })
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(KongAdminReader.GetPluginSchema))]
+        [BddfyFact(DisplayName = nameof(KongAdminReader.GetSchema))]
         public void Scenario5() =>
-            this.Given(s => s.KongHasData("/plugins/schema/test-plugin", () => new KongPluginSchema()))
-                .When(async () => Result = await Subject.GetPluginSchema("test-plugin"), Invoking(nameof(KongAdminReader.GetPluginSchema)))
+            this.Given(s => s.KongHasData("/schemas/plugins/test-plugin", () => new KongSchema()))
+                .When(async () => Result = await Subject.GetSchema("plugins/test-plugin"), Invoking(nameof(KongAdminReader.GetSchema)))
                 .Then(s => s.TheResultIsEquivalentToTheKongData())
                 .BDDfy();
 

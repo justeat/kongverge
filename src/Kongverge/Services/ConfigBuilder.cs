@@ -42,11 +42,11 @@ namespace Kongverge.Services
 
         private static void PopulateServiceTree(KongService service, IReadOnlyCollection<KongRoute> routes, IReadOnlyCollection<KongPlugin> plugins)
         {
-            service.Plugins = plugins.Where(x => x.ServiceId == service.Id).ToArray();
+            service.Plugins = plugins.Where(x => x.Service?.Id == service.Id).ToArray();
             service.Routes = routes.Where(x => x.Service.Id == service.Id).ToArray();
             foreach (var serviceRoute in service.Routes)
             {
-                serviceRoute.Plugins = plugins.Where(x => x.RouteId == serviceRoute.Id).ToArray();
+                serviceRoute.Plugins = plugins.Where(x => x.Route?.Id == serviceRoute.Id).ToArray();
             }
         }
     }

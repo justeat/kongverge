@@ -56,7 +56,7 @@ namespace Kongverge.Tests.DTOs
         protected override void OnlyThePersistenceValuesAreDifferent()
         {
             OtherInstance.Id = this.Create<string>();
-            OtherInstance.Service = this.Create<KongRoute.ServiceReference>();
+            OtherInstance.Service = this.Create<KongObject.Reference>();
             OtherInstance.CreatedAt = this.Create<long>();
         }
     }
@@ -64,55 +64,70 @@ namespace Kongverge.Tests.DTOs
     [Story(Title = nameof(KongRoute) + nameof(IValidatableObject.Validate))]
     public class KongRouteValidationScenarios : KongPluginHostValidationScenarios<KongRoute>
     {
-        protected ProtocolsExample Protocols;
-        protected StringsExample Hosts;
-        protected StringsExample Methods;
-        protected StringsExample Paths;
+        protected Protocols Protocols;
+        protected List Hosts;
+        protected List Headers;
+        protected Set Methods;
+        protected List Paths;
+        protected Set Snis;
+        protected Set Sources;
+        protected Set Destinations;
+        protected ushort HttpsRedirect;
 
         [BddfyFact(DisplayName = nameof(AnInstanceWithExamplePropertyValues))]
         public void Scenario2() =>
             this.Given(x => x.AnInstanceWithExamplePropertyValues())
                 .When(x => x.Validating())
                 .Then(x => x.TheErrorMessagesCountIs(ErrorMessagesCount))
-                .WithExamples(new ExampleTable(nameof(Protocols), nameof(Hosts), nameof(Methods), nameof(Paths), nameof(ErrorMessagesCount))
+                .WithExamples(new ExampleTable(
+                nameof(Protocols), nameof(Hosts), nameof(Headers), nameof(Methods), nameof(Paths), nameof(Snis), nameof(Sources), nameof(Destinations), nameof(Tags), nameof(HttpsRedirect), nameof(ErrorMessagesCount))
                 {
-                    { ProtocolsExample.Null, StringsExample.InvalidAll, StringsExample.InvalidAll, StringsExample.InvalidAll, 7 },
-                    { ProtocolsExample.Empty, StringsExample.Empty, StringsExample.Empty, StringsExample.Empty, 2 },
-                    { ProtocolsExample.Invalid, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.ValidPaths, 1 },
-                    { ProtocolsExample.Http, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.ValidPaths, 0 },
-                    { ProtocolsExample.Https, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.ValidPaths, 0 },
-                    { ProtocolsExample.Both, StringsExample.ValidHosts, StringsExample.Empty, StringsExample.Empty, 0 },
-                    { ProtocolsExample.Both, StringsExample.Empty, StringsExample.ValidMethods, StringsExample.Empty, 0 },
-                    { ProtocolsExample.Both, StringsExample.Empty, StringsExample.Empty, StringsExample.ValidPaths, 0 },
-                    { ProtocolsExample.Invalid, StringsExample.InvalidNull, StringsExample.ValidMethods, StringsExample.ValidPaths, 2 },
-                    { ProtocolsExample.Invalid, StringsExample.InvalidColon, StringsExample.Empty, StringsExample.Empty, 2 },
-                    { ProtocolsExample.Invalid, StringsExample.InvalidWildcard, StringsExample.Empty, StringsExample.Empty, 2 },
-                    { ProtocolsExample.Invalid, StringsExample.ValidHosts, StringsExample.InvalidNull, StringsExample.ValidPaths, 2 },
-                    { ProtocolsExample.Invalid, StringsExample.ValidHosts, StringsExample.ValidMethods, StringsExample.InvalidNull, 2 },
-                    { ProtocolsExample.Invalid, StringsExample.InvalidEmpty, StringsExample.Empty, StringsExample.InvalidEmpty, 3 },
-                    { ProtocolsExample.Invalid, StringsExample.LeadingAndTrailingWildcards, StringsExample.InvalidEmpty, StringsExample.InvalidWhitespace, 4 },
-                    { ProtocolsExample.Invalid, StringsExample.InvalidWhitespace, StringsExample.InvalidWhitespace, StringsExample.InvalidPaths, 4 }
+                    { Protocols.Null,         List.Null,         List.Null,         Set.Null,         List.Null,         Set.Null,         Set.Null,         Set.Null,         Set.Null,         999, 2  },
+                    { Protocols.Empty,        List.Empty,        List.Empty,        Set.Empty,        List.Empty,        Set.Empty,        Set.Empty,        Set.Empty,        Set.Empty,        426, 1  },
+                    { Protocols.Http,         List.Null,         List.Null,         Set.Null,         List.Null,         Set.ValidItems,   Set.ValidItems,   Set.ValidItems,   Set.ValidItems,   426, 1  },
+                    { Protocols.Https,        List.Null,         List.Null,         Set.Null,         List.Null,         Set.Null,         Set.ValidItems,   Set.ValidItems,   Set.ValidItems,   301, 1  },
+                    { Protocols.Tcp,          List.ValidItems,   List.ValidItems,   Set.ValidItems,   List.ValidItems,   Set.ValidItems,   Set.Null,         Set.Null,         Set.ValidItems,   302, 1  },
+                    { Protocols.Tls,          List.ValidItems,   List.ValidItems,   Set.ValidItems,   List.ValidItems,   Set.Null,         Set.Null,         Set.Null,         Set.ValidItems,   307, 1  },
+                    { Protocols.Grpc,         List.Null,         List.Null,         Set.ValidItems,   List.Null,         Set.ValidItems,   Set.ValidItems,   Set.ValidItems,   Set.ValidItems,   308, 1  },
+                    { Protocols.Grpcs,        List.Null,         List.Null,         Set.ValidItems,   List.Null,         Set.Null,         Set.ValidItems,   Set.ValidItems,   Set.ValidItems,   426, 1  },
+                    { Protocols.BothHttp,     List.Null,         List.Null,         Set.Null,         List.Null,         Set.ValidItems,   Set.Null,         Set.Null,         Set.ValidItems,   426, 1  },
+                    { Protocols.BothTcp,      List.Null,         List.Null,         Set.Null,         List.Null,         Set.ValidItems,   Set.Null,         Set.Null,         Set.ValidItems,   426, 1  },
+                    { Protocols.BothGrpc,     List.Null,         List.Null,         Set.Null,         List.Null,         Set.ValidItems,   Set.Null,         Set.Null,         Set.ValidItems,   426, 1  },
+                    { Protocols.InvalidItems, List.ValidItems,   List.ValidItems,   Set.InvalidItems, List.ValidItems,   Set.InvalidItems, Set.InvalidItems, Set.InvalidItems, Set.InvalidItems, 426, 15 },
+                    { Protocols.InvalidSet,   List.ValidItems,   List.ValidItems,   Set.InvalidSet,   List.ValidItems,   Set.InvalidSet,   Set.InvalidSet,   Set.InvalidSet,   Set.InvalidSet,   426, 6  }
                 })
                 .BDDfy();
 
-        protected override void AValidInstanceWithExamplePlugins() => Instance = BuildValidRouteWithoutPlugins(this)
-            .With(x => x.Plugins, this.GetExampleCollection(Plugins, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
+        protected override void AValidInstanceWithExamplePlugins() => Instance = BuildRouteWithoutPlugins(this)
+            .With(x => x.Plugins, this.CreateChildren(Plugins, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
             .Create();
 
-        protected void AnInstanceWithExamplePropertyValues() => Instance = Build<KongRoute>()
-            .With(x => x.Plugins, this.GetExampleCollection(CollectionExample.Empty, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
-            .With(x => x.Protocols, this.GetExampleProtocols(Protocols))
-            .With(x => x.Hosts, this.GetExampleStrings(Hosts))
-            .With(x => x.Methods, this.GetExampleStrings(Methods))
-            .With(x => x.Paths, this.GetExampleStrings(Paths))
-            .Create();
+        protected void AnInstanceWithExamplePropertyValues() => Instance = BuildRouteWithoutPlugins(this, Protocols, Hosts, Headers, Methods, Paths, Snis, Sources, Destinations, Tags, HttpsRedirect).Create();
 
-        public static IPostprocessComposer<KongRoute> BuildValidRouteWithoutPlugins(Fixture fixture) => fixture.Build<KongRoute>()
-            .With(x => x.Plugins, fixture.GetExampleCollection(CollectionExample.Empty, fixture.GetValidKongPlugin, fixture.GetKongPluginWithOneError))
-            .With(x => x.Protocols, fixture.GetExampleProtocols(ProtocolsExample.Both))
-            .With(x => x.Hosts, fixture.GetExampleStrings(StringsExample.Empty))
-            .With(x => x.Methods, fixture.GetExampleStrings(StringsExample.Empty))
-            .With(x => x.Paths, fixture.GetExampleStrings(StringsExample.ValidPaths));
+        public static IPostprocessComposer<KongRoute> BuildRouteWithoutPlugins(
+            Fixture fixture,
+            Protocols protocols = Protocols.BothHttp,
+            List hosts = List.ValidItems,
+            List headers = List.Null,
+            Set methods = Set.Null,
+            List paths = List.Null,
+            Set snis = Set.Null,
+            Set sources = Set.Null,
+            Set destinations = Set.Null,
+            Set tags = Set.Null,
+            ushort httpsRedirect = 426) => fixture.Build<KongRoute>()
+            .With(x => x.Id, fixture.Create<string>())
+            .With(x => x.HttpsRedirectStatusCode, httpsRedirect)
+            .With(x => x.Plugins, fixture.CreateChildren(Children.Empty, fixture.GetValidKongPlugin, fixture.GetKongPluginWithOneError))
+            .With(x => x.Protocols, fixture.CreateProtocols(protocols))
+            .With(x => x.Hosts, fixture.CreateHosts(hosts))
+            .With(x => x.Headers, fixture.CreateHeaders(headers))
+            .With(x => x.Methods, fixture.CreateMethods(methods))
+            .With(x => x.Paths, fixture.CreatePaths(paths))
+            .With(x => x.Snis, fixture.CreateSnis(snis))
+            .With(x => x.Sources, fixture.CreateEndpoints(sources))
+            .With(x => x.Destinations, fixture.CreateEndpoints(destinations))
+            .With(x => x.Tags, fixture.CreateTags(tags));
     }
 
     [Story(Title = nameof(KongRoute) + nameof(KongObject.ToJsonStringContent))]
@@ -128,7 +143,7 @@ namespace Kongverge.Tests.DTOs
                 .And(x => x.PluginsIsNotNull())
                 .BDDfy();
 
-        protected void PluginsIsNotSerialized() => Serialized.Contains("\"plugins\":").Should().BeFalse();
+        protected void PluginsIsNotSerialized() => Serialized.Should().NotContain("\"plugins\":");
 
         protected void ServiceIsNotNull() => Instance.Service.Should().NotBeNull();
 

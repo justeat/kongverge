@@ -23,14 +23,14 @@ namespace Kongverge.Tests.Workflow
                 .Then(s => s.TheExitCodeIs(ExitCode.HostVersionNotSupported))
                 .WithExamples(new ExampleTable(nameof(KongVersion))
                 {
-                    { "0.35-0-enterprise-edition" },
-                    { "0.35-2-enterprise-edition" },
-                    { "0.36-1-enterprise-edition" },
-                    { "0.36-2-enterprise-edition" },
-                    { "1.0.0" },
-                    { "1.1.0" },
-                    { "1.2.0" },
-                    { "1.4.0" }
+                    { "0.35-1-enterprise-edition" },
+                    { "0.34-1-enterprise-edition" },
+                    { "0.33-1-enterprise-edition" },
+                    { "0.32-0-enterprise-edition" },
+                    { "0.15.999" },
+                    { "0.14.1" },
+                    { "0.13.1" },
+                    { "0.12.0" }
                 })
                 .BDDfy();
 
@@ -41,14 +41,14 @@ namespace Kongverge.Tests.Workflow
                 .Then(s => s.TheExitCodeIs(ExitCode.Success))
                 .WithExamples(new ExampleTable(nameof(KongVersion))
                 {
-                    { "0.34-1-enterprise-edition" },
-                    { "0.33-1-enterprise-edition" },
-                    { "0.32-1-enterprise-edition" },
-                    { "0.31-0-enterprise-edition" },
-                    { "0.14.999" },
-                    { "0.13.1" },
-                    { "0.12.1" },
-                    { "0.11.0" }
+                    { "0.36-0-enterprise-edition" },
+                    { "0.36-2-enterprise-edition" },
+                    { "0.37-1-enterprise-edition" },
+                    { "0.37-2-enterprise-edition" },
+                    { "1.1.0" },
+                    { "1.2.0" },
+                    { "1.3.0" },
+                    { "1.4.0" }
                 })
                 .BDDfy();
     }

@@ -7,7 +7,9 @@ namespace Kongverge.Services
     {
         public KongAdminDryRun(KongAdminHttpClient httpClient) : base(httpClient) { }
 
-        public Task UpsertPlugin(KongPlugin plugin) => Task.CompletedTask;
+        public Task AddPlugin(KongPlugin plugin) => Task.CompletedTask;
+
+        public Task UpdatePlugin(KongPlugin plugin) => Task.CompletedTask;
 
         public Task AddRoute(string serviceId, KongRoute route) => Task.CompletedTask;
 

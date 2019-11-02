@@ -7,7 +7,7 @@ namespace Kongverge.Tests.DTOs
     public abstract class KongPluginHostValidationScenarios<T> : ValidatableObjectSteps<T>
         where T : IKongPluginHost, IValidatableObject
     {
-        protected CollectionExample Plugins;
+        protected Children Plugins;
 
         [BddfyFact(DisplayName = nameof(AValidInstanceWithExamplePlugins))]
         public void Scenario1() =>
@@ -16,10 +16,10 @@ namespace Kongverge.Tests.DTOs
                 .Then(x => x.TheErrorMessagesCountIs(ErrorMessagesCount))
                 .WithExamples(new ExampleTable(nameof(Plugins), nameof(ErrorMessagesCount))
                 {
-                    { CollectionExample.Null, 1 },
-                    { CollectionExample.Empty, 0 },
-                    { CollectionExample.Valid, 0 },
-                    { CollectionExample.OneError, 1 }
+                    { Children.Null, 1 },
+                    { Children.Empty, 0 },
+                    { Children.Valid, 0 },
+                    { Children.OneError, 1 }
                 })
                 .BDDfy();
 

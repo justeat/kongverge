@@ -10,6 +10,6 @@ namespace Kongverge.Services
         Task<IReadOnlyCollection<KongService>> GetServices();
         Task<IReadOnlyCollection<KongRoute>> GetRoutes();
         Task<IReadOnlyCollection<KongPlugin>> GetPlugins();
-        Task<KongPluginSchema> GetPluginSchema(string pluginName);
+        Task<KongSchema> GetSchema(string schemaPath);
     }
 }

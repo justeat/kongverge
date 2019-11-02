@@ -47,13 +47,13 @@
             "name": "latency",
             "stat_type": "meter",
             "sample_rate": 100,
-            "customer_identifier": "username"
+            "consumer_identifier": "username"
           },
           {
             "name": "request_size",
             "stat_type": "histogram",
             "sample_rate": 200,
-            "customer_identifier": "custom_id"
+            "consumer_identifier": "custom_id"
           }
         ]
       }
@@ -73,7 +73,7 @@
         {
           "name": "request-transformer",
           "config": {
-            "http_method": "get",
+            "http_method": "GET",
             "add": {
               "body": [
                 "value-1:a-changed",

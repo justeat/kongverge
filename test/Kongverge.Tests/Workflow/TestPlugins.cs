@@ -22,16 +22,16 @@ namespace Kongverge.Tests.Workflow
             ReferenceEquals(kongPlugin, expectedKongPlugin);
 
         public static bool CorrespondsToKongService(this KongPlugin kongPlugin, KongService kongService) =>
-            kongPlugin.ServiceId == kongService.Id &&
-            !string.IsNullOrWhiteSpace(kongPlugin.ServiceId) &&
-            kongPlugin.ConsumerId == null &&
-            kongPlugin.RouteId == null;
+            kongPlugin.Service?.Id == kongService.Id &&
+            !string.IsNullOrWhiteSpace(kongPlugin.Service?.Id) &&
+            kongPlugin.Consumer?.Id == null &&
+            kongPlugin.Route?.Id == null;
 
         public static bool CorrespondsToKongRoute(this KongPlugin kongPlugin, KongRoute kongRoute) =>
-            kongPlugin.RouteId == kongRoute.Id &&
-            !string.IsNullOrWhiteSpace(kongPlugin.RouteId) &&
-            kongPlugin.ConsumerId == null &&
-            kongPlugin.ServiceId == null;
+            kongPlugin.Route?.Id == kongRoute.Id &&
+            !string.IsNullOrWhiteSpace(kongPlugin.Route?.Id) &&
+            kongPlugin.Consumer?.Id == null &&
+            kongPlugin.Service?.Id == null;
 
         public static bool CorrespondsToExistingPlugin(this KongPlugin kongPlugin, KongPlugin existingKongPlugin) =>
             kongPlugin.Id == existingKongPlugin.Id &&

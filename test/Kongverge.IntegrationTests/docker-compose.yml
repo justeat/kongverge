@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   kong:
-    image: kong:0.14.1-alpine
+    image: kong:1.4.0-alpine
     restart: on-failure
     depends_on:
       - kong-database
@@ -39,7 +39,7 @@ services:
       timeout: 5s
       retries: 5
   kong-migration:
-    image: kong:0.14.1-alpine
+    image: kong:1.4.0-alpine
     restart: on-failure
     depends_on:
       - kong-database
@@ -47,6 +47,6 @@ services:
       KONG_PG_HOST: kong-database
       KONG_PG_USER: postgres
       KONG_PG_DATABASE: postgres
-    command: kong migrations up
+    command: kong migrations bootstrap
     healthcheck:
       test: "exit 0"
