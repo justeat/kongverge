@@ -14,6 +14,7 @@ namespace Kongverge.Tests.DTOs
         {
             OtherInstance.Id = this.Create<string>();
             OtherInstance.CreatedAt = this.Create<long>();
+            OtherInstance.UpdatedAt = this.Create<long>();
         }
     }
 
@@ -101,21 +102,18 @@ namespace Kongverge.Tests.DTOs
         public void Scenario1() =>
             this.Given(x => x.ARandomInstance())
                 .When(x => x.SerializingToStringContent())
-                .Then(x => x.ClientCertificateIsSerialized())
+                .Then(x => x.ClientCertificateReferenceIsSerialized())
                 .And(x => x.RoutesIsNotSerialized())
                 .And(x => x.PluginsIsNotSerialized())
-                .And(x => x.ClientCertificateIsNotNull())
                 .And(x => x.RoutesIsNotNull())
                 .And(x => x.PluginsIsNotNull())
                 .BDDfy();
 
-        protected void ClientCertificateIsSerialized() => Serialized.Should().Contain("\"client_certificate\":");
+        protected void ClientCertificateReferenceIsSerialized() => Serialized.Should().Contain("\"client_certificate\":");
 
         protected void RoutesIsNotSerialized() => Serialized.Should().NotContain("\"routes\":");
 
         protected void PluginsIsNotSerialized() => Serialized.Should().NotContain("\"plugins\":");
-
-        protected void ClientCertificateIsNotNull() => Instance.ClientCertificate.Should().NotBeNull();
 
         protected void RoutesIsNotNull() => Instance.Routes.Should().NotBeNull();
 

@@ -58,6 +58,7 @@ namespace Kongverge.Tests.DTOs
             OtherInstance.Id = this.Create<string>();
             OtherInstance.Service = this.Create<KongObject.Reference>();
             OtherInstance.CreatedAt = this.Create<long>();
+            OtherInstance.UpdatedAt = this.Create<long>();
         }
     }
 
@@ -137,15 +138,14 @@ namespace Kongverge.Tests.DTOs
         public void Scenario1() =>
             this.Given(x => x.ARandomInstance())
                 .When(x => x.SerializingToStringContent())
-                .Then(x => x.ServiceIsNotSerialized())
+                .Then(x => x.ServiceReferenceIsSerialized())
                 .And(x => x.PluginsIsNotSerialized())
-                .And(x => x.ServiceIsNotNull())
                 .And(x => x.PluginsIsNotNull())
                 .BDDfy();
 
-        protected void PluginsIsNotSerialized() => Serialized.Should().NotContain("\"plugins\":");
+        protected void ServiceReferenceIsSerialized() => Serialized.Should().Contain("\"service\":");
 
-        protected void ServiceIsNotNull() => Instance.Service.Should().NotBeNull();
+        protected void PluginsIsNotSerialized() => Serialized.Should().NotContain("\"plugins\":");
 
         protected void PluginsIsNotNull() => Instance.Plugins.Should().NotBeNull();
     }

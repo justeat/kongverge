@@ -10,22 +10,22 @@ using Nito.AsyncEx;
 
 namespace Kongverge.DTOs
 {
-    public sealed class KongService : KongObject, IKongPluginHost, IKongEquatable<KongService>, IKongvergeConfigObject
+    public sealed class KongService : KongObject, IKongPluginHost, IKongParentOf<KongRoute>, IKongEquatable<KongService>, IKongvergeConfigObject
     {
         public static readonly string ObjectName = "service";
 
         private const int DefaultTimeout = 60000;
 
-        [JsonProperty("name")]
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }
 
-        [JsonProperty("host")]
+        [JsonProperty("host", NullValueHandling = NullValueHandling.Ignore)]
         public string Host { get; set; }
 
         [JsonProperty("port")]
         public ushort Port { get; set; } = 80;
 
-        [JsonProperty("protocol")]
+        [JsonProperty("protocol", NullValueHandling = NullValueHandling.Ignore)]
         public string Protocol { get; set; } = "http";
 
         [JsonProperty("retries")]
@@ -40,7 +40,7 @@ namespace Kongverge.DTOs
         [JsonProperty("read_timeout")]
         public uint ReadTimeout { get; set; } = DefaultTimeout;
 
-        [JsonProperty("path")]
+        [JsonProperty("path", NullValueHandling = NullValueHandling.Ignore)]
         public string Path { get; set; }
 
         [JsonProperty("client_certificate", NullValueHandling = NullValueHandling.Ignore)]
@@ -86,11 +86,16 @@ namespace Kongverge.DTOs
             ClientCertificate = null;
         }
 
-        public void AssignParentId(KongPlugin plugin)
+        public void AssignParentId(KongPlugin child)
         {
-            plugin.Consumer = null;
-            plugin.Route = null;
-            plugin.Service = new Reference { Id = Id };
+            child.Consumer = null;
+            child.Route = null;
+            child.Service = new Reference { Id = Id };
+        }
+
+        public void AssignParentId(KongRoute child)
+        {
+            child.Service = new Reference { Id = Id };
         }
 
         public async Task Validate(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages, KongObject parent = null)

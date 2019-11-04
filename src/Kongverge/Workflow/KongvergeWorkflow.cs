@@ -91,8 +91,8 @@ namespace Kongverge.Workflow
                 existingConfiguration.Services,
                 targetConfiguration.Services,
                 DeleteService,
-                x => _kongWriter.AddService(x),
-                x => _kongWriter.UpdateService(x),
+                x => _kongWriter.PutService(x),
+                x => _kongWriter.PutService(x),
                 ConvergeServiceChildren);
 
             Log.Information($"Created {_createdStats}");
@@ -165,17 +165,10 @@ namespace Kongverge.Workflow
 
         private Task ConvergeChildrenPlugins(string parent, IKongPluginHost existing, IKongPluginHost target)
         {
-            Task CreatePlugin(KongPlugin plugin, IKongPluginHost host)
-            {
-                plugin.Id = null;
-                host.AssignParentId(plugin);
-                return _kongWriter.AddPlugin(plugin);
-            }
-
-            Task UpdatePlugin(KongPlugin plugin, IKongPluginHost host)
+            Task PutPlugin(KongPlugin plugin, IKongPluginHost host)
             {
                 host.AssignParentId(plugin);
-                return _kongWriter.UpdatePlugin(plugin);
+                return _kongWriter.PutPlugin(plugin);
             }
 
             return ConvergeObjects(
@@ -184,12 +177,18 @@ namespace Kongverge.Workflow
                 existing?.Plugins,
                 target.Plugins,
                 x => _kongWriter.DeletePlugin(x.Id),
-                x => CreatePlugin(x, target),
-                x => UpdatePlugin(x, target));
+                x => PutPlugin(x, target),
+                x => PutPlugin(x, target));
         }
 
         private async Task ConvergeServiceChildren(KongService existing, KongService target)
         {
+            async Task PutRoute(KongRoute route, KongService service)
+            {
+                service.AssignParentId(route);
+                await _kongWriter.PutRoute(route);
+            }
+
             async Task DeleteRoute(KongRoute route)
             {
                 await _kongWriter.DeleteRoute(route.Id);
@@ -204,8 +203,8 @@ namespace Kongverge.Workflow
                 existing?.Routes,
                 target.Routes,
                 DeleteRoute,
-                x => _kongWriter.AddRoute(target.Id, x),
-                null,
+                x => PutRoute(x, target),
+                x => PutRoute(x, target),
                 (e, t) => ConvergeChildrenPlugins($"{KongRoute.ObjectName} {t} attached to {KongService.ObjectName} {target}", e, t));
         }
 

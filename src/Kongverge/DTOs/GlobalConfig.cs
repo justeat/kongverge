@@ -30,11 +30,11 @@ namespace Kongverge.DTOs
             }
         }
 
-        public virtual void AssignParentId(KongPlugin plugin)
+        public virtual void AssignParentId(KongPlugin child)
         {
-            plugin.Consumer = null;
-            plugin.Service = null;
-            plugin.Route = null;
+            child.Consumer = null;
+            child.Service = null;
+            child.Route = null;
         }
 
         public string ToConfigJson()

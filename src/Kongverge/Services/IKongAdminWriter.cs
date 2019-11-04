@@ -5,13 +5,11 @@ namespace Kongverge.Services
 {
     public interface IKongAdminWriter
     {
-        Task AddService(KongService service);
-        Task UpdateService(KongService service);
+        Task PutService(KongService service);
+        Task PutRoute(KongRoute route);
+        Task PutPlugin(KongPlugin plugin);
         Task DeleteService(string serviceId);
-        Task AddRoute(string serviceId, KongRoute route);
         Task DeleteRoute(string routeId);
-        Task AddPlugin(KongPlugin plugin);
-        Task UpdatePlugin(KongPlugin plugin);
         Task DeletePlugin(string pluginId);
     }
 }

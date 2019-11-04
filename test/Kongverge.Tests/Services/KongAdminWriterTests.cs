@@ -3,10 +3,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using AutoFixture;
-using FluentAssertions;
 using Kongverge.DTOs;
 using Kongverge.Services;
-using Kongverge.Tests.Workflow;
 using Moq;
 using Moq.Language.Flow;
 using Newtonsoft.Json;
@@ -25,35 +23,22 @@ namespace Kongverge.Tests.Services
             GetMock<FakeHttpMessageHandler>().CallBase = true;
             Use(new KongAdminHttpClient(new KongAdminApiConnectionDetails(), Get<FakeHttpMessageHandler>()) { BaseAddress = new Uri("http://localhost") });
         }
-
-        [BddfyFact(DisplayName = nameof(KongAdminWriter.AddService))]
+        
+        [BddfyFact(DisplayName = nameof(KongAdminWriter.PutService))]
         public void Scenario1()
         {
             KongService service = null;
 
-            this.Given(() => service = Fixture.Build<KongService>().Without(x => x.Id).Create(), "A new kong service")
-                .And(s => s.KongRespondsCorrectly<KongService>(HttpMethod.Post, "/services/", service.ToJsonStringContent(), x => x.WithIdAndCreatedAt()),
+            this.Given(() => service = Fixture.Create<KongService>(), "A kong service")
+                .And(s => s.KongRespondsCorrectly<KongService>(HttpMethod.Put, $"/services/{service.Id}", service.ToJsonStringContent()),
                     KongRespondsCorrectlyToMethodAtPathTextTemplate)
-                .When(async () => await Subject.AddService(service), Invoking(nameof(KongAdminWriter.AddService)))
-                .Then(() => service.Id.Should().NotBeNullOrWhiteSpace(), "the Id is set")
-                .BDDfy();
-        }
-
-        [BddfyFact(DisplayName = nameof(KongAdminWriter.UpdateService))]
-        public void Scenario2()
-        {
-            KongService service = null;
-
-            this.Given(() => service = Fixture.Create<KongService>(), "An existing kong service")
-                .And(s => s.KongRespondsCorrectly<KongService>(new HttpMethod("PATCH"), $"/services/{service.Id}", service.ToJsonStringContent(), x => x.WithIdAndCreatedAt()),
-                    KongRespondsCorrectlyToMethodAtPathTextTemplate)
-                .When(async () => await Subject.UpdateService(service), Invoking(nameof(KongAdminWriter.UpdateService)))
+                .When(async () => await Subject.PutService(service), Invoking(nameof(KongAdminWriter.PutService)))
                 .Then("it succeeds")
                 .BDDfy();
         }
 
         [BddfyFact(DisplayName = nameof(KongAdminWriter.DeleteService))]
-        public void Scenario3()
+        public void Scenario2()
         {
             KongService service = null;
 
@@ -88,65 +73,50 @@ namespace Kongverge.Tests.Services
                 .BDDfy();
         }
 
-        [BddfyFact(DisplayName = nameof(KongAdminWriter.AddRoute))]
-        public void Scenario4()
+        [BddfyFact(DisplayName = nameof(KongAdminWriter.PutRoute))]
+        public void Scenario3()
         {
-            var serviceId = Guid.NewGuid().ToString();
             KongRoute route = null;
 
-            this.Given(() => route = Fixture.Build<KongRoute>().Without(x => x.Id).Create(), "A new kong route")
-                .And(s => s.KongRespondsCorrectly<KongRoute>(HttpMethod.Post, $"/services/{serviceId}/routes", route.ToJsonStringContent(), x => x.WithIdAndCreatedAtAndServiceReference(serviceId)),
+            this.Given(() => route = Fixture.Create<KongRoute>(), "A kong route")
+                .And(s => s.KongRespondsCorrectly<KongRoute>(HttpMethod.Put, $"/routes/{route.Id}", route.ToJsonStringContent()),
                     KongRespondsCorrectlyToMethodAtPathTextTemplate)
-                .When(async () => await Subject.AddRoute(serviceId, route), Invoking(nameof(KongAdminWriter.AddRoute)))
-                .Then(() => route.Id.Should().NotBeNullOrWhiteSpace(), "the Id is set")
-                .And(() => route.Service.Id.Should().Be(serviceId), "the ServiceReference is set")
+                .When(async () => await Subject.PutRoute(route), Invoking(nameof(KongAdminWriter.PutRoute)))
+                .Then("it succeeds")
                 .BDDfy();
         }
 
         [BddfyFact(DisplayName = nameof(KongAdminWriter.DeleteRoute))]
-        public void Scenario5()
+        public void Scenario4()
         {
             KongRoute route = null;
 
-            this.Given(() => route = Fixture.Create<KongRoute>(), "An existing kong route")
+            this.Given(() => route = Fixture.Create<KongRoute>(), "A kong route")
                 .And(s => s.KongRespondsCorrectly(HttpMethod.Delete, $"/routes/{route.Id}"), KongRespondsCorrectlyToMethodAtPathTextTemplate)
                 .When(async () => await Subject.DeleteRoute(route.Id), Invoking(nameof(KongAdminWriter.DeleteRoute)))
                 .Then("it succeeds")
                 .BDDfy();
         }
 
-        [BddfyFact(DisplayName = nameof(KongAdminWriter.AddPlugin))]
-        public void Scenario6()
+        [BddfyFact(DisplayName = nameof(KongAdminWriter.PutPlugin))]
+        public void Scenario5()
         {
             KongPlugin plugin = null;
 
-            this.Given(() => plugin = Fixture.Build<KongPlugin>().Without(x => x.Id).Create(), "A new kong plugin")
-                .And(s => s.KongRespondsCorrectly<KongPlugin>(HttpMethod.Post, "/plugins", plugin.ToJsonStringContent(), x => x.WithIdAndCreatedAt()),
+            this.Given(() => plugin = Fixture.Create<KongPlugin>(), "A kong plugin")
+                .And(s => s.KongRespondsCorrectly<KongPlugin>(HttpMethod.Put, $"/plugins/{plugin.Id}", plugin.ToJsonStringContent()),
                     KongRespondsCorrectlyToMethodAtPathTextTemplate)
-                .When(async () => await Subject.AddPlugin(plugin), Invoking(nameof(KongAdminWriter.AddPlugin)))
-                .Then(() => plugin.Id.Should().NotBeNullOrWhiteSpace(), "the Id is set")
-                .BDDfy();
-        }
-
-        [BddfyFact(DisplayName = nameof(KongAdminWriter.UpdatePlugin))]
-        public void Scenario7()
-        {
-            KongPlugin plugin = null;
-
-            this.Given(() => plugin = Fixture.Create<KongPlugin>(), "An existing kong plugin")
-                .And(s => s.KongRespondsCorrectly<KongPlugin>(new HttpMethod("PATCH"), $"/plugins/{plugin.Id}", plugin.ToJsonStringContent(), x => x.WithIdAndCreatedAt()),
-                    KongRespondsCorrectlyToMethodAtPathTextTemplate)
-                .When(async () => await Subject.UpdatePlugin(plugin), Invoking(nameof(KongAdminWriter.UpdatePlugin)))
+                .When(async () => await Subject.PutPlugin(plugin), Invoking(nameof(KongAdminWriter.PutPlugin)))
                 .Then("it succeeds")
                 .BDDfy();
         }
 
         [BddfyFact(DisplayName = nameof(KongAdminWriter.DeletePlugin))]
-        public void Scenario8()
+        public void Scenario6()
         {
             KongPlugin plugin = null;
 
-            this.Given(() => plugin = Fixture.Create<KongPlugin>(), "An existing kong plugin")
+            this.Given(() => plugin = Fixture.Create<KongPlugin>(), "A kong plugin")
                 .And(s => s.KongRespondsCorrectly(HttpMethod.Delete, $"/plugins/{plugin.Id}"), KongRespondsCorrectlyToMethodAtPathTextTemplate)
                 .When(async () => await Subject.DeletePlugin(plugin.Id), Invoking(nameof(KongAdminWriter.DeletePlugin)))
                 .Then("it succeeds")
@@ -155,15 +125,9 @@ namespace Kongverge.Tests.Services
 
         protected string Invoking(string name) => $"invoking {name}";
 
-        protected void KongRespondsCorrectly<T>(HttpMethod httpMethod, string route, StringContent content, Action<T> kongAction)
+        protected void KongRespondsCorrectly<T>(HttpMethod httpMethod, string route, StringContent content)
         {
-            SetupKongResponse(httpMethod, route, content).Returns(() =>
-            {
-                var data = content.ReadAsStringAsync().Result;
-                var responseObject = JsonConvert.DeserializeObject<T>(data);
-                kongAction(responseObject);
-                return OkResponse(responseObject);
-            });
+            SetupKongResponse(httpMethod, route, content).Returns(OkResponse());
         }
 
         protected void KongRespondsCorrectly(HttpMethod httpMethod, string route)

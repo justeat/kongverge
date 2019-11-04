@@ -25,11 +25,11 @@ namespace Kongverge.DTOs
         [JsonProperty("name")]
         public string Name { get; set; }
 
-        [JsonProperty("run_on")]
-        public string RunOn { get; set; } = "first";
+        [JsonProperty("run_on", NullValueHandling = NullValueHandling.Ignore)]
+        public string RunOn { get; set; }
 
-        [JsonProperty("protocols")]
-        public IEnumerable<string> Protocols { get; set; } = new[] { "http", "https", "grpc", "grpcs" };
+        [JsonProperty("protocols", NullValueHandling = NullValueHandling.Ignore)]
+        public IEnumerable<string> Protocols { get; set; }
 
         [JsonProperty("enabled")]
         public bool Enabled { get; set; } = true;
@@ -74,8 +74,11 @@ namespace Kongverge.DTOs
             {
                 schema.Fields = schema.Fields.Concat(fallbackFields).ToArray();
             }
-            
-            schema.Validate<KongPlugin>(JObject.FromObject(this), errorMessages, parent);
+
+            var node = JObject.FromObject(this);
+            schema.Validate<KongPlugin>(node, errorMessages, parent);
+            RunOn = node["run_on"].Value<string>();
+            Protocols = node["protocols"].Values<string>();
         }
 
         public override object GetMatchValue() => Name;

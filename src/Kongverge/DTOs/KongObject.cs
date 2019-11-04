@@ -9,10 +9,13 @@ namespace Kongverge.DTOs
     public abstract class KongObject
     {
         [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
-        public string Id { get; set; }
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
         [JsonProperty("created_at", NullValueHandling = NullValueHandling.Ignore)]
         public long? CreatedAt { get; set; }
+
+        [JsonProperty("updated_at", NullValueHandling = NullValueHandling.Ignore)]
+        public long? UpdatedAt { get; set; }
 
         [JsonProperty("tags", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<string> Tags { get; set; }
@@ -21,6 +24,7 @@ namespace Kongverge.DTOs
         {
             Id = null;
             CreatedAt = null;
+            UpdatedAt = null;
         }
 
         public T MatchWithExisting<T>(IEnumerable<T> existingObjects) where T : KongObject
@@ -30,6 +34,7 @@ namespace Kongverge.DTOs
             {
                 Id = existing.Id;
                 CreatedAt = existing.CreatedAt;
+                UpdatedAt = existing.UpdatedAt;
             }
             return existing;
         }
