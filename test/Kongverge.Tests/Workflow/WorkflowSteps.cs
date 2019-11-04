@@ -27,7 +27,7 @@ namespace Kongverge.Tests.Workflow
 
         protected void KongIsNotReachable() => GetMock<IKongAdminReader>().Setup(x => x.GetConfiguration()).Throws<HttpRequestException>();
 
-        protected void KongIsReachable() => KongIsReachable("1.1.0");
+        protected void KongIsReachable() => KongIsReachable("1.4.0");
 
         protected void KongIsReachable(string version) => GetMock<IKongAdminReader>()
             .Setup(x => x.GetConfiguration())

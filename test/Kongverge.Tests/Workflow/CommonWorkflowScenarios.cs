@@ -45,10 +45,10 @@ namespace Kongverge.Tests.Workflow
                     { "0.36-2-enterprise-edition" },
                     { "0.37-1-enterprise-edition" },
                     { "0.37-2-enterprise-edition" },
-                    { "1.1.0" },
-                    { "1.2.0" },
-                    { "1.3.0" },
-                    { "1.4.0" }
+                    { "1.4.0" },
+                    { "1.4.2" },
+                    { "1.5.1" },
+                    { "1.5.2" }
                 })
                 .BDDfy();
     }

@@ -36,12 +36,12 @@ namespace Kongverge.Workflow
                 if (version < lowestSupportedVersion)
                 {
                     return ExitWithCode.Return(ExitCode.HostVersionNotSupported,
-                        $"This version of Kongverge can only support Kong enterprise from version {lowestSupportedVersion}.x");
+                        $"This version of Kongverge can only support Kong enterprise from version {lowestSupportedVersion}-x");
                 }
             }
             else
             {
-                const double lowestSupportedVersion = 1.1;
+                const double lowestSupportedVersion = 1.4;
                 if (version < lowestSupportedVersion)
                 {
                     return ExitWithCode.Return(ExitCode.HostVersionNotSupported,
