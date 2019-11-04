@@ -2,9 +2,13 @@ using System.Collections.Generic;
 
 namespace Kongverge.DTOs
 {
-    public interface IKongPluginHost
+    public interface IKongPluginHost : IKongParentOf<KongPlugin>
     {
         IReadOnlyList<KongPlugin> Plugins { get; set; }
-        void AssignParentId(KongPlugin plugin);
+    }
+
+    public interface IKongParentOf<in T> where T : KongObject
+    {
+        void AssignParentId(T child);
     }
 }

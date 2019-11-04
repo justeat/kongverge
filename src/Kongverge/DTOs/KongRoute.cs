@@ -20,22 +20,22 @@ namespace Kongverge.DTOs
         [JsonProperty("service", NullValueHandling = NullValueHandling.Ignore)]
         public Reference Service { get; set; }
 
-        [JsonProperty("name")]
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
         public string Name { get; set; }
 
-        [JsonProperty("hosts")]
+        [JsonProperty("hosts", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<string> Hosts { get; set; }
 
-        [JsonProperty("headers")]
+        [JsonProperty("headers", NullValueHandling = NullValueHandling.Ignore)]
         public IDictionary<string, string[]> Headers { get; set; }
 
         [JsonProperty("protocols")]
         public IEnumerable<string> Protocols { get; set; } = new[] { "http", "https" };
 
-        [JsonProperty("methods")]
+        [JsonProperty("methods", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<string> Methods { get; set; }
 
-        [JsonProperty("paths")]
+        [JsonProperty("paths", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<string> Paths { get; set; }
 
         [JsonProperty("snis", NullValueHandling = NullValueHandling.Ignore)]
@@ -81,13 +81,10 @@ namespace Kongverge.DTOs
 
         public override StringContent ToJsonStringContent()
         {
-            var serviceReference = Service;
             var plugins = Plugins;
 
-            Service = null;
             Plugins = null;
             var json = JsonConvert.SerializeObject(this);
-            Service = serviceReference;
             Plugins = plugins;
 
             return json.AsJsonStringContent();
@@ -103,11 +100,11 @@ namespace Kongverge.DTOs
             Service = null;
         }
 
-        public void AssignParentId(KongPlugin plugin)
+        public void AssignParentId(KongPlugin child)
         {
-            plugin.Consumer = null;
-            plugin.Service = null;
-            plugin.Route = new Reference { Id = Id };
+            child.Consumer = null;
+            child.Service = null;
+            child.Route = new Reference { Id = Id };
         }
 
         public async Task Validate(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages, KongObject parent = null)

@@ -15,8 +15,6 @@ namespace Kongverge.Tests.DTOs
         protected string Serialized;
 
         protected void ARandomInstance() => Instance = this.Create<T>();
-        
-        protected void ServiceIsNotSerialized() => Serialized.Contains("\"service\":").Should().BeFalse();
     }
 
     public abstract class KongObjectSerializationScenarios<T> : SerializationScenarios<T> where T : KongObject
@@ -32,22 +30,27 @@ namespace Kongverge.Tests.DTOs
                 .When(x => x.SerializingToConfigJson())
                 .Then(x => x.IdIsNotSerialized())
                 .And(x => x.CreatedAtIsNotSerialized())
-                .And(x => x.ConsumerIdIsNotSerialized())
-                .And(x => x.ServiceIdIsNotSerialized())
-                .And(x => x.RouteIdIsNotSerialized())
-                .And(x => x.ServiceIsNotSerialized())
+                .And(x => x.UpdatedAtIsNotSerialized())
+                .And(x => x.ConsumerReferenceIsNotSerialized())
+                .And(x => x.ServiceReferenceIsNotSerialized())
+                .And(x => x.RouteReferenceIsNotSerialized())
+                .And(x => x.ClientCertificateReferenceIsNotSerialized())
                 .BDDfy();
 
         protected string SerializingToConfigJson() => Serialized = Instance.ToConfigJson();
 
-        protected void IdIsNotSerialized() => Serialized.Contains("\"id\":").Should().BeFalse();
+        protected void IdIsNotSerialized() => Serialized.Should().NotContain("\"id\":");
 
-        protected void CreatedAtIsNotSerialized() => Serialized.Contains("\"created_at\":").Should().BeFalse();
+        protected void CreatedAtIsNotSerialized() => Serialized.Should().NotContain("\"created_at\":");
 
-        protected void ConsumerIdIsNotSerialized() => Serialized.Contains("\"consumer_id\":").Should().BeFalse();
+        protected void UpdatedAtIsNotSerialized() => Serialized.Should().NotContain("\"updated_at\":");
 
-        protected void ServiceIdIsNotSerialized() => Serialized.Contains("\"service_id\":").Should().BeFalse();
+        protected void ConsumerReferenceIsNotSerialized() => Serialized.Should().NotContain("\"consumer\":");
 
-        protected void RouteIdIsNotSerialized() => Serialized.Contains("\"route_id\":").Should().BeFalse();
+        protected void ServiceReferenceIsNotSerialized() => Serialized.Should().NotContain("\"service\":");
+
+        protected void RouteReferenceIsNotSerialized() => Serialized.Should().NotContain("\"route\":");
+
+        protected void ClientCertificateReferenceIsNotSerialized() => Serialized.Should().NotContain("\"client_certificate\":");
     }
 }

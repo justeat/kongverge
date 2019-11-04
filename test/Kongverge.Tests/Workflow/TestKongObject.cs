@@ -5,20 +5,13 @@ namespace Kongverge.Tests.Workflow
 {
     public static class TestKongObject
     {
-        public static T AsExisting<T>(this T kongObject) where T : KongObject =>
-            kongObject.Clone().WithIdAndCreatedAt();
-
-        public static T WithIdAndCreatedAt<T>(this T kongObject) where T : KongObject
+        public static T AsExisting<T>(this T kongObject) where T : KongObject
         {
-            if (kongObject.Id == null)
-            {
-                kongObject.Id = Guid.NewGuid().ToString();
-            }
-            if (!kongObject.CreatedAt.HasValue)
-            {
-                kongObject.CreatedAt = new Random(Environment.TickCount).Next(int.MaxValue);
-            }
-            return kongObject;
+            var existing = kongObject.Clone();
+            kongObject.Id = Guid.NewGuid().ToString();
+            kongObject.CreatedAt = new Random(Environment.TickCount).Next(int.MaxValue);
+            kongObject.UpdatedAt = new Random(Environment.TickCount).Next(int.MaxValue);
+            return existing;
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Kongverge.Tests.Workflow
             kongPlugin.Id == existingKongPlugin.Id &&
             !string.IsNullOrWhiteSpace(kongPlugin.Id) &&
             kongPlugin.CreatedAt == existingKongPlugin.CreatedAt &&
-            kongPlugin.CreatedAt.HasValue;
+            kongPlugin.UpdatedAt == existingKongPlugin.UpdatedAt;
 
         public static KongPlugin AsTarget(this KongPlugin kongPlugin, bool modified = false)
         {

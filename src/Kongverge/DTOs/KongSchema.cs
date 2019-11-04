@@ -134,23 +134,32 @@ namespace Kongverge.DTOs
             switch (Type)
             {
                 case FieldType.String:
+                    return value.Type == JTokenType.String;
+
                 case FieldType.Number:
+                    return value.Type == JTokenType.Integer ||
+                           value.Type == JTokenType.Float;
+
                 case FieldType.Integer:
+                    return value.Type == JTokenType.Integer;
+
                 case FieldType.Boolean:
-                    return !(value is JContainer);
+                    return value.Type == JTokenType.Boolean;
 
                 case FieldType.Set:
                 case FieldType.Array:
-                    return Equals(value, JValue.CreateNull()) || !(value is JValue) && (value is JArray || !value.HasValues);
+                    return value.Type == JTokenType.Array;
 
                 case FieldType.Foreign:
                 case FieldType.Record:
                 case FieldType.Map:
-                    return Equals(value, JValue.CreateNull()) || !(value is JValue) && (value is JObject || !value.HasValues);
+                    return value.Type == JTokenType.Object;
 
                 default: throw new NotImplementedException();
             }
         }
+
+        private bool HasDefault => Default.ToString() != NoDefault;
 
         private void ValidateString<T>(JToken node, ICollection<string> errorMessages) where T : KongObject
         {
@@ -321,7 +330,7 @@ namespace Kongverge.DTOs
             var record = (JObject)node;
             foreach (var field in Fields)
             {
-                if (!record.ContainsKey(field.Name) && field.Schema.Required && field.Schema.Default.ToString() != NoDefault)
+                if (!record.ContainsKey(field.Name) && field.Schema.Required && field.Schema.HasDefault)
                 {
                     // Our record has a missing field and schema has a default value, so add that to our record
                     record.Add(field.Name, field.Schema.Default);

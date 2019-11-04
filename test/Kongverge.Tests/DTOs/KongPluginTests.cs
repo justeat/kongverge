@@ -36,6 +36,7 @@ namespace Kongverge.Tests.DTOs
         {
             OtherInstance.Id = this.Create<string>();
             OtherInstance.CreatedAt = this.Create<long>();
+            OtherInstance.UpdatedAt = this.Create<long>();
             OtherInstance.Consumer = new KongObject.Reference { Id = this.Create<string>() };
             OtherInstance.Service = new KongObject.Reference { Id = this.Create<string>() };
             OtherInstance.Route = new KongObject.Reference { Id = this.Create<string>() };
@@ -63,6 +64,7 @@ namespace Kongverge.Tests.DTOs
         public void Scenario3() =>
             this.Given(x => x.AValidInstanceWithMissingDefaultFields())
                 .When(x => x.Validating())
+                .Then(x => x.TheMissingDefaultFieldsAreSubstitutedWithTheirDefaults())
                 .Then(x => x.TheErrorMessagesCountIs(0))
                 .BDDfy();
 
@@ -98,7 +100,13 @@ namespace Kongverge.Tests.DTOs
         protected void AValidInstanceWithMissingDefaultFields()
         {
             AValidInstance();
-            Instance.Config["field3"].Children().Last().Remove();
+            Instance.Config.Property("field1").Remove();
+        }
+
+        protected void TheMissingDefaultFieldsAreSubstitutedWithTheirDefaults()
+        {
+            Instance.RunOn.Should().Be("first");
+            Instance.Protocols.Should().BeEquivalentTo("grpc", "grpcs", "http", "https");
         }
 
         protected void AValidInstanceWithTwelveInvalidFields()
@@ -143,9 +151,15 @@ namespace Kongverge.Tests.DTOs
         public void Scenario1() =>
             this.Given(x => x.ARandomInstance())
                 .When(x => x.SerializingToStringContent())
-                .Then(x => x.ItSerializesWithoutError())
+                .Then(x => x.ServiceReferenceIsSerialized())
+                .And(x => x.RouteReferenceIsSerialized())
+                .And(x => x.ConsumerReferenceIsSerialized())
                 .BDDfy();
 
-        protected void ItSerializesWithoutError() => Serialized.Should().NotBeEmpty();
+        protected void ServiceReferenceIsSerialized() => Serialized.Should().Contain("\"service\":");
+
+        protected void RouteReferenceIsSerialized() => Serialized.Should().Contain("\"route\":");
+
+        protected void ConsumerReferenceIsSerialized() => Serialized.Should().Contain("\"consumer\":");
     }
 }
