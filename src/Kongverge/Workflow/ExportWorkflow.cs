@@ -24,7 +24,7 @@ namespace Kongverge.Workflow
 
         public override async Task<int> DoExecute()
         {
-            var existingConfiguration = await _configBuilder.FromKong(KongReader);
+            var existingConfiguration = await _configBuilder.FromKong(KongReader, _arguments.IgnoreTags);
 
             await _configWriter.WriteConfiguration(existingConfiguration, _arguments.OutputFolder);
 

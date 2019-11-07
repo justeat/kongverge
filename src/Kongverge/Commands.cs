@@ -34,6 +34,9 @@ namespace Kongverge
         [Option("-p|--password=<Password>", "Optional. Basic Auth protected Kong Admin API Password (can be passed via redirected stdin)", CommandOptionType.SingleOrNoValue)]
         public Password BasicAuthPassword { get; }
 
+        [Option("-i|--ignore=<Tag>", "Optional. A tag to be ignored when reading from Kong. Can be specified multiple times.", CommandOptionType.MultipleValue)]
+        public string[] IgnoreTags { get; }
+
         protected ValidationResult OnValidate(ValidationContext validationContext, CommandLineContext commandLineContext)
         {
             if (!string.IsNullOrWhiteSpace(BasicAuthUser) && string.IsNullOrWhiteSpace(BasicAuthPassword.Value))
@@ -100,6 +103,7 @@ namespace Kongverge
         {
             Parent.Initialize(app);
             app.GetRequiredService<KongvergeWorkflowArguments>().InputFolder = InputFolder;
+            app.GetRequiredService<KongvergeWorkflowArguments>().IgnoreTags = Parent.IgnoreTags;
         }
 
         public Task<int> OnExecuteAsync(CommandLineApplication app)
@@ -120,6 +124,7 @@ namespace Kongverge
         {
             Parent.Initialize(app);
             app.GetRequiredService<ExportWorkflowArguments>().OutputFolder = OutputFolder;
+            app.GetRequiredService<ExportWorkflowArguments>().IgnoreTags = Parent.IgnoreTags;
             return app.GetRequiredService<ExportWorkflow>().Execute();
         }
     }

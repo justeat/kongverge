@@ -19,11 +19,13 @@ namespace Kongverge.IntegrationTests
     public abstract class ProgramSteps
     {
         public const string Host = "localhost";
+        public const string Ignore = "kongverge-ignore";
         public const int Port = 8001;
 
         protected const string And = "_";
         protected const string NonExistent = nameof(NonExistent);
         protected const string InvalidData = nameof(InvalidData);
+        protected const string Ignored = nameof(Ignored);
         protected const string A = nameof(A);
         protected const string B = nameof(B);
         protected const string Output = nameof(Output);
@@ -55,9 +57,17 @@ namespace Kongverge.IntegrationTests
             ExitCode = (ExitCode)Program.Main(arguments);
         }
 
-        protected void InvokingMainAgainForExport()
+        protected void InvokingMainAgainForExport() => InvokingMainAgainForExport(false);
+
+        protected void InvokingMainAgainForExportWithIgnoreTags() => InvokingMainAgainForExport(true);
+
+        protected void InvokingMainAgainForExport(bool ignoreTags)
         {
             AValidHost();
+            if (ignoreTags)
+            {
+                IgnoreTags();
+            }
             TheExportCommand();
             OutputFolderIs(Output);
             InvokingMain();
@@ -68,6 +78,8 @@ namespace Kongverge.IntegrationTests
         protected void AnInvalidPort() => Arguments.AddPair("--port", 1);
 
         protected void AValidHost() => Arguments.AddPair("--host", Host);
+
+        protected void IgnoreTags() => Arguments.AddPair("--ignore", Ignore);
 
         protected void TheRunCommand() => Arguments.Add("run");
 
@@ -125,6 +137,11 @@ namespace Kongverge.IntegrationTests
 
             Directory.CreateDirectory(folderPath);
             KongMatchesInputFolder(folderPath);
+        }
+
+        protected void KongMatchesIgnored()
+        {
+            KongMatchesInputFolder(Ignored);
         }
 
         protected void KongMatchesInputFolder(string folder)

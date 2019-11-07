@@ -21,7 +21,7 @@ namespace Kongverge.Tests.Workflow
 
         protected WorkflowSteps()
         {
-            GetMock<ConfigBuilder>().Setup(x => x.FromKong(Get<IKongAdminReader>())).ReturnsAsync(Existing);
+            GetMock<ConfigBuilder>().Setup(x => x.FromKong(Get<IKongAdminReader>(), It.IsAny<IReadOnlyCollection<string>>())).ReturnsAsync(Existing);
             GetMock<IKongAdminReader>().Setup(x => x.GetSchema(It.IsAny<string>())).ReturnsAsync(new KongSchema());
         }
 
@@ -40,6 +40,6 @@ namespace Kongverge.Tests.Workflow
 
         protected void TheExitCodeIs(ExitCode exitCode) => ExitCode.Should().Be(exitCode);
 
-        protected void TheConfigurationIsRetrievedFromKong() => GetMock<ConfigBuilder>().Verify(x => x.FromKong(Get<IKongAdminReader>()));
+        protected void TheConfigurationIsRetrievedFromKong() => GetMock<ConfigBuilder>().Verify(x => x.FromKong(Get<IKongAdminReader>(), It.IsAny<IReadOnlyCollection<string>>()));
     }
 }

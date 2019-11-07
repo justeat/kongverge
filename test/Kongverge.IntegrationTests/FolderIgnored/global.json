@@ -1,0 +1,27 @@
+{
+  "plugins": [
+    {
+      "tags": [ "kongverge-ignore" ],
+      "name": "key-auth",
+      "config": {}
+    }
+  ],
+  "consumers": [
+    {
+      "tags": [ "kongverge-ignore" ],
+      "username": "ignored",
+      "custom_id": "ignored_user",
+      "id": "65c5e2d4-8a05-4c99-bea8-665a41b33ace",
+      "plugins": [
+        {
+          "name": "request-termination",
+          "config": {
+            "status_code": 401,
+            "content_type": "application/json; charset=utf-8",
+            "body": "{ \"error\": \"Authentication required\" }"
+          }
+        }
+      ]
+    }
+  ]
+}

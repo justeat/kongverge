@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,21 +9,23 @@ namespace Kongverge.Services
 {
     public class ConfigBuilder
     {
-        public virtual async Task<KongvergeConfiguration> FromKong(IKongAdminReader kongReader)
+        public virtual async Task<KongvergeConfiguration> FromKong(IKongAdminReader kongReader, IReadOnlyCollection<string> ignoreTags)
         {
+            ignoreTags ??= Array.Empty<string>();
+
             Log.Information("Reading configuration from Kong");
 
             Log.Verbose("Getting consumers from Kong");
-            var consumers = await kongReader.GetConsumers();
+            var consumers = IgnoreByTag(ignoreTags, await kongReader.GetConsumers());
 
             Log.Verbose("Getting plugins from Kong");
-            var plugins = await kongReader.GetPlugins();
+            var plugins = IgnoreByTag(ignoreTags, await kongReader.GetPlugins());
 
             Log.Verbose("Getting services from Kong");
-            var services = await kongReader.GetServices();
+            var services = IgnoreByTag(ignoreTags, await kongReader.GetServices());
 
             Log.Verbose("Getting routes from Kong");
-            var routes = await kongReader.GetRoutes();
+            var routes = IgnoreByTag(ignoreTags, await kongReader.GetRoutes());
 
             foreach (var consumer in consumers)
             {
@@ -46,6 +49,11 @@ namespace Kongverge.Services
             Log.Information($"Configuration from Kong: {configuration}");
 
             return configuration;
+        }
+
+        private static IReadOnlyCollection<T> IgnoreByTag<T>(IReadOnlyCollection<string> tags, IEnumerable<T> objects) where T : KongObject
+        {
+            return objects.Where(x => !tags.Any() || x.Tags?.Any(tags.Contains) != true).ToArray();
         }
 
         private static void PopulateServiceTree(KongService service, IReadOnlyCollection<KongRoute> routes, IReadOnlyCollection<KongPlugin> plugins)
