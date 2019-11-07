@@ -12,31 +12,20 @@ namespace Kongverge.Tests.DTOs
     [Story(Title = nameof(KongPlugin) + nameof(Equals))]
     public class KongPluginEqualityScenarios : EqualityScenarios<KongPlugin>
     {
-        [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(AnotherInstanceClonedFromTheFirst) + And + nameof(ConfigValuesAreShuffled))]
-        public void Scenario4() =>
-            this.Given(x => x.ARandomInstance())
-                .And(x => x.AnotherInstanceClonedFromTheFirst())
-                .And(x => x.ConfigValuesAreShuffled())
-                .When(x => x.CheckingEquality())
-                .And(x => x.CheckingHashCodes())
-                .Then(x => x.TheyAreEqual())
-                .BDDfy();
-
         protected override void ARandomInstance() => Instance = Build<KongPlugin>()
             .With(x => x.Config, JObject.FromObject(this.Create<Dictionary<string, string>>()))
             .Create();
 
-        protected void ConfigValuesAreShuffled()
+        protected override void ListValuesAreShuffled()
         {
+            base.ListValuesAreShuffled();
             var otherConfig = OtherInstance.Config.ToObject<Dictionary<string, object>>();
             OtherInstance.Config = JObject.FromObject(new Dictionary<string, object>(otherConfig.Reverse()));
         }
 
         protected override void OnlyThePersistenceValuesAreDifferent()
         {
-            OtherInstance.Id = this.Create<string>();
-            OtherInstance.CreatedAt = this.Create<long>();
-            OtherInstance.UpdatedAt = this.Create<long>();
+            base.OnlyThePersistenceValuesAreDifferent();
             OtherInstance.Consumer = new KongObject.Reference { Id = this.Create<string>() };
             OtherInstance.Service = new KongObject.Reference { Id = this.Create<string>() };
             OtherInstance.Route = new KongObject.Reference { Id = this.Create<string>() };

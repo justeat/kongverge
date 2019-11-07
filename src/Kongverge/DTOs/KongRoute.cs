@@ -157,7 +157,7 @@ namespace Kongverge.DTOs
             }
         }
 
-        public override object GetMatchValue() => this;
+        public bool IsMatch(KongRoute other) => Id == other.Id || Equals(this, other);
 
         public object GetEqualityValues() =>
             new
@@ -190,6 +190,13 @@ namespace Kongverge.DTOs
 
             [JsonProperty("port", NullValueHandling = NullValueHandling.Ignore)]
             public int? Port { get; set; }
+
+            public override bool Equals(object obj) =>
+                obj is Endpoint endpoint &&
+                Ip == endpoint.Ip &&
+                EqualityComparer<int?>.Default.Equals(Port, endpoint.Port);
+
+            public override int GetHashCode() => HashCode.Combine(Ip, Port);
         }
     }
 }

@@ -191,13 +191,20 @@ namespace Kongverge.IntegrationTests
             var outputConfiguration = await configReader.ReadConfiguration(OutputFolder, schemas);
 
             folderConfiguration.GlobalConfig.Plugins.Should().NotBeEmpty();
-            folderConfiguration.Services.Count.Should().Be(3);
+            folderConfiguration.GlobalConfig.Consumers.Should().NotBeEmpty();
+            folderConfiguration.Services.Should().NotBeEmpty();
 
             outputConfiguration.GlobalConfig.Plugins.Should().BeEquivalentTo(folderConfiguration.GlobalConfig.Plugins);
+            outputConfiguration.GlobalConfig.Consumers.Should().BeEquivalentTo(folderConfiguration.GlobalConfig.Consumers);
+            foreach (var outputConsumer in outputConfiguration.GlobalConfig.Consumers)
+            {
+                var folderConsumer = folderConfiguration.GlobalConfig.Consumers.Single(outputConsumer.IsMatch);
+                outputConsumer.Plugins.Should().BeEquivalentTo(folderConsumer.Plugins);
+            }
             outputConfiguration.Services.Should().BeEquivalentTo(folderConfiguration.Services);
             foreach (var outputService in outputConfiguration.Services)
             {
-                var folderService = folderConfiguration.Services.Single(x => x.Name == outputService.Name);
+                var folderService = folderConfiguration.Services.Single(outputService.IsMatch);
                 outputService.Plugins.Should().BeEquivalentTo(folderService.Plugins);
                 outputService.Routes.Should().BeEquivalentTo(folderService.Routes);
                 foreach (var outputServiceRoute in outputService.Routes)

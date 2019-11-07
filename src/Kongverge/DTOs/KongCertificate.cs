@@ -11,7 +11,7 @@ namespace Kongverge.DTOs
 
         protected override string[] ToStringSegments => throw new System.NotImplementedException();
 
-        public override object GetMatchValue()
+        public bool IsMatch(KongCertificate other)
         {
             throw new System.NotImplementedException();
         }

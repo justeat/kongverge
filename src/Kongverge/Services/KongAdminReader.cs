@@ -5,6 +5,16 @@ using Newtonsoft.Json;
 
 namespace Kongverge.Services
 {
+    public interface IKongAdminReader
+    {
+        Task<KongConfiguration> GetConfiguration();
+        Task<IReadOnlyCollection<KongConsumer>> GetConsumers();
+        Task<IReadOnlyCollection<KongService>> GetServices();
+        Task<IReadOnlyCollection<KongRoute>> GetRoutes();
+        Task<IReadOnlyCollection<KongPlugin>> GetPlugins();
+        Task<KongSchema> GetSchema(string schemaPath);
+    }
+
     public class KongAdminReader : IKongAdminReader
     {
         protected readonly KongAdminHttpClient HttpClient;
@@ -20,6 +30,9 @@ namespace Kongverge.Services
             var value = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<KongConfiguration>(value);
         }
+
+        public async Task<IReadOnlyCollection<KongConsumer>> GetConsumers() =>
+            await GetPagedResponse<KongConsumer>("/consumers");
 
         public async Task<IReadOnlyCollection<KongService>> GetServices() =>
             await GetPagedResponse<KongService>("/services");

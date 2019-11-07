@@ -16,10 +16,17 @@ namespace Kongverge.Tests.Workflow
                 .Build<KongPlugin>()
                 .Without(x => x.Id)
                 .Without(x => x.CreatedAt)
+                .Without(x => x.CreatedAt)
                 .Create();
 
         public static bool IsTheSameAs(this KongPlugin kongPlugin, KongPlugin expectedKongPlugin) =>
             ReferenceEquals(kongPlugin, expectedKongPlugin);
+
+        public static bool CorrespondsToKongConsumer(this KongPlugin kongPlugin, KongConsumer kongConsumer) =>
+            kongPlugin.Consumer?.Id == kongConsumer.Id &&
+            !string.IsNullOrWhiteSpace(kongPlugin.Consumer?.Id) &&
+            kongPlugin.Service?.Id == null &&
+            kongPlugin.Route?.Id == null;
 
         public static bool CorrespondsToKongService(this KongPlugin kongPlugin, KongService kongService) =>
             kongPlugin.Service?.Id == kongService.Id &&

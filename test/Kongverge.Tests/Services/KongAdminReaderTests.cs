@@ -36,8 +36,16 @@ namespace Kongverge.Tests.Services
                 .Then(s => s.TheResultIsEquivalentToTheKongData())
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(KongAdminReader.GetServices))]
+        [BddfyFact(DisplayName = nameof(KongAdminReader.GetConsumers))]
         public void Scenario2() =>
+            this.Given(s => s.KongHasPagedData("/consumers", () => Fixture.Build<KongConsumer>().Without(x => x.Plugins).Create()), KongHasPagedDataStepTextTemplate)
+                .When(async () => Result = await Subject.GetConsumers(), Invoking(nameof(KongAdminReader.GetConsumers)))
+                .Then(s => s.TheResultIsEquivalentToTheKongData())
+                .WithExamples(new ExampleTable(nameof(MultiplePages)) { false, true })
+                .BDDfy();
+
+        [BddfyFact(DisplayName = nameof(KongAdminReader.GetServices))]
+        public void Scenario3() =>
             this.Given(s => s.KongHasPagedData("/services", () => Fixture.Build<KongService>().Without(x => x.Plugins).Without(x => x.Routes).Create()), KongHasPagedDataStepTextTemplate)
                 .When(async () => Result = await Subject.GetServices(), Invoking(nameof(KongAdminReader.GetServices)))
                 .Then(s => s.TheResultIsEquivalentToTheKongData())
@@ -45,7 +53,7 @@ namespace Kongverge.Tests.Services
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(KongAdminReader.GetRoutes))]
-        public void Scenario3() =>
+        public void Scenario4() =>
             this.Given(s => s.KongHasPagedData("/routes", () => Fixture.Build<KongRoute>().Without(x => x.Plugins).Create()), KongHasPagedDataStepTextTemplate)
                 .When(async () => Result = await Subject.GetRoutes(), Invoking(nameof(KongAdminReader.GetRoutes)))
                 .Then(s => s.TheResultIsEquivalentToTheKongData())
@@ -53,7 +61,7 @@ namespace Kongverge.Tests.Services
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(KongAdminReader.GetPlugins))]
-        public void Scenario4() =>
+        public void Scenario5() =>
             this.Given(s => s.KongHasPagedData("/plugins", () => Fixture.Create<KongPlugin>()), KongHasPagedDataStepTextTemplate)
                 .When(async () => Result = await Subject.GetPlugins(), Invoking(nameof(KongAdminReader.GetPlugins)))
                 .Then(s => s.TheResultIsEquivalentToTheKongData())
@@ -61,7 +69,7 @@ namespace Kongverge.Tests.Services
                 .BDDfy();
 
         [BddfyFact(DisplayName = nameof(KongAdminReader.GetSchema))]
-        public void Scenario5() =>
+        public void Scenario6() =>
             this.Given(s => s.KongHasData("/schemas/plugins/test-plugin", () => new KongSchema()))
                 .When(async () => Result = await Subject.GetSchema("plugins/test-plugin"), Invoking(nameof(KongAdminReader.GetSchema)))
                 .Then(s => s.TheResultIsEquivalentToTheKongData())

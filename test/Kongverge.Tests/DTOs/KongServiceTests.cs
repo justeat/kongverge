@@ -8,15 +8,7 @@ using TestStack.BDDfy.Xunit;
 namespace Kongverge.Tests.DTOs
 {
     [Story(Title = nameof(KongService) + nameof(Equals))]
-    public class KongServiceEqualityScenarios : EqualityScenarios<KongService>
-    {
-        protected override void OnlyThePersistenceValuesAreDifferent()
-        {
-            OtherInstance.Id = this.Create<string>();
-            OtherInstance.CreatedAt = this.Create<long>();
-            OtherInstance.UpdatedAt = this.Create<long>();
-        }
-    }
+    public class KongServiceEqualityScenarios : EqualityScenarios<KongService> { }
 
     [Story(Title = nameof(KongService) + nameof(IValidatableObject.Validate))]
     public class KongServiceValidationScenarios : ValidatableObjectSteps<KongService>
@@ -67,7 +59,7 @@ namespace Kongverge.Tests.DTOs
             .Create();
 
         protected void AnInstanceWithValidRoutesAndExamplePropertyValues() => Instance = BuildServiceWithoutPluginsOrRoutes(
-                this, Name, Protocol, Host, Path, tags:Tags)
+                this, Name, Protocol, Host, Path, Tags)
             .Create();
 
         public static IPostprocessComposer<KongService> BuildServiceWithoutPluginsOrRoutes(
@@ -76,11 +68,11 @@ namespace Kongverge.Tests.DTOs
             string protocol = "https",
             string host = "foo.bar.baz",
             string path = null,
+            Set tags = Set.Null,
             byte retries = 5,
             uint connectTimeout = 1000U,
             uint writeTimeout = 1000U,
-            uint readTimeout = 1000U,
-            Set tags = Set.ValidItems) => fixture.Build<KongService>()
+            uint readTimeout = 1000U) => fixture.Build<KongService>()
             .With(x => x.Id, fixture.Create<string>())
             .With(x => x.Plugins, fixture.CreateChildren(Children.Empty, fixture.GetValidKongPlugin, fixture.GetKongPluginWithOneError))
             .With(x => x.Routes, fixture.CreateChildren(Children.Valid, fixture.GetValidKongRoute, fixture.GetKongRouteWithOneError))

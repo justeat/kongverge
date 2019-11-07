@@ -143,7 +143,7 @@ namespace Kongverge.DTOs
             return this.ToNormalizedJson() + Environment.NewLine;
         }
 
-        public override object GetMatchValue() => Name;
+        public bool IsMatch(KongService other) => Id == other.Id || Name == other.Name;
 
         public object GetEqualityValues() =>
             new

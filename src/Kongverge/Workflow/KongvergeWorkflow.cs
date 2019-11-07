@@ -72,6 +72,12 @@ namespace Kongverge.Workflow
 
         private async Task ConvergeConfiguration(KongvergeConfiguration existingConfiguration, KongvergeConfiguration targetConfiguration)
         {
+            async Task DeleteConsumer(KongConsumer consumer)
+            {
+                await _kongWriter.DeleteConsumer(consumer.Id);
+                _deletedStats.Increment<KongPlugin>(consumer.Plugins.Count);
+            }
+
             async Task DeleteService(KongService service)
             {
                 await _kongWriter.DeleteService(service.Id);
@@ -84,6 +90,16 @@ namespace Kongverge.Workflow
             _deletedStats = new OperationStats();
 
             await ConvergeChildrenPlugins(null, existingConfiguration.GlobalConfig, targetConfiguration.GlobalConfig);
+
+            await ConvergeObjects(
+                null,
+                KongConsumer.ObjectName,
+                existingConfiguration.GlobalConfig.Consumers,
+                targetConfiguration.GlobalConfig.Consumers,
+                DeleteConsumer,
+                x => _kongWriter.PutConsumer(x),
+                x => _kongWriter.PutConsumer(x),
+                (e, t) => ConvergeChildrenPlugins($"{KongConsumer.ObjectName} {t}", e, t));
 
             await ConvergeObjects(
                 null,
@@ -112,7 +128,7 @@ namespace Kongverge.Workflow
             Func<T, Task> deleteObject,
             Func<T, Task> createObject,
             Func<T, Task> updateObject = null,
-            Func<T, T, Task> recurse = null) where T : KongObject, IKongEquatable
+            Func<T, T, Task> recurse = null) where T : KongObject, IKongEquatable<T>
         {
             existingObjects ??= Array.Empty<T>();
             updateObject ??= (x => Task.CompletedTask);
@@ -129,9 +145,7 @@ namespace Kongverge.Workflow
             var parentPhrase = parent == null ? string.Empty : $" attached to {parent}";
             Log.Verbose($"Converging {targetPhrase}{parentPhrase} with {existingPhrase}");
 
-            var targetMatchValues = targetObjects.Select(x => x.GetMatchValue()).ToArray();
-            var toRemove = existingObjects.Where(x => !targetMatchValues.Contains(x.GetMatchValue())).ToArray();
-
+            var toRemove = existingObjects.Where(x => !targetObjects.Any(x.IsMatch)).ToArray();
             foreach (var existing in toRemove)
             {
                 Log.Verbose($"Deleting {objectName} {existing}{parentPhrase} which exists in Kong but not in target configuration");
@@ -141,24 +155,29 @@ namespace Kongverge.Workflow
 
             foreach (var target in targetObjects)
             {
-                var existing = target.MatchWithExisting(existingObjects);
+                var existing = existingObjects.SingleOrDefault(target.IsMatch);
                 if (existing == null)
                 {
                     Log.Verbose($"Creating {objectName} {target}{parentPhrase} which exists in target configuration but not in Kong");
                     await createObject(target);
                     _createdStats.Increment<T>();
                 }
-                else if (target.Equals(existing))
-                {
-                    Log.Verbose($"Identical {objectName} {existing}{parentPhrase} found in Kong matching target configuration");
-                }
                 else
                 {
-                    var patch = target.DifferencesFrom(existing);
-                    Log.Verbose($"Updating {objectName} {existing}{parentPhrase} which exists in both Kong and target configuration, having the following differences:{Environment.NewLine}{patch}");
-                    await updateObject(target);
-                    _updatedStats.Increment<T>();
+                    target.MatchWithExisting(existing);
+                    if (target.Equals(existing))
+                    {
+                        Log.Verbose($"Identical {objectName} {existing}{parentPhrase} found in Kong matching target configuration");
+                    }
+                    else
+                    {
+                        var patch = target.DifferencesFrom(existing);
+                        Log.Verbose($"Updating {objectName} {existing}{parentPhrase} which exists in both Kong and target configuration, having the following differences:{Environment.NewLine}{patch}");
+                        await updateObject(target);
+                        _updatedStats.Increment<T>();
+                    }
                 }
+                
                 await recurse(existing, target);
             }
         }
@@ -223,6 +242,7 @@ namespace Kongverge.Workflow
         {
             public OperationStats()
             {
+                Add(typeof(KongConsumer), new OperationCount(KongConsumer.ObjectName));
                 Add(typeof(KongService), new OperationCount(KongService.ObjectName));
                 Add(typeof(KongPlugin), new OperationCount(KongPlugin.ObjectName));
                 Add(typeof(KongRoute), new OperationCount(KongRoute.ObjectName));

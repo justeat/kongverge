@@ -35,8 +35,49 @@
         "keepalive": 200,
         "port": 8080,
         "timeout": 100,
-        "tls": true 
+        "tls": true
       }
+    }
+  ],
+  "consumers": [
+    {
+      "username": "blocked_user",
+      "custom_id": "blocked_user",
+      "id": "bd75fe33-a454-45c1-9f1c-7eda44316235",
+      "plugins": [
+        {
+          "name": "request-termination",
+          "config": {
+            "status_code": 401,
+            "content_type": "application/json; charset=utf-8",
+            "body": "{ \"error\": \"Authentication required\" }"
+          }
+        },
+        {
+          "name": "correlation-id",
+          "config": {
+            "echo_downstream": true,
+            "generator": "uuid",
+            "header_name": "x-correlation-id"
+          }
+        },
+        {
+          "name": "request-size-limiting",
+          "config": {
+            "allowed_payload_size": 256
+          }
+        }
+      ]
+    },
+    {
+      "username": "guest_user",
+      "custom_id": "guest_user",
+      "id": "51b91426-4d22-4810-b49b-63f84b4a16b8"
+    },
+    {
+      "username": "user_1",
+      "custom_id": "user_1",
+      "id": "595bd4fb-892a-47e8-86f7-89b323cabe9e"
     }
   ]
 }

@@ -27,19 +27,12 @@ namespace Kongverge.DTOs
             UpdatedAt = null;
         }
 
-        public T MatchWithExisting<T>(IEnumerable<T> existingObjects) where T : KongObject
+        public void MatchWithExisting(KongObject existing)
         {
-            var existing = existingObjects.SingleOrDefault(x => GetMatchValue().Equals(x.GetMatchValue()));
-            if (existing != null)
-            {
-                Id = existing.Id;
-                CreatedAt = existing.CreatedAt;
-                UpdatedAt = existing.UpdatedAt;
-            }
-            return existing;
+            Id = existing.Id;
+            CreatedAt = existing.CreatedAt;
+            UpdatedAt = existing.UpdatedAt;
         }
-
-        public abstract object GetMatchValue();
 
         public abstract StringContent ToJsonStringContent();
 

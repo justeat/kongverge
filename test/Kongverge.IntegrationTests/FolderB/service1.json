@@ -1,5 +1,6 @@
 {
-  "name": "service1",
+  "id": "1b4f328c-cde5-4bf0-b552-2fd8e4004cd9",
+  "name": "service1-changed",
   "host": "www.service1.com",
   "port": 8080,
   "protocol": "http",

@@ -1,4 +1,5 @@
 {
+  "id": "1b4f328c-cde5-4bf0-b552-2fd8e4004cd9",
   "name": "service1",
   "host": "www.service1.com",
   "port": 80,
@@ -62,7 +63,7 @@
         "bar": [
           "3",
           "4"
-        ] 
+        ]
       },
       "regex_priority": 20,
       "strip_path": true,
@@ -71,7 +72,7 @@
           "name": "request-transformer",
           "config": {
             "http_method": "GET",
-            "add": {}, 
+            "add": {},
             "append": {
               "body": [
                 "value-1:a",
