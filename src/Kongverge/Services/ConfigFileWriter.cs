@@ -6,6 +6,11 @@ using Serilog;
 
 namespace Kongverge.Services
 {
+    public interface IConfigFileWriter
+    {
+        Task WriteConfiguration(KongvergeConfiguration configuration, string folderPath);
+    }
+
     public class ConfigFileWriter : IConfigFileWriter
     {
         private readonly IFileProvider _fileProvider;
@@ -25,7 +30,7 @@ namespace Kongverge.Services
                 await WriteConfigObject(service, folderPath, $"{service.Name}{Constants.FileExtension}");
             }
 
-            if (configuration.GlobalConfig.Plugins.Any())
+            if (configuration.GlobalConfig.Plugins.Any() || configuration.GlobalConfig.Consumers.Any())
             {
                 await WriteConfigObject(configuration.GlobalConfig, folderPath, Constants.GlobalConfigFileName);
             }

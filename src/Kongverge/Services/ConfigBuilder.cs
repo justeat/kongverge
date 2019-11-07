@@ -12,6 +12,9 @@ namespace Kongverge.Services
         {
             Log.Information("Reading configuration from Kong");
 
+            Log.Verbose("Getting consumers from Kong");
+            var consumers = await kongReader.GetConsumers();
+
             Log.Verbose("Getting plugins from Kong");
             var plugins = await kongReader.GetPlugins();
 
@@ -21,9 +24,13 @@ namespace Kongverge.Services
             Log.Verbose("Getting routes from Kong");
             var routes = await kongReader.GetRoutes();
 
-            foreach (var existingService in services)
+            foreach (var consumer in consumers)
             {
-                PopulateServiceTree(existingService, routes, plugins);
+                consumer.Plugins = plugins.Where(x => x.Consumer?.Id == consumer.Id).ToArray();
+            }
+            foreach (var service in services)
+            {
+                PopulateServiceTree(service, routes, plugins);
             }
 
             var configuration = new KongvergeConfiguration
@@ -31,7 +38,8 @@ namespace Kongverge.Services
                 Services = services.ToArray(),
                 GlobalConfig = new GlobalConfig
                 {
-                    Plugins = plugins.Where(x => x.IsGlobal()).ToArray()
+                    Plugins = plugins.Where(x => x.IsGlobal()).ToArray(),
+                    Consumers = consumers.ToArray()
                 }
             };
 

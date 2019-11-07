@@ -5,7 +5,10 @@ using Newtonsoft.Json.Linq;
 
 namespace Kongverge.DTOs
 {
-    public interface IKongEquatable<T> : IKongEquatable, IEquatable<T> { }
+    public interface IKongEquatable<T> : IKongEquatable, IEquatable<T>
+    {
+        bool IsMatch(T other);
+    }
 
     public interface IKongEquatable
     {
@@ -47,8 +50,8 @@ namespace Kongverge.DTOs
 
         internal static JToken DifferencesFrom(this IKongEquatable instance, IKongEquatable other)
         {
-            var instanceToken = instance.ToEqualityToken();
-            var otherToken = other.ToEqualityToken();
+            var instanceToken = instance.ToDifferenceToken();
+            var otherToken = other.ToDifferenceToken();
 
             var options = new Options
             {
@@ -58,7 +61,7 @@ namespace Kongverge.DTOs
             return new JsonDiffPatch(options).Diff(otherToken, instanceToken);
         }
 
-        private static JToken ToEqualityToken(this IKongEquatable instance) =>
+        private static JToken ToDifferenceToken(this IKongEquatable instance) =>
             JToken.FromObject(instance.GetEqualityValues()).Normalize();
     }
 }

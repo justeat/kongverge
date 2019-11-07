@@ -16,6 +16,7 @@ namespace Kongverge.Tests.Workflow
                 .Build<KongService>()
                 .Without(x => x.Id)
                 .Without(x => x.CreatedAt)
+                .Without(x => x.UpdatedAt)
                 .Without(x => x.Routes)
                 .Without(x => x.Plugins)
                 .Create();

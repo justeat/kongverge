@@ -12,9 +12,12 @@ namespace Kongverge.DTOs
         public override string ToString()
         {
             var routes = Services.SelectMany(x => x.Routes).ToArray();
-            var pluginsCount = GlobalConfig.Plugins.Count;
-            pluginsCount += Services.Sum(x => x.Plugins.Count) + routes.Sum(x => x.Plugins.Count);
-            return $"{Services.Count} {KongObject.GetName(0, "service")}, {pluginsCount} {KongObject.GetName(0, "plugin")}, {routes.Length} {KongObject.GetName(0, "route")}";
+            var pluginsCount = GlobalConfig.Plugins.Count + GlobalConfig.Consumers.Sum(x => x.Plugins.Count) + Services.Sum(x => x.Plugins.Count) + routes.Sum(x => x.Plugins.Count);
+
+            return $"{GlobalConfig.Consumers.Count} {KongObject.GetName(0, KongConsumer.ObjectName)}," +
+                   $" {Services.Count} {KongObject.GetName(0, KongService.ObjectName)}," +
+                   $" {pluginsCount} {KongObject.GetName(0, KongPlugin.ObjectName)}," +
+                   $" {routes.Length} {KongObject.GetName(0, KongRoute.ObjectName)}";
         }
     }
 

@@ -37,5 +37,61 @@
         "timeout": 200
       }
     }
+  ],
+  "consumers": [
+    {
+      "username": "unauthorized_user",
+      "custom_id": "unauthorized_user",
+      "id": "bd75fe33-a454-45c1-9f1c-7eda44316235",
+      "plugins": [
+        {
+          "name": "request-termination",
+          "config": {
+            "status_code": 401,
+            "content_type": "application/json; charset=utf-8",
+            "body": "{ \"error\": \"Unauthorized\" }"
+          }
+        },
+        {
+          "name": "correlation-id",
+          "config": {
+            "echo_downstream": true,
+            "generator": "uuid",
+            "header_name": "x-correlation-id"
+          }
+        },
+        {
+          "name": "response-ratelimiting",
+          "config": {
+            "block_on_first_violation": false,
+            "fault_tolerant": false,
+            "header_name": "x-kong-limit",
+            "hide_client_headers": true,
+            "limit_by": "consumer",
+            "policy": "cluster",
+            "redis_database": 0,
+            "redis_port": 6379,
+            "redis_timeout": 2000,
+            "limits": {
+              "all": {
+                "second": 5,
+                "minute": 200,
+                "hour": 10000
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "username": "guest_user",
+      "custom_id": "guest_user",
+      "id": "51b91426-4d22-4810-b49b-63f84b4a16b8"
+    },
+    {
+      "username": "user_2",
+      "custom_id": "user_2",
+      "id": "14e6ea51-7660-4314-b587-f16aa9109a00"
+    }
   ]
 }

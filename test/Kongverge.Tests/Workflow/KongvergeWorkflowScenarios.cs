@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
@@ -24,6 +25,7 @@ namespace Kongverge.Tests.Workflow
 
         protected KongvergeWorkflowArguments Arguments;
         protected IReadOnlyList<GlobalConfig> GlobalConfigs;
+        protected IReadOnlyList<KongConsumer> Consumers;
         protected IReadOnlyList<KongService> Services;
         protected IReadOnlyList<KongRoute> Routes;
         
@@ -32,9 +34,10 @@ namespace Kongverge.Tests.Workflow
             Arguments = Fixture.Create<KongvergeWorkflowArguments>();
             Use(Arguments);
             GlobalConfigs = Fixture.CreateGlobalConfigs(2);
+            Consumers = Fixture.CreateConsumers(4);
             Services = Fixture.CreateServices(4);
             Routes = Fixture.CreateRoutes(6);
-            Plugins = Fixture.CreatePlugins(10);
+            Plugins = Fixture.CreatePlugins(13);
             
             GetMock<IKongAdminWriter>()
                 .Setup(x => x.PutRoute(It.IsAny<KongRoute>()))
@@ -92,7 +95,9 @@ namespace Kongverge.Tests.Workflow
                 .And(s => s.NoExistingServicesOrGlobalConfig())
                 .And(s => s.NoTargetServicesOrGlobalConfig())
                 .When(s => s.Executing())
-                .Then(s => s.NoServicesAreAddedOrUpdated())
+                .Then(s => s.NoConsumersAreAddedOrUpdated())
+                .And(s => s.NoConsumersAreDeleted())
+                .And(s => s.NoServicesAreAddedOrUpdated())
                 .And(s => s.NoServicesAreDeleted())
                 .And(s => s.NoRoutesAreAddedOrUpdated())
                 .And(s => s.NoRoutesAreDeleted())
@@ -107,7 +112,9 @@ namespace Kongverge.Tests.Workflow
                 .And(s => s.NoExistingServicesOrGlobalConfig())
                 .And(s => s.AnAssortmentOfTargetServicesAndGlobalConfig())
                 .When(s => s.Executing())
-                .Then(s => s.TheTargetServicesAreAdded())
+                .Then(s => s.TheTargetConsumersAreAdded())
+                .And(s => s.NoConsumersAreDeleted())
+                .And(s => s.TheTargetServicesAreAdded())
                 .And(s => s.NoServicesAreDeleted())
                 .And(s => s.TheTargetRoutesAreAdded())
                 .And(s => s.NoRoutesAreDeleted())
@@ -122,12 +129,14 @@ namespace Kongverge.Tests.Workflow
                 .And(s => s.AnAssortmentOfExistingServicesAndGlobalConfig())
                 .And(s => s.NoTargetServicesOrGlobalConfig())
                 .When(s => s.Executing())
-                .Then(s => s.NoServicesAreAddedOrUpdated())
+                .Then(s => s.NoConsumersAreAddedOrUpdated())
+                .And(s => s.TheExistingConsumersAreDeleted())
+                .And(s => s.NoServicesAreAddedOrUpdated())
                 .And(s => s.TheExistingServicesAreDeleted())
                 .And(s => s.NoRoutesAreAddedOrUpdated())
                 .And(s => s.NoRoutesAreDeleted())
                 .And(s => s.NoPluginsAreAddedOrUpdated())
-                .And(s => s.TheExistingPluginsAreDeleted())
+                .And(s => s.TheExistingGlobalPluginsAreDeleted())
                 .And(s => s.TheExitCodeIs(ExitCode.Success))
                 .BDDfy();
 
@@ -137,7 +146,11 @@ namespace Kongverge.Tests.Workflow
                 .And(s => s.AnAssortmentOfExistingServicesAndGlobalConfig())
                 .And(s => s.AnAssortmentOfTargetServicesAndGlobalConfig())
                 .When(s => s.Executing())
-                .Then(s => s.TheNewServicesAreAdded())
+                .Then(s => s.TheNewConsumersAreAdded())
+                .And(s => s.TheChangedConsumersAreUpdated())
+                .And(s => s.TheUnchangedConsumersAreNotUpdated())
+                .And(s => s.TheRemovedConsumersAreDeleted())
+                .And(s => s.TheNewServicesAreAdded())
                 .And(s => s.TheChangedServicesAreUpdated())
                 .And(s => s.TheUnchangedServicesAreNotUpdated())
                 .And(s => s.TheRemovedServicesAreDeleted())
@@ -231,6 +244,18 @@ namespace Kongverge.Tests.Workflow
                 Plugins[7].AsExisting(),
                 Plugins[8].AsExisting()
             };
+            Existing.GlobalConfig.Consumers = new[]
+            {
+                Consumers[0].AsExisting(),
+                Consumers[1].AsExisting(),
+                Consumers[2].AsExisting()
+            };
+            Existing.GlobalConfig.Consumers[0].Plugins = new[]
+            {
+                Plugins[9].AsExisting(),
+                Plugins[10].AsExisting(),
+                Plugins[11].AsExisting()
+            };
         }
 
         protected void AnAssortmentOfTargetServicesAndGlobalConfig()
@@ -242,6 +267,11 @@ namespace Kongverge.Tests.Workflow
                 // Services[2] Removed
                 Services[3].AsTarget() // Added
             };
+            if (Existing.Services.Any())
+            {
+                Target.Services[0].Id = Existing.Services[0].Id;
+                Target.Services[0].Name = Guid.NewGuid().ToString();
+            }
 
             Target.Services[0].Plugins = new[]
             {
@@ -297,11 +327,36 @@ namespace Kongverge.Tests.Workflow
                 // Plugins[8] Removed
                 Plugins[9].AsTarget() // Added
             };
+            Target.GlobalConfig.Consumers = new[]
+            {
+                Consumers[0].AsTarget(true), // Changed
+                Consumers[1].AsTarget(), // Same
+                // Consumers[2] Removed
+                Consumers[3].AsTarget() // Added
+            };
+            if (Existing.GlobalConfig.Consumers.Any())
+            {
+                Target.GlobalConfig.Consumers[0].Id = Existing.GlobalConfig.Consumers[0].Id;
+                Target.GlobalConfig.Consumers[0].Username = Guid.NewGuid().ToString();
+            }
+            Target.GlobalConfig.Consumers[0].Plugins = new[]
+            {
+                Plugins[9].AsTarget(true), // Changed
+                Plugins[10].AsTarget(), // Same
+                // Plugins[11] Removed
+                Plugins[12].AsTarget() // Added
+            };
 
             SetupTargetConfiguration();
         }
 
         protected void SetupTargetConfiguration() => GetMock<IConfigFileReader>().Setup(x => x.ReadConfiguration(Arguments.InputFolder, It.IsAny<IDictionary<string, AsyncLazy<KongSchema>>>())).ReturnsAsync(Target);
+
+        protected void NoConsumersAreAddedOrUpdated() =>
+            GetMock<IKongAdminWriter>().Verify(x => x.PutConsumer(It.IsAny<KongConsumer>()), Times.Never);
+
+        protected void NoConsumersAreDeleted() =>
+            GetMock<IKongAdminWriter>().Verify(x => x.DeleteConsumer(It.IsAny<string>()), Times.Never);
 
         protected void NoServicesAreAddedOrUpdated() =>
             GetMock<IKongAdminWriter>().Verify(x => x.PutService(It.IsAny<KongService>()), Times.Never);
@@ -320,6 +375,23 @@ namespace Kongverge.Tests.Workflow
 
         protected void NoPluginsAreDeleted() =>
             GetMock<IKongAdminWriter>().Verify(x => x.DeletePlugin(It.IsAny<string>()), Times.Never);
+
+        protected void TheTargetConsumersAreAdded()
+        {
+            foreach (var targetConsumer in Target.GlobalConfig.Consumers)
+            {
+                GetMock<IKongAdminWriter>().Verify(x => x.PutConsumer(targetConsumer), Times.Once);
+            }
+        }
+
+        protected void TheExistingConsumersAreDeleted()
+        {
+            foreach (var existingConsumer in Target.GlobalConfig.Consumers)
+            {
+                GetMock<IKongAdminWriter>().Verify(x => x.DeleteConsumer(existingConsumer.Id), Times.Once);
+            }
+        }
+
 
         protected void TheTargetServicesAreAdded()
         {
@@ -374,15 +446,36 @@ namespace Kongverge.Tests.Workflow
                     p.IsTheSameAs(targetPlugin) &&
                     p.IsGlobal())), Times.Once);
             }
+            foreach (var targetConsumer in Target.GlobalConfig.Consumers)
+            {
+                foreach (var targetPlugin in targetConsumer.Plugins)
+                {
+                    GetMock<IKongAdminWriter>().Verify(x => x.PutPlugin(It.Is<KongPlugin>(p =>
+                        p.IsTheSameAs(targetPlugin) &&
+                        p.CorrespondsToKongConsumer(targetConsumer))), Times.Once);
+                }
+            }
         }
 
-        protected void TheExistingPluginsAreDeleted()
+        protected void TheExistingGlobalPluginsAreDeleted()
         {
             foreach (var existingPlugin in Existing.GlobalConfig.Plugins)
             {
                 GetMock<IKongAdminWriter>().Verify(x => x.DeletePlugin(existingPlugin.Id), Times.Once);
             }
         }
+
+        protected void TheNewConsumersAreAdded() =>
+            GetMock<IKongAdminWriter>().Verify(x => x.PutConsumer(Target.GlobalConfig.Consumers[2]), Times.Once);
+
+        protected void TheChangedConsumersAreUpdated() =>
+            GetMock<IKongAdminWriter>().Verify(x => x.PutConsumer(Target.GlobalConfig.Consumers[0]), Times.Once);
+
+        protected void TheUnchangedConsumersAreNotUpdated() =>
+            GetMock<IKongAdminWriter>().Verify(x => x.PutConsumer(Target.GlobalConfig.Consumers[1]), Times.Never);
+
+        protected void TheRemovedConsumersAreDeleted() =>
+            GetMock<IKongAdminWriter>().Verify(x => x.DeleteConsumer(Existing.GlobalConfig.Consumers[2].Id), Times.Once);
 
         protected void TheNewServicesAreAdded() =>
             GetMock<IKongAdminWriter>().Verify(x => x.PutService(Target.Services[2]), Times.Once);
@@ -438,6 +531,9 @@ namespace Kongverge.Tests.Workflow
             GetMock<IKongAdminWriter>().Verify(x => x.PutPlugin(It.Is<KongPlugin>(p =>
                 p.IsTheSameAs(Target.GlobalConfig.Plugins[2]) &&
                 p.IsGlobal())), Times.Once);
+            GetMock<IKongAdminWriter>().Verify(x => x.PutPlugin(It.Is<KongPlugin>(p =>
+                p.IsTheSameAs(Target.GlobalConfig.Consumers[0].Plugins[2]) &&
+                p.CorrespondsToKongConsumer(Target.GlobalConfig.Consumers[0]))), Times.Once);
         }
 
         protected void TheChangedPluginsAreUpdated()
@@ -454,6 +550,10 @@ namespace Kongverge.Tests.Workflow
                 p.IsTheSameAs(Target.GlobalConfig.Plugins[0]) &&
                 p.IsGlobal() &&
                 p.CorrespondsToExistingPlugin(Existing.GlobalConfig.Plugins[0]))), Times.Once);
+            GetMock<IKongAdminWriter>().Verify(x => x.PutPlugin(It.Is<KongPlugin>(p =>
+                p.IsTheSameAs(Target.GlobalConfig.Consumers[0].Plugins[0]) &&
+                p.CorrespondsToKongConsumer(Target.GlobalConfig.Consumers[0]) &&
+                p.CorrespondsToExistingPlugin(Existing.GlobalConfig.Consumers[0].Plugins[0]))), Times.Once);
         }
 
         protected void TheUnchangedPluginsAreNotUpdated()
@@ -466,6 +566,9 @@ namespace Kongverge.Tests.Workflow
                 p.CorrespondsToKongService(Target.Services[0]))), Times.Never);
             GetMock<IKongAdminWriter>().Verify(x => x.PutPlugin(It.Is<KongPlugin>(p =>
                 p.IsTheSameAs(Target.GlobalConfig.Plugins[1]) &&
+                p.IsGlobal())), Times.Never);
+            GetMock<IKongAdminWriter>().Verify(x => x.PutPlugin(It.Is<KongPlugin>(p =>
+                p.IsTheSameAs(Target.GlobalConfig.Consumers[0].Plugins[1]) &&
                 p.IsGlobal())), Times.Never);
         }
 
@@ -487,6 +590,7 @@ namespace Kongverge.Tests.Workflow
             GetMock<IKongAdminWriter>().Verify(x => x.DeletePlugin(Existing.Services[0].Plugins[2].Id), Times.Once);
             GetMock<IKongAdminWriter>().Verify(x => x.DeletePlugin(Existing.Services[0].Routes[1].Plugins[2].Id), Times.Once);
             GetMock<IKongAdminWriter>().Verify(x => x.DeletePlugin(Existing.GlobalConfig.Plugins[2].Id), Times.Once);
+            GetMock<IKongAdminWriter>().Verify(x => x.DeletePlugin(Existing.GlobalConfig.Consumers[0].Plugins[2].Id), Times.Once);
         }
 
         protected void NoneOfThePluginsOfDeletedServicesAreDeleted() =>

@@ -81,7 +81,7 @@ namespace Kongverge.DTOs
             Protocols = node["protocols"].Values<string>();
         }
 
-        public override object GetMatchValue() => Name;
+        public bool IsMatch(KongPlugin other) => Id == other.Id || Name == other.Name;
 
         public object GetEqualityValues() =>
              new

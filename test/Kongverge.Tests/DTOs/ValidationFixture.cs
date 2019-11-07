@@ -431,12 +431,16 @@ namespace Kongverge.Tests.DTOs
             Config = new JObject()
         };
 
-        public static KongRoute GetValidKongRoute(this Fixture fixture) => KongRouteValidationScenarios.BuildRouteWithoutPlugins(fixture)
-            .With(x => x.Plugins, fixture.CreateChildren(Children.Empty, fixture.GetValidKongPlugin, fixture.GetKongPluginWithOneError))
-            .Create();
+        public static KongRoute GetValidKongRoute(this Fixture fixture) => KongRouteValidationScenarios.BuildRouteWithoutPlugins(fixture).Create();
 
         public static KongRoute GetKongRouteWithOneError(this Fixture fixture) => KongRouteValidationScenarios.BuildRouteWithoutPlugins(fixture)
             .With(x => x.Protocols, fixture.CreateProtocols(Protocols.Null))
+            .Create();
+
+        public static KongConsumer GetValidKongConsumer(this Fixture fixture) => KongConsumerValidationScenarios.BuildConsumerWithoutPlugins(fixture).Create();
+
+        public static KongConsumer GetKongConsumerWithOneError(this Fixture fixture) => KongConsumerValidationScenarios.BuildConsumerWithoutPlugins(fixture)
+            .With(x => x.Plugins, fixture.CreateChildren(Children.OneError, fixture.GetValidKongPlugin, fixture.GetKongPluginWithOneError))
             .Create();
     }
 

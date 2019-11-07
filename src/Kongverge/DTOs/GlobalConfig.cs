@@ -12,9 +12,13 @@ namespace Kongverge.DTOs
         [JsonProperty("plugins")]
         public IReadOnlyList<KongPlugin> Plugins { get; set; } = Array.Empty<KongPlugin>();
 
+        [JsonProperty("consumers")]
+        public IReadOnlyList<KongConsumer> Consumers { get; set; } = Array.Empty<KongConsumer>();
+
         public async Task Validate(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages, KongObject parent = null)
         {
             await ValidatePlugins(schemas, errorMessages);
+            await ValidateConsumers(schemas, errorMessages);
         }
 
         private async Task ValidatePlugins(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages)
@@ -30,6 +34,19 @@ namespace Kongverge.DTOs
             }
         }
 
+        private async Task ValidateConsumers(IDictionary<string, AsyncLazy<KongSchema>> schemas, ICollection<string> errorMessages)
+        {
+            if (Consumers == null)
+            {
+                errorMessages.Add("Global Consumers cannot be null.");
+                return;
+            }
+            foreach (var consumer in Consumers)
+            {
+                await consumer.Validate(schemas, errorMessages);
+            }
+        }
+
         public virtual void AssignParentId(KongPlugin child)
         {
             child.Consumer = null;
@@ -42,6 +59,10 @@ namespace Kongverge.DTOs
             foreach (var plugin in Plugins)
             {
                 plugin.StripPersistedValues();
+            }
+            foreach (var consumer in Consumers)
+            {
+                consumer.StripPersistedValues();
             }
             return this.ToNormalizedJson() + Environment.NewLine;
         }

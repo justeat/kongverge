@@ -12,59 +12,47 @@ namespace Kongverge.Tests.DTOs
     [Story(Title = nameof(KongRoute) + nameof(Equals))]
     public class KongRouteEqualityScenarios : EqualityScenarios<KongRoute>
     {
-        [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(AnotherInstanceClonedFromTheFirst) + And + nameof(ListValuesAreShuffled))]
-        public void Scenario4() =>
-            this.Given(x => x.ARandomInstance())
-                .And(x => x.AnotherInstanceClonedFromTheFirst())
-                .And(x => x.ListValuesAreShuffled())
-                .When(x => x.CheckingEquality())
-                .And(x => x.CheckingHashCodes())
-                .Then(x => x.TheyAreEqual())
-                .BDDfy();
-
-        [BddfyFact(DisplayName = nameof(ARandomInstance) + And + nameof(AnotherInstanceClonedFromTheFirst) + And + nameof(ListPropertiesAreEmptyAndNull))]
-        public void Scenario5() =>
-            this.Given(x => x.ARandomInstance())
-                .And(x => x.AnotherInstanceClonedFromTheFirst())
-                .And(x => x.ListPropertiesAreEmptyAndNull())
-                .When(x => x.CheckingEquality())
-                .And(x => x.CheckingHashCodes())
-                .Then(x => x.TheyAreEqual())
-                .BDDfy();
-
-        protected void ListValuesAreShuffled()
+        protected override void ListValuesAreShuffled()
         {
+            base.ListValuesAreShuffled();
             OtherInstance.Hosts = OtherInstance.Hosts.Reverse();
             OtherInstance.Protocols = OtherInstance.Protocols.Reverse();
             OtherInstance.Methods = OtherInstance.Methods.Reverse();
             OtherInstance.Paths = OtherInstance.Paths.Reverse();
+            OtherInstance.Snis = OtherInstance.Snis.Reverse();
         }
 
-        protected void ListPropertiesAreEmptyAndNull()
+        protected override void ListPropertiesAreEmptyAndNull()
         {
+            base.ListPropertiesAreEmptyAndNull();
             Instance.Hosts = Array.Empty<string>();
             Instance.Protocols = Array.Empty<string>();
             Instance.Methods = Array.Empty<string>();
             Instance.Paths = Array.Empty<string>();
+            Instance.Sources = Array.Empty<KongRoute.Endpoint>();
+            Instance.Destinations = Array.Empty<KongRoute.Endpoint>();
+            Instance.Snis = Array.Empty<string>();
 
             OtherInstance.Hosts = null;
             OtherInstance.Protocols = null;
             OtherInstance.Methods = null;
             OtherInstance.Paths = null;
+            OtherInstance.Sources = null;
+            OtherInstance.Destinations = null;
+            OtherInstance.Snis = null;
         }
 
         protected override void OnlyThePersistenceValuesAreDifferent()
         {
-            OtherInstance.Id = this.Create<string>();
+            base.OnlyThePersistenceValuesAreDifferent();
             OtherInstance.Service = this.Create<KongObject.Reference>();
-            OtherInstance.CreatedAt = this.Create<long>();
-            OtherInstance.UpdatedAt = this.Create<long>();
         }
     }
 
     [Story(Title = nameof(KongRoute) + nameof(IValidatableObject.Validate))]
-    public class KongRouteValidationScenarios : KongPluginHostValidationScenarios<KongRoute>
+    public class KongRouteValidationScenarios : ValidatableObjectSteps<KongRoute>
     {
+        protected Children Plugins;
         protected Protocols Protocols;
         protected List Hosts;
         protected List Headers;
@@ -74,6 +62,20 @@ namespace Kongverge.Tests.DTOs
         protected Set Sources;
         protected Set Destinations;
         protected ushort HttpsRedirect;
+
+        [BddfyFact(DisplayName = nameof(AValidInstanceWithExamplePlugins))]
+        public void Scenario1() =>
+            this.Given(x => x.AValidInstanceWithExamplePlugins())
+                .When(x => x.Validating())
+                .Then(x => x.TheErrorMessagesCountIs(ErrorMessagesCount))
+                .WithExamples(new ExampleTable(nameof(Plugins), nameof(ErrorMessagesCount))
+                {
+                    { Children.Null, 1 },
+                    { Children.Empty, 0 },
+                    { Children.Valid, 0 },
+                    { Children.OneError, 1 }
+                })
+                .BDDfy();
 
         [BddfyFact(DisplayName = nameof(AnInstanceWithExamplePropertyValues))]
         public void Scenario2() =>
@@ -99,7 +101,7 @@ namespace Kongverge.Tests.DTOs
                 })
                 .BDDfy();
 
-        protected override void AValidInstanceWithExamplePlugins() => Instance = BuildRouteWithoutPlugins(this)
+        protected void AValidInstanceWithExamplePlugins() => Instance = BuildRouteWithoutPlugins(this)
             .With(x => x.Plugins, this.CreateChildren(Plugins, this.GetValidKongPlugin, this.GetKongPluginWithOneError))
             .Create();
 

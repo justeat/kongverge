@@ -23,9 +23,34 @@ namespace Kongverge.Tests.Services
             GetMock<FakeHttpMessageHandler>().CallBase = true;
             Use(new KongAdminHttpClient(new KongAdminApiConnectionDetails(), Get<FakeHttpMessageHandler>()) { BaseAddress = new Uri("http://localhost") });
         }
-        
-        [BddfyFact(DisplayName = nameof(KongAdminWriter.PutService))]
+
+        [BddfyFact(DisplayName = nameof(KongAdminWriter.PutConsumer))]
         public void Scenario1()
+        {
+            KongConsumer consumer = null;
+
+            this.Given(() => consumer = Fixture.Create<KongConsumer>(), "A kong consumer")
+                .And(s => s.KongRespondsCorrectly<KongConsumer>(HttpMethod.Put, $"/consumers/{consumer.Id}", consumer.ToJsonStringContent()),
+                    KongRespondsCorrectlyToMethodAtPathTextTemplate)
+                .When(async () => await Subject.PutConsumer(consumer), Invoking(nameof(KongAdminWriter.PutConsumer)))
+                .Then("it succeeds")
+                .BDDfy();
+        }
+
+        [BddfyFact(DisplayName = nameof(KongAdminWriter.DeleteConsumer))]
+        public void Scenario2()
+        {
+            KongConsumer consumer = null;
+
+            this.Given(() => consumer = Fixture.Create<KongConsumer>(), "A kong consumer")
+                .And(s => s.KongRespondsCorrectly(HttpMethod.Delete, $"/consumers/{consumer.Id}"), KongRespondsCorrectlyToMethodAtPathTextTemplate)
+                .When(async () => await Subject.DeleteConsumer(consumer.Id), Invoking(nameof(KongAdminWriter.DeleteConsumer)))
+                .Then("it succeeds")
+                .BDDfy();
+        }
+
+        [BddfyFact(DisplayName = nameof(KongAdminWriter.PutService))]
+        public void Scenario3()
         {
             KongService service = null;
 
@@ -38,7 +63,7 @@ namespace Kongverge.Tests.Services
         }
 
         [BddfyFact(DisplayName = nameof(KongAdminWriter.DeleteService))]
-        public void Scenario2()
+        public void Scenario4()
         {
             KongService service = null;
 
@@ -74,7 +99,7 @@ namespace Kongverge.Tests.Services
         }
 
         [BddfyFact(DisplayName = nameof(KongAdminWriter.PutRoute))]
-        public void Scenario3()
+        public void Scenario5()
         {
             KongRoute route = null;
 
@@ -87,7 +112,7 @@ namespace Kongverge.Tests.Services
         }
 
         [BddfyFact(DisplayName = nameof(KongAdminWriter.DeleteRoute))]
-        public void Scenario4()
+        public void Scenario6()
         {
             KongRoute route = null;
 
@@ -99,7 +124,7 @@ namespace Kongverge.Tests.Services
         }
 
         [BddfyFact(DisplayName = nameof(KongAdminWriter.PutPlugin))]
-        public void Scenario5()
+        public void Scenario7()
         {
             KongPlugin plugin = null;
 
@@ -112,7 +137,7 @@ namespace Kongverge.Tests.Services
         }
 
         [BddfyFact(DisplayName = nameof(KongAdminWriter.DeletePlugin))]
-        public void Scenario6()
+        public void Scenario8()
         {
             KongPlugin plugin = null;
 
