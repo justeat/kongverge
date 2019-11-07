@@ -26,15 +26,16 @@ namespace Kongverge.IntegrationTests
                 .TearDownWith(s => KongIsBlank())
                 .BDDfy();
 
-        [BddfyFact(DisplayName = nameof(KongIsBlank) + And + nameof(AValidHost) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + B)]
+        [BddfyFact(DisplayName = nameof(KongMatchesIgnored) + And + nameof(AValidHost) + And + nameof(TheRunCommand) + And + nameof(InputFolderIs) + B)]
         public void Scenario2() =>
-            this.Given(x => x.KongIsBlank())
+            this.Given(x => x.KongMatchesIgnored())
                 .And(x => x.AValidHost())
+                .And(x => x.IgnoreTags())
                 .And(x => x.TheRunCommand())
                 .And(x => x.InputFolderIs(B))
                 .When(x => x.InvokingMain())
                 .And(x => x.TheExitCodeIs(ExitCode.Success))
-                .And(x => x.InvokingMainAgainForExport())
+                .And(x => x.InvokingMainAgainForExportWithIgnoreTags())
                 .Then(x => x.TheExitCodeIs(ExitCode.Success))
                 .And(x => x.OutputFolderContentsMatchInputFolderContents())
                 .TearDownWith(s => KongIsBlank())

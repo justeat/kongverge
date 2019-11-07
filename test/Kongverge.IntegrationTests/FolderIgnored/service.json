@@ -1,0 +1,34 @@
+{
+  "tags": [ "kongverge-ignore" ],
+  "name": "service",
+  "host": "www.service1.com",
+  "port": 80,
+  "path": "/resource",
+  "protocol": "http",
+  "retries": 1,
+  "connect_timeout": 10000,
+  "read_timeout": 10000,
+  "write_timeout": 10000,
+  "plugins": [
+    {
+      "name": "request-termination",
+      "config": {
+        "message": "request-terminated",
+        "status_code": 403
+      }
+    }
+  ],
+  "routes": [
+    {
+      "paths": [
+        "/resource1"
+      ],
+      "protocols": [
+        "http",
+        "https"
+      ],
+      "regex_priority": 40,
+      "strip_path": true
+    }
+  ]
+}

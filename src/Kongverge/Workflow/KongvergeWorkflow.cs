@@ -52,7 +52,7 @@ namespace Kongverge.Workflow
                 return ExitWithCode.Return(ExitCode.InvalidConfigurationFiles, ex.Message);
             }
 
-            var existingConfiguration = await _configBuilder.FromKong(KongReader);
+            var existingConfiguration = await _configBuilder.FromKong(KongReader, _arguments.IgnoreTags);
             
             try
             {
@@ -61,7 +61,7 @@ namespace Kongverge.Workflow
             catch (KongException e) when (e.StatusCode == HttpStatusCode.BadRequest)
             {
                 Log.Error(e, $"Error converging target configuration: {e}");
-                var currentConfiguration = await _configBuilder.FromKong(KongReader);
+                var currentConfiguration = await _configBuilder.FromKong(KongReader, _arguments.IgnoreTags);
                 Log.Information($"Attempting rollback to previous configuration: {existingConfiguration}");
                 await ConvergeConfiguration(currentConfiguration, existingConfiguration);
                 return ExitWithCode.Return(ExitCode.UnspecifiedError, "An error occurred while attempting to converge target configuration. Rollback was successful.");
